@@ -1,0 +1,44 @@
+# Organic Growth — Product DNA
+
+## What
+An npm package (`organic-growth`) that installs a Claude Code configuration for incremental software development using thin vertical slices.
+
+## For Whom
+Developers using Claude Code who want a structured, controlled workflow instead of "fire and forget" autonomous coding.
+
+## Core Problem
+Claude Code without structure produces inconsistent results — sprawling changes, lost context over long sessions, no clear checkpoints. Developers need a methodology that works WITH LLM limitations (context window degradation, weak self-review) rather than ignoring them.
+
+## How It Works
+- **One agent (gardener)** with three modes: PLAN, GROW, REPLAN
+- **Rolling plans** stored in `docs/growth/<feature>.md` — 3-5 concrete stages + horizon
+- **One stage = one intent = one test = one commit**
+- **Two-layer quality:** deterministic tools (build/lint/typecheck/test) after every stage, LLM deep review on demand
+- **Context hygiene:** fresh session every 3 stages, plan file provides continuity
+
+## Key Commands
+- `/seed` — bootstrap project (from DNA document or interview)
+- `/grow` — plan a new feature
+- `/next` — implement next stage
+- `/replan` — adjust when reality changes
+- `/review` — deep quality check with fresh context
+
+## Tech Stack
+- Node.js CLI (bin/cli.mjs) — zero dependencies, pure Node.js
+- Templates in `templates/.claude/` — markdown files
+- Published to npm, invoked via `bunx organic-growth` or `npx organic-growth`
+
+## Constraints
+- Zero runtime dependencies
+- Single executable file (cli.mjs)
+- Must work with bun and npm
+- Templates are plain markdown — no templating engine
+- Package size under 50KB
+
+## Current State
+v0.1.0 — MVP complete. CLI installs templates, all commands and agent defined.
+
+## Priorities
+1. Correctness of templates (gardener instructions, command definitions)
+2. Developer experience (clear README, easy install, helpful CLI output)
+3. Simplicity (resist adding features — one agent, five commands, that's it)
