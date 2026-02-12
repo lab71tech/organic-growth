@@ -38,7 +38,7 @@ Automated testing and publishing via GitHub Actions. Every push and PR runs test
 ### Horizon (rough outline of what comes after)
 - ~~Dependabot or Renovate for keeping actions up to date~~ → done (see `docs/growth/dependabot.md`)
 - Release notes generation from growth plan commits
-- npm provenance (--provenance flag for supply chain security)
+- ~~npm provenance (--provenance flag for supply chain security)~~ → done (Stage 4)
 
 ## Growth Log
 <!-- Auto-updated after each stage -->
