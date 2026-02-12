@@ -19,10 +19,10 @@ describe('CI workflow', () => {
     assert.ok(content.includes('actions/setup-node'), 'should setup node');
   });
 
-  it('tests across Node 18, 20, and 22 via matrix', () => {
+  it('tests across Node 20 and 22 via matrix', () => {
     assert.ok(content.includes('matrix'), 'should use a matrix strategy');
     assert.ok(content.includes('node-version:'), 'should define node-version in matrix');
-    for (const version of [18, 20, 22]) {
+    for (const version of [20, 22]) {
       assert.ok(
         content.includes(String(version)),
         `matrix should include Node ${version}`
