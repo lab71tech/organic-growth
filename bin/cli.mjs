@@ -44,8 +44,46 @@ function getAllFiles(dir, base = dir) {
   return files;
 }
 
+function readVersion() {
+  const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf8'));
+  return pkg.version;
+}
+
+function printHelp() {
+  log('');
+  log(`${GREEN}🌱 Organic Growth${RESET} — Claude Code setup for incremental development`);
+  log('');
+  log(`${CYAN}Usage:${RESET}`);
+  log(`  npx organic-growth [options] [dna-file.md]`);
+  log('');
+  log(`${CYAN}Options:${RESET}`);
+  log(`  -f, --force     Overwrite existing files without prompting`);
+  log(`  -h, --help      Show this help message`);
+  log(`  -v, --version   Show version number`);
+  log('');
+  log(`${CYAN}Arguments:${RESET}`);
+  log(`  dna-file.md     Path to a product DNA document to copy into docs/`);
+  log('');
+  log(`${CYAN}Examples:${RESET}`);
+  log(`  npx organic-growth                  Install templates (prompts on conflicts)`);
+  log(`  npx organic-growth --force          Install templates (overwrite existing)`);
+  log(`  npx organic-growth spec.md          Install templates + copy DNA document`);
+  log('');
+}
+
 async function install() {
   const args = process.argv.slice(2);
+
+  if (args.includes('--help') || args.includes('-h')) {
+    printHelp();
+    return;
+  }
+
+  if (args.includes('--version') || args.includes('-v')) {
+    log(readVersion());
+    return;
+  }
+
   const force = args.includes('--force') || args.includes('-f');
   const dna = args.find(a => !a.startsWith('-') && a.endsWith('.md'));
 

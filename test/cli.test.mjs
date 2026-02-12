@@ -5,6 +5,8 @@ import { mkdtempSync, existsSync, statSync, writeFileSync, readFileSync } from '
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
+const PKG_PATH = join(import.meta.dirname, '..', 'package.json');
+
 const CLI_PATH = join(import.meta.dirname, '..', 'bin', 'cli.mjs');
 
 /** Run the CLI in a fresh temp directory and return { tmp, output }. */
@@ -68,6 +70,67 @@ describe('CLI template completeness', () => {
     assert.ok(
       statSync(growthDir).isDirectory(),
       'expected docs/growth/ to be a directory'
+    );
+  });
+});
+
+describe('CLI --help flag', () => {
+  it('prints usage information and does not install templates', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+    const output = execFileSync('node', [CLI_PATH, '--help'], {
+      cwd: tmp,
+      encoding: 'utf8',
+      timeout: 5000,
+    });
+
+    assert.ok(output.includes('Usage:'), 'should print usage section');
+    assert.ok(output.includes('--force'), 'should document --force flag');
+    assert.ok(output.includes('--help'), 'should document --help flag');
+    assert.ok(output.includes('--version'), 'should document --version flag');
+    assert.ok(!existsSync(join(tmp, '.claude')), 'should not install templates');
+  });
+
+  it('works with short flag -h', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+    const output = execFileSync('node', [CLI_PATH, '-h'], {
+      cwd: tmp,
+      encoding: 'utf8',
+      timeout: 5000,
+    });
+
+    assert.ok(output.includes('Usage:'), 'should print usage with -h');
+  });
+});
+
+describe('CLI --version flag', () => {
+  it('prints the version from package.json', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+    const output = execFileSync('node', [CLI_PATH, '--version'], {
+      cwd: tmp,
+      encoding: 'utf8',
+      timeout: 5000,
+    });
+
+    const pkg = JSON.parse(readFileSync(PKG_PATH, 'utf8'));
+    assert.ok(
+      output.trim().includes(pkg.version),
+      `should print version ${pkg.version}, got: ${output.trim()}`
+    );
+    assert.ok(!existsSync(join(tmp, '.claude')), 'should not install templates');
+  });
+
+  it('works with short flag -v', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+    const output = execFileSync('node', [CLI_PATH, '-v'], {
+      cwd: tmp,
+      encoding: 'utf8',
+      timeout: 5000,
+    });
+
+    const pkg = JSON.parse(readFileSync(PKG_PATH, 'utf8'));
+    assert.ok(
+      output.trim().includes(pkg.version),
+      `should print version with -v`
     );
   });
 });

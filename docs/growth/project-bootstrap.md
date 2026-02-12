@@ -33,12 +33,13 @@ Feature: organic-growth npm package — CLI + templates for incremental developm
 - **What grew:** 3 new tests — copies DNA file with correct content, prints success message, warns when DNA file missing. Extended `runCLI()` to accept extra args.
 - **Test:** `node --test` passes (6 tests, 0 failures)
 
-## Next Stages
-
-### Stage 6 — CLI help and version flags
+### Stage 6 — CLI help and version flags ✅
 - **Intent:** Add `--help` and `--version` flags so the CLI behaves like a proper tool
-- **Test:** Assert `--help` prints usage, `--version` prints version from package.json
-- **Acceptance:** `node --test` passes, `node bin/cli.mjs --help` works
+- **What grew:** `printHelp()` and `readVersion()` functions, short-circuit before install, `-h`/`-v` aliases
+- **Test:** 4 new tests — `--help` prints usage and doesn't install, `-h` works, `--version` prints version from package.json and doesn't install, `-v` works
+- **Commit:** (pending)
+
+## Next Stages
 
 ### Stage 7 — Validate template content integrity
 - **Intent:** Ensure templates contain the key markers (e.g. CLAUDE.md has "THE SEED", gardener has "PLAN" mode)
