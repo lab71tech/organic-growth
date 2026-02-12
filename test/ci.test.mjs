@@ -87,6 +87,55 @@ describe('Dependabot', () => {
   });
 });
 
+describe('Release workflow', () => {
+  const content = readFileSync(
+    join(ROOT, '.github', 'workflows', 'release.yml'),
+    'utf8'
+  );
+
+  it('runs on a daily cron schedule', () => {
+    assert.ok(content.includes('schedule'), 'should have a schedule trigger');
+    assert.ok(content.includes('cron:'), 'should define a cron expression');
+    assert.match(content, /cron:\s*'[\d *\/]+'/,  'cron expression should be properly formatted');
+  });
+
+  it('supports manual trigger via workflow_dispatch', () => {
+    assert.ok(content.includes('workflow_dispatch'), 'should have workflow_dispatch trigger');
+  });
+
+  it('has contents write permission for tagging and releases', () => {
+    assert.ok(content.includes('contents: write'), 'should have contents write permission');
+  });
+
+  it('checks for changes since the last tag', () => {
+    assert.ok(content.includes('git describe --tags'), 'should find the last tag');
+    assert.ok(content.includes('rev-list'), 'should count commits since last tag');
+    assert.ok(content.includes('has_changes'), 'should output a has_changes flag');
+  });
+
+  it('bumps the patch version in package.json', () => {
+    assert.ok(content.includes('npm version'), 'should use npm version to bump');
+    assert.ok(content.includes('--no-git-tag-version'), 'should not auto-tag during npm version');
+  });
+
+  it('commits, tags, and pushes the version bump', () => {
+    assert.ok(content.includes('git commit'), 'should commit the version bump');
+    assert.ok(content.includes('git tag'), 'should create a git tag');
+    assert.ok(content.includes('git push'), 'should push to remote');
+    assert.ok(content.includes('--follow-tags'), 'should push tags along with commits');
+  });
+
+  it('creates a GitHub Release with auto-generated notes', () => {
+    assert.ok(content.includes('gh release create'), 'should use gh release create');
+    assert.ok(content.includes('--generate-notes'), 'should auto-generate release notes');
+    assert.ok(content.includes('GH_TOKEN'), 'should authenticate with GH_TOKEN');
+  });
+
+  it('uses fetch-depth 0 for full git history', () => {
+    assert.ok(content.includes('fetch-depth: 0'), 'should fetch full history for tag detection');
+  });
+});
+
 describe('README badge and repo URL', () => {
   const readme = readFileSync(join(ROOT, 'README.md'), 'utf8');
   const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
