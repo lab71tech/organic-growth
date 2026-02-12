@@ -188,6 +188,76 @@ describe('Template content integrity', () => {
   });
 });
 
+describe('Package publish readiness', () => {
+  it('includes only expected files in the tarball', () => {
+    const output = execFileSync('npm', ['pack', '--dry-run', '--json'], {
+      cwd: join(import.meta.dirname, '..'),
+      encoding: 'utf8',
+      timeout: 10000,
+    });
+    const [info] = JSON.parse(output);
+    const filePaths = info.files.map(f => f.path);
+
+    // Must include these
+    const required = [
+      'bin/cli.mjs',
+      'package.json',
+      'templates/.claude/CLAUDE.md',
+      'templates/.claude/agents/gardener.md',
+    ];
+    for (const file of required) {
+      assert.ok(
+        filePaths.includes(file),
+        `tarball should include ${file}`
+      );
+    }
+
+    // Must NOT include test files, docs, or dotfiles
+    for (const file of filePaths) {
+      assert.ok(!file.startsWith('test/'), `tarball should not include test files: ${file}`);
+      assert.ok(!file.startsWith('docs/'), `tarball should not include docs: ${file}`);
+      assert.ok(!file.startsWith('.claude/'), `tarball should not include project .claude/: ${file}`);
+    }
+  });
+
+  it('package size is under 50KB', () => {
+    const output = execFileSync('npm', ['pack', '--dry-run', '--json'], {
+      cwd: join(import.meta.dirname, '..'),
+      encoding: 'utf8',
+      timeout: 10000,
+    });
+    const [info] = JSON.parse(output);
+    const unpackedSize = info.unpackedSize;
+
+    assert.ok(
+      unpackedSize < 50 * 1024,
+      `unpacked size ${unpackedSize} bytes should be under 50KB (${50 * 1024} bytes)`
+    );
+  });
+
+  it('package.json has correct bin entry', () => {
+    const pkg = JSON.parse(readFileSync(PKG_PATH, 'utf8'));
+
+    assert.ok(pkg.bin, 'package.json should have a bin field');
+    assert.equal(
+      pkg.bin['organic-growth'],
+      'bin/cli.mjs',
+      'bin should point to bin/cli.mjs'
+    );
+  });
+
+  it('package.json has required publish fields', () => {
+    const pkg = JSON.parse(readFileSync(PKG_PATH, 'utf8'));
+
+    assert.ok(pkg.name, 'should have a name');
+    assert.ok(pkg.version, 'should have a version');
+    assert.ok(pkg.description, 'should have a description');
+    assert.ok(pkg.license, 'should have a license');
+    assert.ok(pkg.files, 'should have a files field');
+    assert.ok(Array.isArray(pkg.files), 'files should be an array');
+  });
+});
+
 describe('CLI DNA document handling', () => {
   it('copies a DNA file to docs/product-dna.md', () => {
     const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));

@@ -44,12 +44,12 @@ Feature: organic-growth npm package — CLI + templates for incremental developm
 - **What grew:** 3 new tests — CLAUDE.md contains key section markers (THE SEED, THE SOIL, LIGHT & WATER, Organic Growth, Growth Rules), gardener agent contains all three modes and quality gate, all 5 commands have description in frontmatter
 - **Test:** `node --test` passes (13 tests, 0 failures)
 
-## Next Stages
-
-### Stage 8 — Package size and publish readiness
+### Stage 8 — Package size and publish readiness ✅
 - **Intent:** Verify package meets constraints (<50KB, correct files included, bin works)
-- **Test:** `npm pack --dry-run` output lists only expected files, total size under 50KB
-- **Acceptance:** `node --test` passes, `npm pack` produces valid tarball
+- **What grew:** 4 new tests — tarball includes only expected files (no test/docs/.claude leakage), unpacked size under 50KB, bin entry points to cli.mjs, package.json has all required publish fields
+- **Test:** `node --test` passes (17 tests, 0 failures)
+
+## All Planned Stages Complete
 
 ## Horizon (not planned in detail)
 
