@@ -1,8 +1,8 @@
 name: Daily Release
 
 on:
-  schedule:
-    - cron: '0 12 * * *'
+  # schedule:
+  #   - cron: '0 12 * * *'  # Re-enable after loop prevention (Stage 3)
   workflow_dispatch:
 
 permissions:

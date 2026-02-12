@@ -93,10 +93,9 @@ describe('Release workflow', () => {
     'utf8'
   );
 
-  it('runs on a daily cron schedule', () => {
-    assert.ok(content.includes('schedule'), 'should have a schedule trigger');
-    assert.ok(content.includes('cron:'), 'should define a cron expression');
-    assert.match(content, /cron:\s*'[\d *\/]+'/,  'cron expression should be properly formatted');
+  it('has a cron schedule commented out until loop prevention is added', () => {
+    assert.ok(content.includes('# schedule:'), 'schedule trigger should be commented out');
+    assert.ok(content.includes('# Re-enable after loop prevention'), 'should explain why cron is disabled');
   });
 
   it('supports manual trigger via workflow_dispatch', () => {

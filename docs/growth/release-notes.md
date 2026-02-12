@@ -40,3 +40,4 @@ A GitHub Actions workflow that automatically releases a new version every day if
 <!-- Auto-updated after each stage -->
 - 2026-02-12: Replanned. Pivoted from `/release-notes` command template to automated GitHub Actions daily release workflow. Original plan had 3 unstarted stages for a CLI command; new plan has 4 stages for a CI/CD workflow that creates GitHub Releases with auto-generated notes.
 - 2026-02-12: Stage 1 complete. Created daily release workflow (`.github/workflows/release.yml`) with cron schedule, manual dispatch, change detection, patch version bump, tagging, and GitHub Release creation. Added 8 structural tests. Total: 36 tests passing.
+- 2026-02-12: Review fix — disabled cron schedule trigger to prevent infinite release loop. Cron will be re-enabled in Stage 3 after loop prevention is implemented.
