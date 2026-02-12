@@ -20,10 +20,10 @@ Automated testing and publishing via GitHub Actions. Every push and PR runs test
   - What grew: Added `strategy.matrix.node-version: [18, 20, 22]` to workflow, test verifies all three versions in matrix
   - Test: `node --test` passes (19 tests, 0 failures)
 
-- ⬜ Stage 3: Add bun to the test matrix
+- ✅ Stage 3: Add bun to the test matrix
   - Intent: Validate bun compatibility (both test runner and `bunx` install path)
-  - Verify: Matrix shows 4 jobs (3 node + 1 bun), all green
-  - Touches: `.github/workflows/test.yml`
+  - What grew: Separate `test-bun` job using `oven-sh/setup-bun@v2` + `bun run test`, renamed node job to `test-node`, test verifies bun job exists
+  - Test: `node --test` passes (20 tests, 0 failures)
 
 - ⬜ Stage 4: Publish to npm on version tag
   - Intent: Automate npm publish when a `v*` tag is pushed

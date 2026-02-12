@@ -33,4 +33,10 @@ describe('CI workflow', () => {
       'should reference matrix.node-version in setup-node'
     );
   });
+
+  it('includes a bun test job', () => {
+    assert.ok(content.includes('test-bun'), 'should have a test-bun job');
+    assert.ok(content.includes('oven-sh/setup-bun'), 'should use oven-sh/setup-bun action');
+    assert.ok(content.includes('bun run test'), 'should run tests via bun');
+  });
 });
