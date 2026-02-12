@@ -113,9 +113,47 @@ describe('Release workflow', () => {
     assert.ok(content.includes('has_changes'), 'should output a has_changes flag');
   });
 
-  it('bumps the patch version in package.json', () => {
+  it('bumps the version in package.json', () => {
     assert.ok(content.includes('npm version'), 'should use npm version to bump');
     assert.ok(content.includes('--no-git-tag-version'), 'should not auto-tag during npm version');
+  });
+
+  it('has a bump input on workflow_dispatch with patch/minor/major options', () => {
+    assert.ok(content.includes('inputs:'), 'should have an inputs block');
+    assert.ok(content.includes('bump:'), 'should have a bump input');
+    assert.ok(content.includes('patch'), 'should include patch option');
+    assert.ok(content.includes('minor'), 'should include minor option');
+    assert.ok(content.includes('major'), 'should include major option');
+    assert.ok(
+      content.includes("default: 'patch'") || content.includes('default: patch'),
+      'should default to patch'
+    );
+  });
+
+  it('reads bump type from github.event.inputs.bump with patch fallback', () => {
+    assert.ok(
+      content.includes('github.event.inputs.bump'),
+      'should reference github.event.inputs.bump for the bump type'
+    );
+    assert.ok(
+      content.includes("|| 'patch'"),
+      'should fall back to patch when inputs are empty (cron trigger)'
+    );
+  });
+
+  it('version bump step handles all three bump types', () => {
+    assert.ok(
+      content.includes("name: Bump version"),
+      'step name should reflect it handles multiple bump types'
+    );
+    assert.ok(
+      content.includes("bump === 'major'"),
+      'should have logic for major version bumps'
+    );
+    assert.ok(
+      content.includes("bump === 'minor'"),
+      'should have logic for minor version bumps'
+    );
   });
 
   it('commits, tags, and pushes the version bump', () => {

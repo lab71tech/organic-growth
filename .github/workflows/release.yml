@@ -4,6 +4,16 @@ on:
   schedule:
     - cron: '0 12 * * *'
   workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Version bump type'
+        required: false
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
 
 concurrency:
   group: release
@@ -45,14 +55,22 @@ jobs:
             fi
           fi
 
-      - name: Bump patch version
+      - name: Bump version
         if: steps.changes.outputs.has_changes == 'true'
         run: |
+          BUMP=${{ github.event.inputs.bump || 'patch' }}
           NEW_VERSION=$(node -e "
             const pkg = require('./package.json');
             const [major, minor, patch] = pkg.version.split('.').map(Number);
-            console.log(major + '.' + minor + '.' + (patch + 1));
-          ")
+            const bump = process.argv[1];
+            if (bump === 'major') {
+              console.log((major + 1) + '.0.0');
+            } else if (bump === 'minor') {
+              console.log(major + '.' + (minor + 1) + '.0');
+            } else {
+              console.log(major + '.' + minor + '.' + (patch + 1));
+            }
+          " "$BUMP")
           npm version "$NEW_VERSION" --no-git-tag-version
           echo "NEW_VERSION=$NEW_VERSION" >> "$GITHUB_ENV"
 
