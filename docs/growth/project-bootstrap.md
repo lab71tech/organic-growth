@@ -26,13 +26,14 @@ Feature: organic-growth npm package — CLI + templates for incremental developm
 - **Intent:** Verify all expected templates are installed and contain required content
 - **What grew:** Two new tests in `test/cli.test.mjs` — one asserts all 7 template files exist and are non-empty after install, another asserts `docs/growth/` directory is created. Extracted shared `runCLI()` helper to avoid duplication.
 - **Test:** `node --test` passes (3 tests, 0 failures)
+- **Commit:** `468f9b1`
+
+### Stage 5 — Test DNA document handling ✅
+- **Intent:** Verify the DNA path copies the document correctly and warns on missing files
+- **What grew:** 3 new tests — copies DNA file with correct content, prints success message, warns when DNA file missing. Extended `runCLI()` to accept extra args.
+- **Test:** `node --test` passes (6 tests, 0 failures)
 
 ## Next Stages
-
-### Stage 5 — Test DNA document handling
-- **Intent:** Verify the `--dna` path copies the document correctly
-- **Test:** Create a temp DNA file, run CLI with it, assert `docs/product-dna.md` exists in target with correct content. Test missing DNA file warns.
-- **Acceptance:** `node --test` passes with new assertions
 
 ### Stage 6 — CLI help and version flags
 - **Intent:** Add `--help` and `--version` flags so the CLI behaves like a proper tool
