@@ -22,10 +22,11 @@ A GitHub Actions workflow that automatically releases a new version every day if
   - Touches: `.github/release.yml`, `test/ci.test.mjs`
   - Done: Created `.github/release.yml` with `changelog.categories` grouping PRs into Features (enhancement), Bug Fixes (bug), CI/CD (ci, github_actions, dependencies), Documentation (documentation), and Other Changes (wildcard catch-all). Added 6 tests validating the config structure. All 42 tests pass.
 
-- ⬜ Stage 3: Loop prevention and robustness hardening
+- ✅ Stage 3: Loop prevention and robustness hardening
   - Intent: Ensure the version-bump commit created by the release workflow does not trigger another release cycle. Use `[skip ci]` in the commit message and add a check that the HEAD commit is not a version bump. Also add a guard that skips release if the only new commit since the last tag is a version bump.
   - Verify: `node --test` passes (test validates the workflow YAML contains skip-ci and version-bump-detection logic). Manual review of the workflow confirms no infinite loop scenario.
   - Touches: `.github/workflows/release.yml`, `test/ci.test.mjs`
+  - Done: Re-enabled cron schedule trigger. Replaced `git rev-list` with `git log --invert-grep --grep="^chore: bump version"` so version-bump commits are excluded from the change count -- if only version bumps exist since the last tag, `has_changes` is false and no release is created. Added `concurrency: group: release` with `cancel-in-progress: false` to prevent parallel release races. Updated 1 existing test, added 2 new tests. All 44 tests pass.
 
 - ⬜ Stage 4: README documentation update
   - Intent: Document the auto-release workflow in the README. Explain the daily release cycle, how it connects to the existing publish workflow, and how to trigger a manual release via `workflow_dispatch`.
@@ -43,3 +44,4 @@ A GitHub Actions workflow that automatically releases a new version every day if
 - 2026-02-12: Stage 1 complete. Created daily release workflow (`.github/workflows/release.yml`) with cron schedule, manual dispatch, change detection, patch version bump, tagging, and GitHub Release creation. Added 8 structural tests. Total: 36 tests passing.
 - 2026-02-12: Review fix — disabled cron schedule trigger to prevent infinite release loop. Cron will be re-enabled in Stage 3 after loop prevention is implemented.
 - 2026-02-12: Stage 2 complete. Created `.github/release.yml` release notes config with 5 changelog categories (Features, Bug Fixes, CI/CD, Documentation, Other Changes). Added 6 tests. Total: 42 tests passing across 13 suites.
+- 2026-02-12: Stage 3 complete. Re-enabled cron schedule, added loop prevention via `--invert-grep` filtering of version-bump commits, added concurrency control. Updated 1 test, added 2 new tests. Total: 44 tests passing across 13 suites.

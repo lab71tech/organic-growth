@@ -1,9 +1,13 @@
 name: Daily Release
 
 on:
-  # schedule:
-  #   - cron: '0 12 * * *'  # Re-enable after loop prevention (Stage 3)
+  schedule:
+    - cron: '0 12 * * *'
   workflow_dispatch:
+
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -28,12 +32,15 @@ jobs:
             echo "No previous tag found, will release"
             echo "has_changes=true" >> "$GITHUB_OUTPUT"
           else
-            COMMITS=$(git rev-list "$LAST_TAG"..HEAD --count)
+            # Count only non-version-bump commits to prevent release loops.
+            # The release workflow creates commits starting with "chore: bump version";
+            # if those are the only commits since the last tag, there is nothing to release.
+            COMMITS=$(git log "$LAST_TAG"..HEAD --oneline --invert-grep --grep="^chore: bump version" | wc -l | tr -d ' ')
             if [ "$COMMITS" -gt 0 ]; then
-              echo "Found $COMMITS new commits since $LAST_TAG"
+              echo "Found $COMMITS meaningful commits since $LAST_TAG (excluding version bumps)"
               echo "has_changes=true" >> "$GITHUB_OUTPUT"
             else
-              echo "No changes since $LAST_TAG"
+              echo "No meaningful changes since $LAST_TAG (only version-bump commits)"
               echo "has_changes=false" >> "$GITHUB_OUTPUT"
             fi
           fi

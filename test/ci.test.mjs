@@ -93,9 +93,10 @@ describe('Release workflow', () => {
     'utf8'
   );
 
-  it('has a cron schedule commented out until loop prevention is added', () => {
-    assert.ok(content.includes('# schedule:'), 'schedule trigger should be commented out');
-    assert.ok(content.includes('# Re-enable after loop prevention'), 'should explain why cron is disabled');
+  it('has an active cron schedule for daily releases', () => {
+    assert.ok(content.includes('schedule:'), 'should have a schedule trigger');
+    assert.ok(content.includes("cron: '0 12 * * *'"), 'should run daily at noon UTC');
+    assert.ok(!content.includes('# schedule:'), 'schedule should not be commented out');
   });
 
   it('supports manual trigger via workflow_dispatch', () => {
@@ -108,7 +109,7 @@ describe('Release workflow', () => {
 
   it('checks for changes since the last tag', () => {
     assert.ok(content.includes('git describe --tags'), 'should find the last tag');
-    assert.ok(content.includes('rev-list'), 'should count commits since last tag');
+    assert.ok(content.includes('git log'), 'should use git log to inspect commits since last tag');
     assert.ok(content.includes('has_changes'), 'should output a has_changes flag');
   });
 
@@ -132,6 +133,18 @@ describe('Release workflow', () => {
 
   it('uses fetch-depth 0 for full git history', () => {
     assert.ok(content.includes('fetch-depth: 0'), 'should fetch full history for tag detection');
+  });
+
+  it('filters out version-bump commits to prevent release loops', () => {
+    assert.ok(content.includes('--invert-grep'), 'should use --invert-grep to exclude version-bump commits');
+    assert.ok(content.includes('chore: bump version'), 'should match the version-bump commit message pattern');
+    assert.ok(content.includes('git log'), 'should use git log for filtered commit counting');
+  });
+
+  it('has concurrency control to prevent parallel release races', () => {
+    assert.ok(content.includes('concurrency:'), 'should have a concurrency block');
+    assert.ok(content.includes('group: release'), 'should use a release concurrency group');
+    assert.ok(content.includes('cancel-in-progress: false'), 'should not cancel in-progress releases');
   });
 });
 
