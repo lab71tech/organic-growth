@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   test-node:
     runs-on: ubuntu-latest
@@ -26,3 +29,15 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - run: bun --version
       - run: bun run test
+
+  # Gate job for branch protection — requires all test jobs to pass
+  test:
+    if: always()
+    needs: [test-node, test-bun]
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          if [[ "${{ needs.test-node.result }}" != "success" || "${{ needs.test-bun.result }}" != "success" ]]; then
+            echo "One or more test jobs failed"
+            exit 1
+          fi
