@@ -73,6 +73,28 @@ This copies the `.claude/` configuration into your project. No runtime dependenc
 2. Fill in Quality Tools section with your project's lint/test commands
 3. Start building with `/grow`
 
+## Releases
+
+New versions are released automatically. A [Daily Release](.github/workflows/release.yml) workflow runs every day at noon UTC and checks whether any meaningful commits have landed on `main` since the last `v*` tag. If there are changes, it:
+
+1. Bumps the patch version in `package.json`
+2. Commits the version bump and pushes a new `v*` tag
+3. Creates a GitHub Release with auto-generated release notes (categorized by label)
+
+The existing [Publish to npm](.github/workflows/publish.yml) workflow triggers on any `v*` tag push, so it picks up the new tag and publishes to npm automatically. The full pipeline is: **daily cron -> version bump -> tag -> GitHub Release -> npm publish**.
+
+Version-bump commits are excluded from the change check, so the workflow cannot trigger itself in a loop.
+
+### Manual release
+
+To release immediately without waiting for the daily cron, trigger the workflow manually:
+
+```bash
+gh workflow run "Daily Release"
+```
+
+Or use the "Run workflow" button on the Actions tab in GitHub.
+
 ## License
 
 MIT

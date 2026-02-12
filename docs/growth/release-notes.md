@@ -1,6 +1,6 @@
 # Feature: Automated Daily Releases
 Created: 2026-02-12
-Status: 🌱 Growing (replanned)
+Status: ✅ Complete
 
 ## Seed (what & why)
 
@@ -28,10 +28,11 @@ A GitHub Actions workflow that automatically releases a new version every day if
   - Touches: `.github/workflows/release.yml`, `test/ci.test.mjs`
   - Done: Re-enabled cron schedule trigger. Replaced `git rev-list` with `git log --invert-grep --grep="^chore: bump version"` so version-bump commits are excluded from the change count -- if only version bumps exist since the last tag, `has_changes` is false and no release is created. Added `concurrency: group: release` with `cancel-in-progress: false` to prevent parallel release races. Updated 1 existing test, added 2 new tests. All 44 tests pass.
 
-- ⬜ Stage 4: README documentation update
+- ✅ Stage 4: README documentation update
   - Intent: Document the auto-release workflow in the README. Explain the daily release cycle, how it connects to the existing publish workflow, and how to trigger a manual release via `workflow_dispatch`.
   - Verify: `node --test` passes, README contains auto-release section.
   - Touches: `README.md`
+  - Done: Added "Releases" section to README documenting the full daily release pipeline (cron -> version bump -> tag -> GitHub Release -> npm publish), loop prevention, and manual release instructions via `gh workflow run` or the Actions UI. All 44 tests pass.
 
 ### Horizon (rough outline of what comes after)
 - Add a release badge to README (latest version from GitHub Releases)
@@ -45,3 +46,4 @@ A GitHub Actions workflow that automatically releases a new version every day if
 - 2026-02-12: Review fix — disabled cron schedule trigger to prevent infinite release loop. Cron will be re-enabled in Stage 3 after loop prevention is implemented.
 - 2026-02-12: Stage 2 complete. Created `.github/release.yml` release notes config with 5 changelog categories (Features, Bug Fixes, CI/CD, Documentation, Other Changes). Added 6 tests. Total: 42 tests passing across 13 suites.
 - 2026-02-12: Stage 3 complete. Re-enabled cron schedule, added loop prevention via `--invert-grep` filtering of version-bump commits, added concurrency control. Updated 1 test, added 2 new tests. Total: 44 tests passing across 13 suites.
+- 2026-02-12: Stage 4 complete. Added "Releases" section to README documenting the daily auto-release pipeline, its connection to the publish workflow, loop prevention, and manual trigger instructions. All 44 tests passing across 13 suites. Feature complete.
