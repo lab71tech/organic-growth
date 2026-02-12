@@ -15,10 +15,10 @@ Automated testing and publishing via GitHub Actions. Every push and PR runs test
   - What grew: `.github/workflows/test.yml` (checkout, setup-node 22, run tests), `test/ci.test.mjs` validating workflow structure
   - Test: `node --test` passes (18 tests, 0 failures)
 
-- ⬜ Stage 2: Node version matrix (18, 20, 22)
+- ✅ Stage 2: Node version matrix (18, 20, 22)
   - Intent: Expand to test across all supported Node versions
-  - Verify: Matrix shows 3 jobs, all green
-  - Touches: `.github/workflows/test.yml`
+  - What grew: Added `strategy.matrix.node-version: [18, 20, 22]` to workflow, test verifies all three versions in matrix
+  - Test: `node --test` passes (19 tests, 0 failures)
 
 - ⬜ Stage 3: Add bun to the test matrix
   - Intent: Validate bun compatibility (both test runner and `bunx` install path)
