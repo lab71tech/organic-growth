@@ -25,10 +25,10 @@ Automated testing and publishing via GitHub Actions. Every push and PR runs test
   - What grew: Separate `test-bun` job using `oven-sh/setup-bun@v2` + `bun run test`, renamed node job to `test-node`, test verifies bun job exists
   - Test: `node --test` passes (20 tests, 0 failures)
 
-- ⬜ Stage 4: Publish to npm on version tag
+- ✅ Stage 4: Publish to npm on version tag
   - Intent: Automate npm publish when a `v*` tag is pushed
-  - Verify: Workflow file has correct trigger, npm publish step, uses NPM_TOKEN secret
-  - Touches: `.github/workflows/publish.yml`
+  - What grew: `.github/workflows/publish.yml` — triggers on `v*` tags, uses `--provenance --access public`, authenticates via `NPM_TOKEN` secret, `id-token: write` permission for provenance
+  - Test: `node --test` passes (23 tests, 0 failures)
 
 - ⬜ Stage 5: README badge and repo URL fix
   - Intent: Add CI status badge to README, fix the placeholder repo URL in package.json

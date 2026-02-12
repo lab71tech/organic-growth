@@ -40,3 +40,28 @@ describe('CI workflow', () => {
     assert.ok(content.includes('bun run test'), 'should run tests via bun');
   });
 });
+
+describe('Publish workflow', () => {
+  const content = readFileSync(
+    join(ROOT, '.github', 'workflows', 'publish.yml'),
+    'utf8'
+  );
+
+  it('triggers on version tags only', () => {
+    assert.ok(content.includes("tags:"), 'should trigger on tags');
+    assert.ok(content.includes("'v*'"), 'should match v* tag pattern');
+    assert.ok(!content.includes('pull_request'), 'should not trigger on pull requests');
+  });
+
+  it('publishes to npm with provenance', () => {
+    assert.ok(content.includes('npm publish'), 'should run npm publish');
+    assert.ok(content.includes('--provenance'), 'should use --provenance flag');
+    assert.ok(content.includes('--access public'), 'should publish with public access');
+    assert.ok(content.includes('registry-url'), 'should configure npm registry');
+  });
+
+  it('uses NPM_TOKEN secret for authentication', () => {
+    assert.ok(content.includes('NPM_TOKEN'), 'should reference NPM_TOKEN secret');
+    assert.ok(content.includes('NODE_AUTH_TOKEN'), 'should set NODE_AUTH_TOKEN env var');
+  });
+});
