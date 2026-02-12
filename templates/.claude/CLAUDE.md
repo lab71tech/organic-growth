@@ -1,36 +1,44 @@
 # Project Context
 
-## Product (THE SEED)
+## Product (THE SEED — fill this in)
 
-**What:** An npm package (`organic-growth`) that installs Claude Code configuration for incremental software development using thin vertical slices.
-**For whom:** Developers using Claude Code who want structured, controlled workflow instead of autonomous "fire and forget" coding.
-**Core problem:** Claude Code without structure produces sprawling changes, loses context, and has no checkpoints. This methodology works with LLM limitations (context window degradation, weak self-review) rather than ignoring them.
-**Key domain concepts:** Growth stage, rolling plan, gardener agent, seed/DNA document, quality gate, context hygiene, vertical slice
-**Current state:** MVP exists (v0.1.0) — CLI installs templates, all commands and agent defined.
-**Full DNA:** docs/product-dna.md
+<!-- Without this section, the agent grows weeds. Be brief but specific. -->
+<!-- If you have a full product document, put it in docs/product-dna.md -->
+<!-- This section is the distilled version — what the agent sees always. -->
+<!-- The DNA document is read only during planning (/grow, /replan). -->
 
-## Tech Stack (THE SOIL)
+**What:** [One sentence. What is this product?]
+**For whom:** [Who uses it? What's their context?]
+**Core problem:** [What pain does it solve?]
+**Key domain concepts:** [3-7 terms that someone new needs to understand]
+**Current state:** [Greenfield / MVP exists / Production system]
+**Full DNA:** [docs/product-dna.md if exists, otherwise "N/A"]
 
-- Node.js CLI — single entry point `bin/cli.mjs`
-- Zero runtime dependencies (hard constraint)
-- Templates in `templates/.claude/` — plain markdown, no templating engine
-- Published to npm, invoked via `bunx organic-growth` or `npx organic-growth`
-- Must work with both bun and npm
-- Package size under 50KB
+## Tech Stack (THE SOIL — auto-discovered, but document the non-obvious)
 
-### Quality tools
+<!-- Claude Code reads your build files. Only add what it CAN'T discover. -->
 
-- **Build:** N/A (no build step — plain JS)
-- **Lint:** N/A (not yet configured)
-- **Type check:** N/A (plain JavaScript, no TypeScript)
-- **Test:** `node --test` (Node.js built-in test runner, no dependencies)
-- **Smoke:** `node bin/cli.mjs --help` (should print usage without error)
+- [Any non-standard commands, e.g.: `./gradlew test --profile staging`]
+- [Unusual conventions, e.g.: "endpoint names in Polish"]
+- [Hard constraints, e.g.: "no Lombok", "Flyway not Liquibase"]
+
+### Quality tools (fill in for your project)
+
+<!-- Gardener runs these after every stage. List the exact commands. -->
+
+- **Build:** [e.g.: `./gradlew build` or `npm run build`]
+- **Lint:** [e.g.: `./gradlew ktlintCheck` or `npm run lint`]
+- **Type check:** [e.g.: `tsc --noEmit` or N/A for dynamic languages]
+- **Test:** [e.g.: `./gradlew test` or `npm test`]
+- **Smoke:** [e.g.: `curl http://localhost:8080/health` or `npm run dev` + check]
 
 ## Priorities (LIGHT & WATER — what matters now)
 
-- Correctness of templates (gardener instructions, command definitions)
-- Developer experience (clear README, easy install, helpful CLI output)
-- Simplicity (resist adding features — one agent, five commands, that's it)
+<!-- This changes. Update it when priorities shift. -->
+
+- [e.g.: "MVP speed over production polish"]
+- [e.g.: "Must work offline first"]
+- [e.g.: "Security is non-negotiable, even for MVP"]
 
 ---
 
