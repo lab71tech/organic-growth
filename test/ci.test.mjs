@@ -135,6 +135,45 @@ describe('Release workflow', () => {
   });
 });
 
+describe('Release notes configuration', () => {
+  const content = readFileSync(
+    join(ROOT, '.github', 'release.yml'),
+    'utf8'
+  );
+
+  it('config file exists and contains changelog categories', () => {
+    assert.ok(content.includes('changelog:'), 'should have a changelog key');
+    assert.ok(content.includes('categories:'), 'should have a categories key');
+  });
+
+  it('has a Features category for enhancements', () => {
+    assert.ok(content.includes('title: Features'), 'should have a Features category');
+    assert.ok(content.includes('enhancement'), 'should include the enhancement label');
+  });
+
+  it('has a Bug Fixes category', () => {
+    assert.ok(content.includes('title: Bug Fixes'), 'should have a Bug Fixes category');
+    assert.ok(content.includes('bug'), 'should include the bug label');
+  });
+
+  it('has a CI/CD category for automation changes', () => {
+    assert.ok(content.includes('title: CI/CD'), 'should have a CI/CD category');
+    assert.ok(content.includes('ci'), 'should include the ci label');
+    assert.ok(content.includes('github_actions'), 'should include the github_actions label');
+    assert.ok(content.includes('dependencies'), 'should include the dependencies label');
+  });
+
+  it('has a Documentation category', () => {
+    assert.ok(content.includes('title: Documentation'), 'should have a Documentation category');
+    assert.ok(content.includes('documentation'), 'should include the documentation label');
+  });
+
+  it('has a catch-all category with wildcard label', () => {
+    assert.ok(content.includes('title: Other Changes'), 'should have an Other Changes category');
+    assert.ok(content.includes('"*"'), 'should include the wildcard label for unlabeled PRs');
+  });
+});
+
 describe('README badge and repo URL', () => {
   const readme = readFileSync(join(ROOT, 'README.md'), 'utf8');
   const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
