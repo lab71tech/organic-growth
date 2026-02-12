@@ -85,6 +85,14 @@ describe('Dependabot', () => {
     assert.ok(content.includes('schedule'), 'should define a schedule');
     assert.ok(content.includes('weekly'), 'should use weekly interval');
   });
+
+  it('groups minor and patch updates to reduce PR noise', () => {
+    assert.ok(content.includes('groups:'), 'should have a groups block');
+    assert.ok(content.includes('actions-minor-patch'), 'should have an actions-minor-patch group');
+    assert.ok(content.includes('applies-to: version-updates'), 'group should apply to version-updates');
+    assert.ok(content.includes('- minor'), 'group should include minor update-types');
+    assert.ok(content.includes('- patch'), 'group should include patch update-types');
+  });
 });
 
 describe('Release workflow', () => {

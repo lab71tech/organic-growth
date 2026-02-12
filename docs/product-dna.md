@@ -36,7 +36,13 @@ Claude Code without structure produces inconsistent results — sprawling change
 - Package size under 50KB
 
 ## Current State
-v0.1.0 — MVP complete. CLI installs templates, all commands and agent defined.
+v0.1.0 — Post-MVP, infrastructure mature. CLI installs templates with all commands and agent defined. Full CI/CD pipeline in place:
+- Test workflow (Node 20/22 + bun matrix)
+- Publish workflow (npm with provenance on version tags)
+- Automated daily release workflow (configurable bump, dry-run mode, loop prevention)
+- Release notes with changelog categories
+- Dependabot for GitHub Actions (grouped minor/patch updates)
+- 53 tests, 13 suites, zero failures
 
 ## Priorities
 1. Correctness of templates (gardener instructions, command definitions)
