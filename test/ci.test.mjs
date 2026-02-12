@@ -65,3 +65,23 @@ describe('Publish workflow', () => {
     assert.ok(content.includes('NODE_AUTH_TOKEN'), 'should set NODE_AUTH_TOKEN env var');
   });
 });
+
+describe('README badge and repo URL', () => {
+  const readme = readFileSync(join(ROOT, 'README.md'), 'utf8');
+  const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
+
+  it('README has CI status badge', () => {
+    assert.ok(readme.includes('actions/workflows/test.yml/badge.svg'), 'should have test workflow badge image');
+    assert.ok(readme.includes('actions/workflows/test.yml'), 'should link badge to workflow');
+  });
+
+  it('package.json repository URL is not a placeholder', () => {
+    assert.ok(pkg.repository, 'should have a repository field');
+    assert.ok(!pkg.repository.url.includes('TODO'), 'repository URL should not contain TODO');
+    assert.match(
+      pkg.repository.url,
+      /^https:\/\/github\.com\/[\w-]+\/[\w-]+$/,
+      'repository URL should be a valid GitHub URL'
+    );
+  });
+});

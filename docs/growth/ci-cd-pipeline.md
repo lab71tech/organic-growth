@@ -1,6 +1,6 @@
 # Feature: CI/CD Pipeline
 Created: 2026-02-12
-Status: 🌱 Growing
+Status: 🌳 Complete
 
 ## Seed (what & why)
 
@@ -30,10 +30,10 @@ Automated testing and publishing via GitHub Actions. Every push and PR runs test
   - What grew: `.github/workflows/publish.yml` — triggers on `v*` tags, uses `--provenance --access public`, authenticates via `NPM_TOKEN` secret, `id-token: write` permission for provenance
   - Test: `node --test` passes (23 tests, 0 failures)
 
-- ⬜ Stage 5: README badge and repo URL fix
+- ✅ Stage 5: README badge and repo URL fix
   - Intent: Add CI status badge to README, fix the placeholder repo URL in package.json
-  - Verify: Badge renders, repo URL is correct
-  - Touches: `README.md`, `package.json`
+  - What grew: CI badge in README linking to test workflow, `package.json` repo URL fixed to `lab71tech/organic-growth`, tests verify badge exists and URL has no TODO placeholder
+  - Test: `node --test` passes (25 tests, 0 failures)
 
 ### Horizon (rough outline of what comes after)
 - Dependabot or Renovate for keeping actions up to date

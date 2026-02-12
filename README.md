@@ -1,5 +1,7 @@
 # 🌱 Organic Growth
 
+[![Test](https://github.com/lab71tech/organic-growth/actions/workflows/test.yml/badge.svg)](https://github.com/lab71tech/organic-growth/actions/workflows/test.yml)
+
 Claude Code setup for incremental software development. Grow features in natural stages — each stage produces a complete, working system.
 
 Inspired by Elephant Carpaccio, but reframed: we're not slicing a finished animal — we're growing a living system from seed.
