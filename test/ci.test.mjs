@@ -101,14 +101,17 @@ describe('Release workflow', () => {
     'utf8'
   );
 
-  it('has an active cron schedule for daily releases', () => {
-    assert.ok(content.includes('schedule:'), 'should have a schedule trigger');
-    assert.ok(content.includes("cron: '0 12 * * *'"), 'should run daily at noon UTC');
-    assert.ok(!content.includes('# schedule:'), 'schedule should not be commented out');
+  it('is manual-only with no cron schedule', () => {
+    assert.ok(!content.includes('schedule:'), 'should not have a schedule trigger');
+    assert.ok(!content.includes('cron:'), 'should not have a cron schedule');
   });
 
   it('supports manual trigger via workflow_dispatch', () => {
     assert.ok(content.includes('workflow_dispatch'), 'should have workflow_dispatch trigger');
+  });
+
+  it('runs tests before releasing', () => {
+    assert.ok(content.includes('node --test'), 'should run tests');
   });
 
   it('has contents write permission for tagging and releases', () => {
