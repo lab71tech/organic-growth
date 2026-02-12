@@ -36,7 +36,7 @@ Automated testing and publishing via GitHub Actions. Every push and PR runs test
   - Test: `node --test` passes (25 tests, 0 failures)
 
 ### Horizon (rough outline of what comes after)
-- Dependabot or Renovate for keeping actions up to date
+- ~~Dependabot or Renovate for keeping actions up to date~~ → done (see `docs/growth/dependabot.md`)
 - Release notes generation from growth plan commits
 - npm provenance (--provenance flag for supply chain security)
 

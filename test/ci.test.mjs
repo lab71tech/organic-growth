@@ -66,6 +66,27 @@ describe('Publish workflow', () => {
   });
 });
 
+describe('Dependabot', () => {
+  const content = readFileSync(
+    join(ROOT, '.github', 'dependabot.yml'),
+    'utf8'
+  );
+
+  it('config exists and uses version 2', () => {
+    assert.ok(content.includes('version: 2'), 'should use Dependabot config version 2');
+  });
+
+  it('monitors github-actions ecosystem', () => {
+    assert.ok(content.includes('github-actions'), 'should target github-actions ecosystem');
+    assert.ok(content.includes('package-ecosystem'), 'should specify package-ecosystem');
+  });
+
+  it('has a weekly schedule', () => {
+    assert.ok(content.includes('schedule'), 'should define a schedule');
+    assert.ok(content.includes('weekly'), 'should use weekly interval');
+  });
+});
+
 describe('README badge and repo URL', () => {
   const readme = readFileSync(join(ROOT, 'README.md'), 'utf8');
   const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
