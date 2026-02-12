@@ -196,6 +196,17 @@ describe('README badge and repo URL', () => {
     assert.ok(readme.includes('actions/workflows/test.yml'), 'should link badge to workflow');
   });
 
+  it('README has GitHub Release badge', () => {
+    assert.ok(
+      readme.includes('https://img.shields.io/github/v/release/lab71tech/organic-growth'),
+      'should have shields.io release badge image URL'
+    );
+    assert.ok(
+      readme.includes('https://github.com/lab71tech/organic-growth/releases'),
+      'should link release badge to GitHub Releases page'
+    );
+  });
+
   it('package.json repository URL is not a placeholder', () => {
     assert.ok(pkg.repository, 'should have a repository field');
     assert.ok(!pkg.repository.url.includes('TODO'), 'repository URL should not contain TODO');
