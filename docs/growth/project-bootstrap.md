@@ -37,14 +37,14 @@ Feature: organic-growth npm package — CLI + templates for incremental developm
 - **Intent:** Add `--help` and `--version` flags so the CLI behaves like a proper tool
 - **What grew:** `printHelp()` and `readVersion()` functions, short-circuit before install, `-h`/`-v` aliases
 - **Test:** 4 new tests — `--help` prints usage and doesn't install, `-h` works, `--version` prints version from package.json and doesn't install, `-v` works
-- **Commit:** (pending)
+- **Commit:** `87d0f7f`
+
+### Stage 7 — Validate template content integrity ✅
+- **Intent:** Ensure templates contain the key markers (e.g. CLAUDE.md has "THE SEED", gardener has "PLAN" mode)
+- **What grew:** 3 new tests — CLAUDE.md contains key section markers (THE SEED, THE SOIL, LIGHT & WATER, Organic Growth, Growth Rules), gardener agent contains all three modes and quality gate, all 5 commands have description in frontmatter
+- **Test:** `node --test` passes (13 tests, 0 failures)
 
 ## Next Stages
-
-### Stage 7 — Validate template content integrity
-- **Intent:** Ensure templates contain the key markers (e.g. CLAUDE.md has "THE SEED", gardener has "PLAN" mode)
-- **Test:** Read installed templates and assert key strings are present
-- **Acceptance:** `node --test` passes
 
 ### Stage 8 — Package size and publish readiness
 - **Intent:** Verify package meets constraints (<50KB, correct files included, bin works)

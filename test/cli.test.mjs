@@ -135,6 +135,59 @@ describe('CLI --version flag', () => {
   });
 });
 
+describe('Template content integrity', () => {
+  it('CLAUDE.md contains key section markers', () => {
+    const { tmp } = runCLI();
+    const content = readFileSync(join(tmp, '.claude', 'CLAUDE.md'), 'utf8');
+
+    const markers = [
+      'THE SEED',
+      'THE SOIL',
+      'LIGHT & WATER',
+      'Organic Growth',
+      'Growth Rules',
+    ];
+    for (const marker of markers) {
+      assert.ok(
+        content.includes(marker),
+        `CLAUDE.md should contain "${marker}"`
+      );
+    }
+  });
+
+  it('gardener agent contains all three modes and quality gate', () => {
+    const { tmp } = runCLI();
+    const content = readFileSync(join(tmp, '.claude', 'agents', 'gardener.md'), 'utf8');
+
+    const markers = [
+      'Mode: PLAN',
+      'Mode: GROW',
+      'Mode: REPLAN',
+      'Quality gate',
+    ];
+    for (const marker of markers) {
+      assert.ok(
+        content.includes(marker),
+        `gardener.md should contain "${marker}"`
+      );
+    }
+  });
+
+  it('all commands have a description in frontmatter', () => {
+    const { tmp } = runCLI();
+    const commands = ['seed', 'grow', 'next', 'replan', 'review'];
+
+    for (const cmd of commands) {
+      const content = readFileSync(join(tmp, '.claude', 'commands', `${cmd}.md`), 'utf8');
+      assert.match(
+        content,
+        /^---\s*\ndescription:/m,
+        `${cmd}.md should have a description in frontmatter`
+      );
+    }
+  });
+});
+
 describe('CLI DNA document handling', () => {
   it('copies a DNA file to docs/product-dna.md', () => {
     const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
