@@ -77,40 +77,35 @@ This copies the `.claude/` configuration into your project. No runtime dependenc
 
 ## Releases
 
-New versions are released automatically. A [Daily Release](.github/workflows/release.yml) workflow runs every day at noon UTC and checks whether any meaningful commits have landed on `main` since the last `v*` tag. If there are changes, it:
+Releases are triggered manually via the [Release](.github/workflows/release.yml) workflow. When triggered, it:
 
-1. Bumps the patch version in `package.json`
-2. Commits the version bump and pushes a new `v*` tag
-3. Creates a GitHub Release with auto-generated release notes (categorized by label)
+1. Checks for meaningful commits since the last `v*` tag
+2. Bumps the version in `package.json`
+3. Commits the version bump and pushes a new `v*` tag
+4. Creates a GitHub Release with auto-generated release notes
 
-The existing [Publish to npm](.github/workflows/publish.yml) workflow triggers on any `v*` tag push, so it picks up the new tag and publishes to npm automatically. The full pipeline is: **daily cron -> version bump -> tag -> GitHub Release -> npm publish**.
-
-Version-bump commits are excluded from the change check, so the workflow cannot trigger itself in a loop.
-
-### Manual release
-
-To release immediately without waiting for the daily cron, trigger the workflow manually:
+The [Publish to npm](.github/workflows/publish.yml) workflow triggers on any `v*` tag push and publishes to npm automatically. The full pipeline is: **manual trigger -> version bump -> tag -> GitHub Release -> npm publish**.
 
 ```bash
 # Patch release (default — bug fixes, small changes)
-gh workflow run "Daily Release"
+gh workflow run Release
 
 # Minor release (new features, backwards-compatible)
-gh workflow run "Daily Release" -f bump=minor
+gh workflow run Release -f bump=minor
 
 # Major release (breaking changes)
-gh workflow run "Daily Release" -f bump=major
+gh workflow run Release -f bump=major
 
 # Dry run — preview what would be released without making changes
-gh workflow run "Daily Release" -f dry-run=true
+gh workflow run Release -f dry-run=true
 ```
 
 Or use the "Run workflow" button on the Actions tab in GitHub.
 
 | Input | Type | Default | Description |
 |-------|------|---------|-------------|
-| `bump` | choice: `patch`, `minor`, `major` | `patch` | Version bump type. Cron runs always use `patch`. |
-| `dry-run` | boolean | `false` | When `true`, calculates the version and shows a summary but skips the commit, tag, and release. |
+| `bump` | choice: `patch`, `minor`, `major` | `patch` | Version bump type |
+| `dry-run` | boolean | `false` | When `true`, calculates the version and shows a summary but skips the commit, tag, and release |
 
 ## License
 
