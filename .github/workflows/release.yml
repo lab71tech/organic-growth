@@ -14,6 +14,11 @@ on:
           - patch
           - minor
           - major
+      dry-run:
+        description: 'Preview what would be released without making changes'
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
   group: release
@@ -75,7 +80,7 @@ jobs:
           echo "NEW_VERSION=$NEW_VERSION" >> "$GITHUB_ENV"
 
       - name: Commit version bump and tag
-        if: steps.changes.outputs.has_changes == 'true'
+        if: steps.changes.outputs.has_changes == 'true' && github.event.inputs.dry-run != 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -85,7 +90,24 @@ jobs:
           git push origin main --follow-tags
 
       - name: Create GitHub Release
-        if: steps.changes.outputs.has_changes == 'true'
+        if: steps.changes.outputs.has_changes == 'true' && github.event.inputs.dry-run != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release create "v$NEW_VERSION" --generate-notes
+
+      - name: Dry run summary
+        if: steps.changes.outputs.has_changes == 'true' && github.event.inputs.dry-run == 'true'
+        run: |
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -z "$LAST_TAG" ]; then
+            COMMIT_COUNT=$(git rev-list --count HEAD)
+          else
+            COMMIT_COUNT=$(git log "$LAST_TAG"..HEAD --oneline --invert-grep --grep="^chore: bump version" | wc -l | tr -d ' ')
+          fi
+          echo "## Dry Run Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Would release:** v$NEW_VERSION" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Commits included:** $COMMIT_COUNT" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Bump type:** ${{ github.event.inputs.bump || 'patch' }}" >> "$GITHUB_STEP_SUMMARY"
+          echo ""
+          echo "DRY RUN: Would have released v$NEW_VERSION with $COMMIT_COUNT commits (bump: ${{ github.event.inputs.bump || 'patch' }})"

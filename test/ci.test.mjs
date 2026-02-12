@@ -184,6 +184,54 @@ describe('Release workflow', () => {
     assert.ok(content.includes('group: release'), 'should use a release concurrency group');
     assert.ok(content.includes('cancel-in-progress: false'), 'should not cancel in-progress releases');
   });
+
+  it('has a dry-run input of type boolean', () => {
+    assert.ok(content.includes('dry-run:'), 'should have a dry-run input');
+    assert.ok(content.includes('type: boolean'), 'dry-run should be a boolean type');
+    assert.ok(
+      content.includes('default: false'),
+      'dry-run should default to false'
+    );
+  });
+
+  it('commit/tag/push step checks dry-run flag', () => {
+    const commitStepMatch = content.match(/Commit version bump and tag[\s\S]*?if:([^\n]+)/);
+    assert.ok(commitStepMatch, 'should find the commit step with an if condition');
+    assert.ok(
+      commitStepMatch[1].includes("github.event.inputs.dry-run != 'true'"),
+      'commit step should skip when dry-run is true'
+    );
+  });
+
+  it('release creation step checks dry-run flag', () => {
+    const releaseStepMatch = content.match(/Create GitHub Release[\s\S]*?if:([^\n]+)/);
+    assert.ok(releaseStepMatch, 'should find the release step with an if condition');
+    assert.ok(
+      releaseStepMatch[1].includes("github.event.inputs.dry-run != 'true'"),
+      'release step should skip when dry-run is true'
+    );
+  });
+
+  it('has a dry-run summary step that outputs the preview', () => {
+    assert.ok(
+      content.includes('name: Dry run summary'),
+      'should have a dry-run summary step'
+    );
+    const summaryMatch = content.match(/Dry run summary[\s\S]*?if:([^\n]+)/);
+    assert.ok(summaryMatch, 'dry-run summary step should have an if condition');
+    assert.ok(
+      summaryMatch[1].includes("github.event.inputs.dry-run == 'true'"),
+      'dry-run summary should only run when dry-run is true'
+    );
+    assert.ok(
+      content.includes('Would release'),
+      'summary should output the would-be version'
+    );
+    assert.ok(
+      content.includes('Commits included'),
+      'summary should output the commit count'
+    );
+  });
 });
 
 describe('Release notes configuration', () => {

@@ -15,7 +15,7 @@ The daily release workflow currently always bumps the patch version, whether tri
   - Verify: `node --test` passes. New tests in `test/ci.test.mjs` validate: (1) `workflow_dispatch` has an `inputs` block with a `bump` input, (2) the input has `patch`, `minor`, `major` as options, (3) the version bump step references `github.event.inputs.bump` or the inputs context, (4) the step name reflects that it handles multiple bump types. Existing release workflow tests still pass.
   - Touches: `.github/workflows/release.yml`, `test/ci.test.mjs`
 
-- ⬜ Stage 2: Add `dry-run` input that previews without releasing
+- ✅ Stage 2: Add `dry-run` input that previews without releasing -- Added boolean dry-run input (default: false). Commit/tag/push and release creation steps now skip when dry-run is true. New "Dry run summary" step outputs would-be version, commit count, and bump type to GITHUB_STEP_SUMMARY. 4 new tests, all 52 pass.
   - Intent: Add a boolean `dry-run` input to `workflow_dispatch` (default: `false`). When true, the workflow runs the change detection and version calculation steps but skips the commit, tag, push, and GitHub Release steps. It outputs what version would have been created and how many commits would be included. This lets maintainers verify the pipeline works correctly without side effects.
   - Verify: `node --test` passes. New tests validate: (1) `workflow_dispatch` has a `dry-run` input of type boolean, (2) the commit/tag/push and release creation steps have conditions that check the dry-run flag, (3) there is a dry-run summary step that outputs the preview. Existing tests still pass.
   - Touches: `.github/workflows/release.yml`, `test/ci.test.mjs`
@@ -32,3 +32,4 @@ The daily release workflow currently always bumps the patch version, whether tri
 ## Growth Log
 <!-- Auto-updated after each stage -->
 - **2026-02-12 Stage 1**: Added `bump` input (patch/minor/major) to workflow_dispatch. Version calculation now handles all three bump types with patch fallback for cron. Step renamed from "Bump patch version" to "Bump version". 3 new tests, 1 updated test, all 48 pass.
+- **2026-02-12 Stage 2**: Added `dry-run` boolean input to workflow_dispatch. When true, commit/tag/push and release creation are skipped; a summary step outputs the would-be version and commit count. 4 new tests, all 52 pass.
