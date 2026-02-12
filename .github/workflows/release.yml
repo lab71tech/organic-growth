@@ -37,6 +37,9 @@ jobs:
         with:
           node-version: 22
 
+      - name: Run tests
+        run: node --test
+
       - name: Check for changes since last tag
         id: changes
         run: |
