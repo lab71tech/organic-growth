@@ -1,6 +1,6 @@
 # Feature: Configurable Release via Workflow Dispatch Inputs
 Created: 2026-02-12
-Status: 🌱 Growing
+Status: ✅ Complete
 
 ## Seed (what & why)
 
@@ -20,7 +20,7 @@ The daily release workflow currently always bumps the patch version, whether tri
   - Verify: `node --test` passes. New tests validate: (1) `workflow_dispatch` has a `dry-run` input of type boolean, (2) the commit/tag/push and release creation steps have conditions that check the dry-run flag, (3) there is a dry-run summary step that outputs the preview. Existing tests still pass.
   - Touches: `.github/workflows/release.yml`, `test/ci.test.mjs`
 
-- ⬜ Stage 3: Update README Releases section to document the new inputs
+- ✅ Stage 3: Update README Releases section to document the new inputs -- Expanded manual release section with examples for patch/minor/major/dry-run. Added input reference table. All 52 tests pass unchanged.
   - Intent: Document the `bump` and `dry-run` inputs in the README's Releases section. Update the manual release example to show how to pass inputs via `gh workflow run`. Add a brief explanation of when to use minor/major bumps and the dry-run option.
   - Verify: `node --test` passes. All existing tests pass unchanged. README contains documentation of both inputs.
   - Touches: `README.md`
@@ -33,3 +33,4 @@ The daily release workflow currently always bumps the patch version, whether tri
 <!-- Auto-updated after each stage -->
 - **2026-02-12 Stage 1**: Added `bump` input (patch/minor/major) to workflow_dispatch. Version calculation now handles all three bump types with patch fallback for cron. Step renamed from "Bump patch version" to "Bump version". 3 new tests, 1 updated test, all 48 pass.
 - **2026-02-12 Stage 2**: Added `dry-run` boolean input to workflow_dispatch. When true, commit/tag/push and release creation are skipped; a summary step outputs the would-be version and commit count. 4 new tests, all 52 pass.
+- **2026-02-12 Stage 3**: Documented `bump` and `dry-run` inputs in README. Expanded manual release section with `gh workflow run` examples for all bump types and dry-run. Added input reference table. All 52 tests pass unchanged. Feature complete.

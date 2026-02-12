@@ -90,10 +90,25 @@ Version-bump commits are excluded from the change check, so the workflow cannot 
 To release immediately without waiting for the daily cron, trigger the workflow manually:
 
 ```bash
+# Patch release (default — bug fixes, small changes)
 gh workflow run "Daily Release"
+
+# Minor release (new features, backwards-compatible)
+gh workflow run "Daily Release" -f bump=minor
+
+# Major release (breaking changes)
+gh workflow run "Daily Release" -f bump=major
+
+# Dry run — preview what would be released without making changes
+gh workflow run "Daily Release" -f dry-run=true
 ```
 
 Or use the "Run workflow" button on the Actions tab in GitHub.
+
+| Input | Type | Default | Description |
+|-------|------|---------|-------------|
+| `bump` | choice: `patch`, `minor`, `major` | `patch` | Version bump type. Cron runs always use `patch`. |
+| `dry-run` | boolean | `false` | When `true`, calculates the version and shows a summary but skips the commit, tag, and release. |
 
 ## License
 
