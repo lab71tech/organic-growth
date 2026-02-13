@@ -8,6 +8,10 @@ Grow features in natural stages, where each stage delivers a complete, working s
 
 Inspired by Alistair Cockburn’s Elephant Carpaccio and the idea that projects grow like plants, rather than being sliced from a finished whole.
 
+<p align="center">
+  <img src="assets/organic-growth.png" alt="Organic Growth — from seed to code" width="600">
+</p>
+
 ## Install
 
 ```bash
