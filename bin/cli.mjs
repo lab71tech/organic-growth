@@ -140,6 +140,28 @@ async function install() {
     created.push(file);
   }
 
+  // Install shared project context (always, regardless of --target)
+  const contextSrc = join(TEMPLATES_DIR, 'docs', 'project-context.md');
+  const contextDest = join(TARGET_DIR, 'docs', 'project-context.md');
+  if (existsSync(contextSrc)) {
+    const docsDir = dirname(contextDest);
+    if (!existsSync(docsDir)) {
+      mkdirSync(docsDir, { recursive: true });
+    }
+    if (!existsSync(contextDest) || force) {
+      copyFileSync(contextSrc, contextDest);
+      created.push('docs/project-context.md');
+    } else {
+      const answer = await ask(`${YELLOW}!${RESET} docs/project-context.md already exists. Overwrite? [y/N] `);
+      if (answer === 'y' || answer === 'yes') {
+        copyFileSync(contextSrc, contextDest);
+        created.push('docs/project-context.md');
+      } else {
+        skipped.push('docs/project-context.md');
+      }
+    }
+  }
+
   // Create docs/growth/ directory
   const growthDir = join(TARGET_DIR, 'docs', 'growth');
   if (!existsSync(growthDir)) {

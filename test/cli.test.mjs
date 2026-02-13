@@ -31,7 +31,7 @@ describe('CLI smoke test', () => {
 });
 
 describe('CLI template completeness', () => {
-  it('installs all 8 template files', () => {
+  it('installs all 9 template files', () => {
     const { tmp } = runCLI();
 
     const expectedFiles = [
@@ -43,6 +43,7 @@ describe('CLI template completeness', () => {
       '.claude/commands/replan.md',
       '.claude/commands/review.md',
       '.github/copilot-instructions.md',
+      'docs/project-context.md',
     ];
 
     for (const file of expectedFiles) {
@@ -275,6 +276,52 @@ describe('Template content integrity', () => {
     );
   });
 
+  it('project-context.md contains key sections', () => {
+    const { tmp } = runCLI();
+    const content = readFileSync(join(tmp, 'docs', 'project-context.md'), 'utf8');
+
+    const sections = [
+      'Product',
+      'Tech Stack',
+      'Quality tools',
+      'Priorities',
+    ];
+    for (const section of sections) {
+      assert.ok(
+        content.includes(section),
+        `project-context.md should contain "${section}"`
+      );
+    }
+  });
+
+  it('project-context.md has fill-in placeholders', () => {
+    const { tmp } = runCLI();
+    const content = readFileSync(join(tmp, 'docs', 'project-context.md'), 'utf8');
+
+    const placeholders = [
+      '[One sentence',
+      '[Who uses it',
+      '[What pain does it solve',
+    ];
+    for (const placeholder of placeholders) {
+      assert.ok(
+        content.includes(placeholder),
+        `project-context.md should contain placeholder "${placeholder}"`
+      );
+    }
+  });
+
+  it('project-context.md is installed regardless of --target flag', () => {
+    const targets = ['claude', 'copilot', 'all'];
+    for (const target of targets) {
+      const { tmp } = runCLI(['--target', target]);
+      assert.ok(
+        existsSync(join(tmp, 'docs', 'project-context.md')),
+        `project-context.md should be installed with --target ${target}`
+      );
+    }
+  });
+
   it('all commands have a description in frontmatter', () => {
     const { tmp } = runCLI();
     const commands = ['seed', 'grow', 'next', 'replan', 'review'];
@@ -306,6 +353,7 @@ describe('Package publish readiness', () => {
       'package.json',
       'templates/.claude/CLAUDE.md',
       'templates/.claude/agents/gardener.md',
+      'templates/docs/project-context.md',
     ];
     for (const file of required) {
       assert.ok(
