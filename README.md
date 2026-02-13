@@ -42,8 +42,11 @@ This copies configuration files into your project. No runtime dependencies.
 ## What You Get
 
 ```
+docs/
+└── project-context.md                # Shared project context (single source of truth)
+
 .claude/                              # Claude Code configuration
-├── CLAUDE.md                         # Project context template + growth philosophy
+├── CLAUDE.md                         # References project-context.md + growth philosophy
 ├── agents/
 │   └── gardener.md                   # Plans, implements, and validates growth stages
 └── commands/
@@ -54,7 +57,7 @@ This copies configuration files into your project. No runtime dependencies.
     └── review.md                     # /review — deep quality review
 
 .github/                              # GitHub Copilot configuration
-└── copilot-instructions.md           # Project context + growth methodology for Copilot
+└── copilot-instructions.md           # Synced context + growth methodology for Copilot
 ```
 
 Use `--target claude` or `--target copilot` to install only one tool's configuration.
@@ -85,19 +88,37 @@ Use `--target claude` or `--target copilot` to install only one tool's configura
 - **Rolling plan:** 3-5 stages ahead, re-evaluate every 3
 - **Two-layer quality:** deterministic tools after every stage, LLM review on demand
 - **Context hygiene:** fresh session every 3 stages
-- **Product context required:** fill in CLAUDE.md or provide a DNA document
+- **Shared context:** one file (`docs/project-context.md`) feeds all AI tools
 
 ## After Install
 
-**Claude Code:**
-1. Edit `.claude/CLAUDE.md` — fill in the Product section (or run `/seed`)
-2. Fill in Quality Tools section with your project's lint/test commands
-3. Start building with `/grow`
+**All tools:**
+1. Edit `docs/project-context.md` — fill in Product, Tech Stack, Quality Tools, Priorities (or run `/seed` in Claude Code)
 
-**GitHub Copilot:**
-1. Edit `.github/copilot-instructions.md` — fill in the Product Context section
-2. Fill in Quality Tools section with your project's lint/test commands
-3. Use the organic growth methodology described in the instructions
+**Claude Code** reads `docs/project-context.md` directly. Start building with `/grow`.
+
+**GitHub Copilot** uses synced context. After editing `docs/project-context.md`:
+```bash
+npx organic-growth sync
+```
+
+## Syncing Context
+
+`docs/project-context.md` is the single source of truth for project context. Claude Code reads it directly. For tools that use static instruction files (like Copilot), run `sync` to inject the context:
+
+```bash
+npx organic-growth sync
+```
+
+This replaces the content between `<!-- BEGIN SHARED CONTEXT -->` and `<!-- END SHARED CONTEXT -->` markers in `.github/copilot-instructions.md`.
+
+### Upgrading from v1.x
+
+If you installed before shared context existed, your project context lives inline in `.claude/CLAUDE.md` and `.github/copilot-instructions.md`. To migrate:
+
+1. Run `npx organic-growth --force` to get the new templates
+2. Move your project context into `docs/project-context.md`
+3. Run `npx organic-growth sync` to update Copilot instructions
 
 ## Releases
 

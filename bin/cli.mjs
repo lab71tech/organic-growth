@@ -222,16 +222,17 @@ async function install() {
   const installedClaude = target === 'claude' || target === 'all';
   const installedCopilot = target === 'copilot' || target === 'all';
 
-  if (installedClaude) {
-    if (dna) {
-      info(`Run ${CYAN}/seed docs/product-dna.md${RESET} to bootstrap from your DNA document`);
-    } else {
-      info(`Run ${CYAN}/seed${RESET} to bootstrap a new project (interview mode)`);
-    }
-    info(`Edit ${CYAN}.claude/CLAUDE.md${RESET} to fill in your project context`);
+  // Shared context is always the first step
+  if (installedClaude && dna) {
+    info(`Run ${CYAN}/seed docs/product-dna.md${RESET} to bootstrap from your DNA document`);
+  } else if (installedClaude) {
+    info(`Run ${CYAN}/seed${RESET} to fill in project context (interview mode)`);
+  } else {
+    info(`Edit ${CYAN}docs/project-context.md${RESET} to fill in your project context`);
   }
+
   if (installedCopilot) {
-    info(`Edit ${CYAN}.github/copilot-instructions.md${RESET} to fill in your project context`);
+    info(`Run ${CYAN}npx organic-growth sync${RESET} to update Copilot instructions after editing context`);
   }
 
   if (installedClaude) {

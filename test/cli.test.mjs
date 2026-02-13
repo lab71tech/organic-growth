@@ -416,16 +416,16 @@ describe('CLI --target flag', () => {
   it('--target copilot shows copilot-specific next steps', () => {
     const { output } = runCLI(['--target', 'copilot']);
 
-    assert.ok(output.includes('copilot-instructions.md'), 'should mention copilot-instructions.md');
+    assert.ok(output.includes('project-context.md'), 'should mention project-context.md');
+    assert.ok(output.includes('sync'), 'should mention sync command');
     assert.ok(!output.includes('/seed'), 'should NOT show Claude Code commands');
   });
 
   it('--target claude shows claude-specific next steps', () => {
     const { output } = runCLI(['--target', 'claude']);
 
-    assert.ok(output.includes('CLAUDE.md'), 'should mention CLAUDE.md');
     assert.ok(output.includes('/seed'), 'should show Claude Code commands');
-    assert.ok(!output.includes('copilot-instructions.md'), 'should NOT mention copilot');
+    assert.ok(!output.includes('sync'), 'should NOT mention sync (no copilot target)');
   });
 });
 
