@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { existsSync, mkdirSync, copyFileSync, readFileSync, readdirSync, statSync } from 'fs';
+import { existsSync, mkdirSync, copyFileSync, readFileSync, writeFileSync, readdirSync, statSync } from 'fs';
 import { join, dirname, relative } from 'path';
 import { fileURLToPath } from 'url';
 import { createInterface } from 'readline';
@@ -55,6 +55,10 @@ function printHelp() {
   log('');
   log(`${CYAN}Usage:${RESET}`);
   log(`  npx organic-growth [options] [dna-file.md]`);
+  log(`  npx organic-growth sync`);
+  log('');
+  log(`${CYAN}Commands:${RESET}`);
+  log(`  sync                     Sync docs/project-context.md into tool-specific configs`);
   log('');
   log(`${CYAN}Options:${RESET}`);
   log(`  -f, --force              Overwrite existing files without prompting`);
@@ -90,6 +94,43 @@ function parseTarget(args) {
     process.exit(1);
   }
   return value;
+}
+
+const SYNC_TARGETS = ['.github/copilot-instructions.md'];
+const MARKER_BEGIN = '<!-- BEGIN SHARED CONTEXT -->';
+const MARKER_END = '<!-- END SHARED CONTEXT -->';
+
+function sync() {
+  const sourcePath = join(TARGET_DIR, 'docs', 'project-context.md');
+  if (!existsSync(sourcePath)) {
+    console.error(`Error: docs/project-context.md not found. Run organic-growth first to install templates.`);
+    process.exit(1);
+  }
+
+  const context = readFileSync(sourcePath, 'utf8');
+  let synced = 0;
+
+  for (const target of SYNC_TARGETS) {
+    const targetPath = join(TARGET_DIR, target);
+    if (!existsSync(targetPath)) continue;
+
+    const content = readFileSync(targetPath, 'utf8');
+    const beginIdx = content.indexOf(MARKER_BEGIN);
+    const endIdx = content.indexOf(MARKER_END);
+    if (beginIdx === -1 || endIdx === -1) continue;
+
+    const before = content.slice(0, beginIdx + MARKER_BEGIN.length);
+    const after = content.slice(endIdx);
+    const updated = before + '\n' + context.trimEnd() + '\n' + after;
+
+    writeFileSync(targetPath, updated);
+    success(`Synced → ${target}`);
+    synced++;
+  }
+
+  if (synced === 0) {
+    warn('No sync targets found. Install templates first.');
+  }
 }
 
 async function install() {
@@ -205,7 +246,12 @@ async function install() {
   log('');
 }
 
-install().catch(err => {
-  console.error('Error:', err.message);
-  process.exit(1);
-});
+const firstArg = process.argv[2];
+if (firstArg === 'sync') {
+  sync();
+} else {
+  install().catch(err => {
+    console.error('Error:', err.message);
+    process.exit(1);
+  });
+}

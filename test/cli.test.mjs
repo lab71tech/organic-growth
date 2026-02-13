@@ -183,13 +183,13 @@ describe('Template content integrity', () => {
     }
   });
 
-  it('copilot-instructions.md contains key sections', () => {
+  it('copilot-instructions.md contains shared context markers and methodology', () => {
     const { tmp } = runCLI();
     const content = readFileSync(join(tmp, '.github', 'copilot-instructions.md'), 'utf8');
 
     const markers = [
-      'Product',
-      'Tech Stack',
+      'BEGIN SHARED CONTEXT',
+      'END SHARED CONTEXT',
       'Organic Growth',
       'Quality gate',
       'Vertical, not horizontal',
@@ -198,25 +198,6 @@ describe('Template content integrity', () => {
       assert.ok(
         content.includes(marker),
         `copilot-instructions.md should contain "${marker}"`
-      );
-    }
-  });
-
-  it('copilot-instructions.md has fill-in placeholders for project context', () => {
-    const { tmp } = runCLI();
-    const content = readFileSync(join(tmp, '.github', 'copilot-instructions.md'), 'utf8');
-
-    const placeholders = [
-      '[One sentence',
-      '[Who uses it',
-      '[What pain does it solve',
-      '[3-7 terms',
-      '[Greenfield',
-    ];
-    for (const placeholder of placeholders) {
-      assert.ok(
-        content.includes(placeholder),
-        `copilot-instructions.md should contain placeholder "${placeholder}"`
       );
     }
   });
@@ -250,13 +231,11 @@ describe('Template content integrity', () => {
     }
   });
 
-  it('copilot-instructions.md contains quality tools and growth plan sections', () => {
+  it('copilot-instructions.md contains methodology sections', () => {
     const { tmp } = runCLI();
     const content = readFileSync(join(tmp, '.github', 'copilot-instructions.md'), 'utf8');
 
     const sections = [
-      'Quality tools',
-      'Priorities',
       'Growth Plans',
       'Commit Convention',
       'feat(scope)',
@@ -485,6 +464,74 @@ describe('CLI DNA document handling', () => {
     assert.ok(
       output.includes('DNA file not found'),
       'should warn about missing DNA file'
+    );
+  });
+});
+
+describe('CLI sync command', () => {
+  it('injects project-context.md content between markers', () => {
+    const { tmp } = runCLI();
+
+    // Write some project context
+    const context = '# Project Context\n\n## Product\n\n**What:** A test product\n';
+    writeFileSync(join(tmp, 'docs', 'project-context.md'), context);
+
+    const output = execFileSync('node', [CLI_PATH, 'sync'], {
+      cwd: tmp,
+      encoding: 'utf8',
+      timeout: 5000,
+    });
+
+    assert.ok(output.includes('Synced'), 'should print sync success');
+
+    const copilot = readFileSync(join(tmp, '.github', 'copilot-instructions.md'), 'utf8');
+    assert.ok(copilot.includes('A test product'), 'should contain injected content');
+    assert.ok(copilot.includes('BEGIN SHARED CONTEXT'), 'should preserve begin marker');
+    assert.ok(copilot.includes('END SHARED CONTEXT'), 'should preserve end marker');
+  });
+
+  it('preserves content outside markers', () => {
+    const { tmp } = runCLI();
+
+    writeFileSync(join(tmp, 'docs', 'project-context.md'), '**What:** Test\n');
+
+    execFileSync('node', [CLI_PATH, 'sync'], {
+      cwd: tmp,
+      encoding: 'utf8',
+      timeout: 5000,
+    });
+
+    const copilot = readFileSync(join(tmp, '.github', 'copilot-instructions.md'), 'utf8');
+    assert.ok(copilot.includes('Organic Growth'), 'should preserve methodology section');
+    assert.ok(copilot.includes('How to Work With Me'), 'should preserve Copilot framing');
+  });
+
+  it('is idempotent — running sync twice produces same result', () => {
+    const { tmp } = runCLI();
+
+    const context = '**What:** A test product\n';
+    writeFileSync(join(tmp, 'docs', 'project-context.md'), context);
+
+    execFileSync('node', [CLI_PATH, 'sync'], { cwd: tmp, encoding: 'utf8', timeout: 5000 });
+    const first = readFileSync(join(tmp, '.github', 'copilot-instructions.md'), 'utf8');
+
+    execFileSync('node', [CLI_PATH, 'sync'], { cwd: tmp, encoding: 'utf8', timeout: 5000 });
+    const second = readFileSync(join(tmp, '.github', 'copilot-instructions.md'), 'utf8');
+
+    assert.equal(first, second, 'sync should be idempotent');
+  });
+
+  it('errors when docs/project-context.md is missing', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+
+    assert.throws(
+      () => execFileSync('node', [CLI_PATH, 'sync'], {
+        cwd: tmp,
+        encoding: 'utf8',
+        timeout: 5000,
+      }),
+      /project-context\.md not found/,
+      'should error about missing source file'
     );
   });
 });
