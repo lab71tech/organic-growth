@@ -139,14 +139,12 @@ describe('CLI --version flag', () => {
 });
 
 describe('Template content integrity', () => {
-  it('CLAUDE.md contains key section markers', () => {
+  it('CLAUDE.md references shared context and contains methodology', () => {
     const { tmp } = runCLI();
     const content = readFileSync(join(tmp, '.claude', 'CLAUDE.md'), 'utf8');
 
     const markers = [
-      'THE SEED',
-      'THE SOIL',
-      'LIGHT & WATER',
+      'project-context.md',
       'Organic Growth',
       'Growth Rules',
     ];
@@ -154,6 +152,15 @@ describe('Template content integrity', () => {
       assert.ok(
         content.includes(marker),
         `CLAUDE.md should contain "${marker}"`
+      );
+    }
+
+    // Should NOT contain inline project context anymore
+    const removed = ['THE SEED', 'THE SOIL', 'LIGHT & WATER'];
+    for (const marker of removed) {
+      assert.ok(
+        !content.includes(marker),
+        `CLAUDE.md should NOT contain inline "${marker}" (moved to project-context.md)`
       );
     }
   });

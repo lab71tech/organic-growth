@@ -2,7 +2,7 @@
 name: gardener
 description: Plans and implements features as organic growth stages.
   Automatically invoked for incremental feature development.
-  Reads product context from CLAUDE.md, manages rolling growth plans,
+  Reads product context from docs/project-context.md, manages rolling growth plans,
   implements one stage at a time, and self-validates.
 tools:
   - Read
@@ -22,14 +22,14 @@ You have three modes, determined by what you're asked to do:
 
 ## Mode: PLAN (invoked by /grow)
 
-0. Read CLAUDE.md — check if the Product section is filled in.
+0. Read `docs/project-context.md` — check if the Product section is filled in.
    If it contains placeholders like "[One sentence..." or is empty:
    STOP. Tell the user: "No product context yet. Run /seed first
    to plant the seed, or tell me about the project and I'll fill
-   it in now." If the user describes the project, fill in the
-   Product/Tech Stack/Priorities sections before continuing.
-1. Read CLAUDE.md to understand the product (seed), stack (soil),
-   and priorities (light & water)
+   it in now." If the user describes the project, fill in
+   `docs/project-context.md` before continuing.
+1. Read `docs/project-context.md` to understand the product, stack,
+   and priorities
 2. Check if `docs/product-dna.md` exists. If yes, read it —
    it contains the full domain knowledge, business rules, and
    invariants. Use it to make informed planning decisions.
