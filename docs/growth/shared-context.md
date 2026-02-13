@@ -57,10 +57,13 @@ Project context (product, tech stack, quality tools, priorities) is currently du
   - No old instructions remain telling users to edit .claude/CLAUDE.md or .github/copilot-instructions.md directly
   - No new tests needed (documentation-only change); 82 tests still passing
 
-- ⬜ Stage 8: Update product-dna.md to reflect shared context architecture
-  - Intent: The product DNA document is outdated -- references 65 tests, doesn't mention shared context, sync command, or project-context.md. Update to accurately describe the current system so future planning sessions have correct context
-  - Verify: product-dna.md mentions project-context.md, sync command, current test count, shared context as an architectural concept
-  - Touches: `docs/product-dna.md`
+- ✅ Stage 8: Update product-dna.md to reflect shared context architecture
+  - Updated "What" to mention project-context.md and sync command
+  - Added "Shared context" and "Sync architecture" bullets to "How It Works"
+  - Added `sync` to Key Commands; updated `/seed` description to mention project-context.md
+  - Tech Stack now lists templates/docs/, sync markers, and project-context.md template
+  - Current State updated: 82 tests / 15 suites, shared context architecture bullet added
+  - No new tests needed (documentation-only change); 82 tests still passing
 
 - ⬜ Stage 9: Add `sync --watch` mode for auto-syncing on file changes
   - Intent: Running `sync` manually after every edit is friction. `sync --watch` uses `fs.watch` to monitor `docs/project-context.md` and auto-sync to all targets when it changes. Exits on Ctrl+C
@@ -83,3 +86,4 @@ Project context (product, tech stack, quality tools, priorities) is currently du
 - 2026-02-13: REPLAN — Phase 2 started. Added stages 6-9: validation, README update, product-dna update, sync --watch mode.
 - 2026-02-13: Stage 6 ✅ — placeholder validation during sync warns users about unfilled template text (82 tests)
 - 2026-02-13: Stage 7 ✅ — README documents shared context workflow: file tree, after-install steps, sync command (82 tests)
+- 2026-02-13: Stage 8 ✅ — product-dna.md updated with shared context architecture, sync command, accurate test counts (82 tests)
