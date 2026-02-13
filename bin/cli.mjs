@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { existsSync, mkdirSync, copyFileSync, readFileSync, writeFileSync, readdirSync, statSync } from 'fs';
+import { existsSync, mkdirSync, copyFileSync, readFileSync, writeFileSync, readdirSync, statSync, watch } from 'fs';
 import { join, dirname, relative } from 'path';
 import { fileURLToPath } from 'url';
 import { createInterface } from 'readline';
@@ -55,11 +55,12 @@ function printHelp() {
   log('');
   log(`${CYAN}Usage:${RESET}`);
   log(`  npx organic-growth [options] [dna-file.md]    Install templates`);
-  log(`  npx organic-growth sync [--target <name>]     Sync project context to tool configs`);
+  log(`  npx organic-growth sync [options]             Sync project context to tool configs`);
   log('');
   log(`${CYAN}Options:${RESET}`);
   log(`  -f, --force              Overwrite existing files without prompting`);
   log(`  --target <claude|copilot|all>  Which AI tool config to install/sync (default: all)`);
+  log(`  -w, --watch              Watch docs/project-context.md and auto-sync on changes`);
   log(`  -h, --help               Show this help message`);
   log(`  -v, --version            Show version number`);
   log('');
@@ -69,6 +70,7 @@ function printHelp() {
   log(`${CYAN}Commands:${RESET}`);
   log(`  sync            Sync docs/project-context.md into tool config files`);
   log(`                  Replaces content between sync markers in target files`);
+  log(`                  Use --watch to auto-sync when the file changes`);
   log('');
   log(`${CYAN}Examples:${RESET}`);
   log(`  npx organic-growth                        Install all templates (prompts on conflicts)`);
@@ -77,6 +79,7 @@ function printHelp() {
   log(`  npx organic-growth --force spec.md         Install all + copy DNA document`);
   log(`  npx organic-growth sync                    Sync project context to all tool configs`);
   log(`  npx organic-growth sync --target copilot   Sync only to Copilot config`);
+  log(`  npx organic-growth sync --watch            Watch and auto-sync on changes`);
   log('');
 }
 
@@ -158,20 +161,11 @@ function hasPlaceholders(content) {
   return PLACEHOLDER_PATTERN.test(content);
 }
 
-function sync() {
-  const args = process.argv.slice(3); // skip 'node', 'cli.mjs', 'sync'
-
-  if (args.includes('--help') || args.includes('-h')) {
-    printHelp();
-    return;
-  }
-
-  const target = parseSyncTarget(args);
-
-  log('');
-  log(`${GREEN}🌱 Organic Growth${RESET} — sync project context`);
-  log('');
-
+/**
+ * Core sync logic: reads project-context.md and syncs to target files.
+ * Returns { syncedCount } or throws if project-context.md is missing.
+ */
+function runSyncOnce(target) {
   // Read project-context.md
   const contextPath = join(TARGET_DIR, 'docs', 'project-context.md');
   if (!existsSync(contextPath)) {
@@ -218,6 +212,27 @@ function sync() {
     }
   }
 
+  return { syncedCount };
+}
+
+function sync() {
+  const args = process.argv.slice(3); // skip 'node', 'cli.mjs', 'sync'
+
+  if (args.includes('--help') || args.includes('-h')) {
+    printHelp();
+    return;
+  }
+
+  const target = parseSyncTarget(args);
+  const watchMode = args.includes('--watch') || args.includes('-w');
+
+  log('');
+  log(`${GREEN}🌱 Organic Growth${RESET} — sync project context`);
+  log('');
+
+  // Initial sync
+  const { syncedCount } = runSyncOnce(target);
+
   log('');
   if (syncedCount > 0) {
     log(`${GREEN}Done!${RESET} Synced ${syncedCount} file${syncedCount > 1 ? 's' : ''} from docs/project-context.md`);
@@ -225,6 +240,42 @@ function sync() {
     log(`${DIM}Nothing to sync. All files are up to date.${RESET}`);
   }
   log('');
+
+  if (!watchMode) return;
+
+  // Watch mode: monitor project-context.md for changes
+  const contextPath = join(TARGET_DIR, 'docs', 'project-context.md');
+  info(`Watching docs/project-context.md for changes... ${DIM}(Ctrl+C to stop)${RESET}`);
+  log('');
+
+  let debounceTimer = null;
+  const watcher = watch(contextPath, () => {
+    // Debounce: fs.watch can fire multiple events for a single save
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      info('Change detected, syncing...');
+      try {
+        const result = runSyncOnce(target);
+        if (result.syncedCount > 0) {
+          log(`${GREEN}Done!${RESET} Synced ${result.syncedCount} file${result.syncedCount > 1 ? 's' : ''}`);
+        } else {
+          log(`${DIM}Nothing to sync. All files are up to date.${RESET}`);
+        }
+        log('');
+      } catch (err) {
+        warn(`Sync failed: ${err.message}`);
+      }
+    }, 150);
+  });
+
+  // Clean up on SIGINT (Ctrl+C)
+  process.on('SIGINT', () => {
+    if (debounceTimer) clearTimeout(debounceTimer);
+    watcher.close();
+    log('');
+    info('Watcher stopped.');
+    process.exit(0);
+  });
 }
 
 async function install() {

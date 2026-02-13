@@ -1,9 +1,10 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawn } from 'node:child_process';
 import { mkdtempSync, mkdirSync, existsSync, statSync, writeFileSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
+import { setTimeout as delay } from 'node:timers/promises';
 
 const PKG_PATH = join(import.meta.dirname, '..', 'package.json');
 
@@ -801,5 +802,135 @@ describe('CLI sync subcommand', () => {
 
     const result = readFileSync(join(tmp, '.github', 'copilot-instructions.md'), 'utf8');
     assert.ok(result.startsWith(beginLine), 'should preserve the exact BEGIN marker line');
+  });
+});
+
+// --- Sync --watch tests ---
+
+/**
+ * Spawn the CLI in watch mode and collect stdout.
+ * Returns { proc, output(), kill() }.
+ */
+function spawnWatch(cwd, extraArgs = []) {
+  const proc = spawn('node', [CLI_PATH, 'sync', '--watch', ...extraArgs], {
+    cwd,
+    stdio: ['pipe', 'pipe', 'pipe'],
+    env: { ...process.env, FORCE_COLOR: '0' },
+  });
+
+  let stdout = '';
+  let stderr = '';
+  proc.stdout.on('data', (chunk) => { stdout += chunk.toString(); });
+  proc.stderr.on('data', (chunk) => { stderr += chunk.toString(); });
+
+  return {
+    proc,
+    output: () => stdout,
+    errors: () => stderr,
+    kill: () => {
+      proc.kill('SIGINT');
+      return new Promise((resolve) => {
+        proc.on('close', resolve);
+        // Safety timeout in case SIGINT doesn't work
+        setTimeout(() => { proc.kill('SIGKILL'); resolve(); }, 2000);
+      });
+    },
+  };
+}
+
+describe('CLI sync --watch', () => {
+  it('performs initial sync and prints watch message, then stops on SIGINT', async () => {
+    const context = '# Watch Test Project\n\n**What:** A watch test';
+    const target = [
+      '<!-- BEGIN PROJECT CONTEXT — synced from docs/project-context.md -->',
+      '',
+      'Old content',
+      '',
+      '<!-- END PROJECT CONTEXT -->',
+    ].join('\n');
+
+    const tmp = setupSyncEnv({ contextContent: context, targetContent: target });
+    const w = spawnWatch(tmp);
+
+    // Wait for initial sync and watch message to appear
+    await delay(500);
+
+    const out = w.output();
+    assert.ok(out.includes('synced'), 'should perform initial sync');
+    assert.ok(out.includes('Watching'), 'should print watching message');
+
+    // Verify the file was actually synced
+    const result = readFileSync(join(tmp, '.github', 'copilot-instructions.md'), 'utf8');
+    assert.ok(result.includes('Watch Test Project'), 'target file should contain synced content');
+
+    // Stop the watcher
+    await w.kill();
+  });
+
+  it('detects file changes and re-syncs', async () => {
+    const context = '# Initial Content';
+    const target = [
+      '<!-- BEGIN PROJECT CONTEXT — synced from docs/project-context.md -->',
+      '',
+      'Old content',
+      '',
+      '<!-- END PROJECT CONTEXT -->',
+    ].join('\n');
+
+    const tmp = setupSyncEnv({ contextContent: context, targetContent: target });
+    const w = spawnWatch(tmp);
+
+    // Wait for initial sync
+    await delay(500);
+
+    // Modify the project-context.md file
+    writeFileSync(join(tmp, 'docs', 'project-context.md'), '# Updated Via Watch');
+
+    // Wait for debounce (150ms) + processing time
+    await delay(600);
+
+    const out = w.output();
+    assert.ok(out.includes('Change detected'), 'should detect the file change');
+
+    // Verify the re-synced content in the target file
+    const result = readFileSync(join(tmp, '.github', 'copilot-instructions.md'), 'utf8');
+    assert.ok(result.includes('Updated Via Watch'), 'target should contain updated content after re-sync');
+
+    await w.kill();
+  });
+
+  it('--watch works together with --target flag', async () => {
+    const context = '# Target Watch Test';
+    const target = [
+      '<!-- BEGIN PROJECT CONTEXT — synced from docs/project-context.md -->',
+      '',
+      'Old content',
+      '',
+      '<!-- END PROJECT CONTEXT -->',
+    ].join('\n');
+
+    const tmp = setupSyncEnv({ contextContent: context, targetContent: target });
+    const w = spawnWatch(tmp, ['--target', 'copilot']);
+
+    // Wait for initial sync
+    await delay(500);
+
+    const out = w.output();
+    assert.ok(out.includes('synced'), 'should sync with --target flag');
+    assert.ok(out.includes('Watching'), 'should enter watch mode');
+
+    await w.kill();
+  });
+
+  it('help text documents --watch flag', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-sync-'));
+    const output = execFileSync('node', [CLI_PATH, '--help'], {
+      cwd: tmp,
+      encoding: 'utf8',
+      timeout: 5000,
+    });
+
+    assert.ok(output.includes('--watch'), 'help should document --watch flag');
+    assert.ok(output.includes('auto-sync'), 'help should describe auto-sync behavior');
   });
 });

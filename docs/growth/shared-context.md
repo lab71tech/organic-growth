@@ -1,6 +1,6 @@
 # Feature: Shared Project Context
 Created: 2026-02-13
-Status: 🌱 Growing (phase 2)
+Status: 🌳 Phase 2 complete
 
 ## Seed (what & why)
 Project context (product, tech stack, quality tools, priorities) is currently duplicated across tool-specific config files (CLAUDE.md, copilot-instructions.md). When users change priorities, they update multiple files. Adding new tools (opencode, VSCode) would mean more duplication. This feature extracts project context into a single shared file (`docs/project-context.md`) that serves as the source of truth. Claude Code references it dynamically (gardener reads the file). Other tools get context injected via a CLI `sync` command that replaces content between markers.
@@ -65,10 +65,16 @@ Project context (product, tech stack, quality tools, priorities) is currently du
   - Current State updated: 82 tests / 15 suites, shared context architecture bullet added
   - No new tests needed (documentation-only change); 82 tests still passing
 
-- ⬜ Stage 9: Add `sync --watch` mode for auto-syncing on file changes
-  - Intent: Running `sync` manually after every edit is friction. `sync --watch` uses `fs.watch` to monitor `docs/project-context.md` and auto-sync to all targets when it changes. Exits on Ctrl+C
-  - Verify: `--watch` flag accepted, initial sync runs on start, file change triggers re-sync, Ctrl+C exits cleanly; test covers at least: watch starts, detects a change, syncs; help text documents `--watch`
-  - Touches: `bin/cli.mjs` (sync function, fs.watch), `test/cli.test.mjs` (watch tests), help text
+- ✅ Stage 9: Add `sync --watch` mode for auto-syncing on file changes
+  - Extracted `runSyncOnce()` from `sync()` for reuse in watch mode
+  - `--watch` / `-w` flag starts fs.watch on docs/project-context.md after initial sync
+  - Debounced at 150ms to handle multiple fs.watch events per save
+  - SIGINT handler cleanly closes watcher and exits
+  - Works with `--target` flag (e.g., `sync --watch --target copilot`)
+  - Help text updated: --watch documented in Options, Commands, and Examples
+  - 4 new tests: initial sync + watch message, file change triggers re-sync, --target compatibility, help text
+  - 86 tests total across 16 suites, all passing
+  - Re-evaluation point (stage 9 = multiple of 3): horizon items still appropriate, no changes needed
 
 ### Horizon (rough outline of what comes after)
 - opencode template (`templates/.opencode/`) with sync markers + CLI target support
@@ -87,3 +93,5 @@ Project context (product, tech stack, quality tools, priorities) is currently du
 - 2026-02-13: Stage 6 ✅ — placeholder validation during sync warns users about unfilled template text (82 tests)
 - 2026-02-13: Stage 7 ✅ — README documents shared context workflow: file tree, after-install steps, sync command (82 tests)
 - 2026-02-13: Stage 8 ✅ — product-dna.md updated with shared context architecture, sync command, accurate test counts (82 tests)
+- 2026-02-13: Stage 9 ✅ — sync --watch auto-syncs on file changes via fs.watch with debounce (86 tests)
+- 2026-02-13: Phase 2 COMPLETE — all 4 stages (6-9) done. Validation, docs, and watch mode fully functional.
