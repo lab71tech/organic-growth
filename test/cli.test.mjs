@@ -31,7 +31,7 @@ describe('CLI smoke test', () => {
 });
 
 describe('CLI template completeness', () => {
-  it('installs all 8 template files', () => {
+  it('installs all 9 template files', () => {
     const { tmp } = runCLI();
 
     const expectedFiles = [
@@ -43,6 +43,7 @@ describe('CLI template completeness', () => {
       '.claude/commands/replan.md',
       '.claude/commands/review.md',
       '.github/copilot-instructions.md',
+      'docs/project-context.md',
     ];
 
     for (const file of expectedFiles) {
@@ -275,6 +276,26 @@ describe('Template content integrity', () => {
     );
   });
 
+  it('project-context.md contains key section markers', () => {
+    const { tmp } = runCLI();
+    const content = readFileSync(join(tmp, 'docs', 'project-context.md'), 'utf8');
+
+    const markers = [
+      'Product',
+      'Tech Stack',
+      'Quality tools',
+      'Priorities',
+      '[One sentence',
+      '[Who uses it',
+    ];
+    for (const marker of markers) {
+      assert.ok(
+        content.includes(marker),
+        `project-context.md should contain "${marker}"`
+      );
+    }
+  });
+
   it('all commands have a description in frontmatter', () => {
     const { tmp } = runCLI();
     const commands = ['seed', 'grow', 'next', 'replan', 'review'];
@@ -361,18 +382,20 @@ describe('Package publish readiness', () => {
 });
 
 describe('CLI --target flag', () => {
-  it('--target claude installs only .claude/ files', () => {
+  it('--target claude installs only .claude/ files plus shared docs', () => {
     const { tmp } = runCLI(['--target', 'claude']);
 
     assert.ok(existsSync(join(tmp, '.claude', 'CLAUDE.md')), 'should install .claude/CLAUDE.md');
     assert.ok(existsSync(join(tmp, '.claude', 'agents', 'gardener.md')), 'should install gardener agent');
+    assert.ok(existsSync(join(tmp, 'docs', 'project-context.md')), 'should install shared docs/project-context.md');
     assert.ok(!existsSync(join(tmp, '.github', 'copilot-instructions.md')), 'should NOT install copilot-instructions.md');
   });
 
-  it('--target copilot installs only .github/ files', () => {
+  it('--target copilot installs only .github/ files plus shared docs', () => {
     const { tmp } = runCLI(['--target', 'copilot']);
 
     assert.ok(existsSync(join(tmp, '.github', 'copilot-instructions.md')), 'should install copilot-instructions.md');
+    assert.ok(existsSync(join(tmp, 'docs', 'project-context.md')), 'should install shared docs/project-context.md');
     assert.ok(!existsSync(join(tmp, '.claude')), 'should NOT install .claude/ directory');
   });
 

@@ -74,6 +74,7 @@ function printHelp() {
 }
 
 const VALID_TARGETS = ['claude', 'copilot', 'all'];
+const SHARED_PREFIXES = ['docs/'];
 const TARGET_PREFIXES = {
   claude: ['.claude/'],
   copilot: ['.github/'],
@@ -112,7 +113,7 @@ async function install() {
   log(`${GREEN}🌱 Organic Growth${RESET} — setup for incremental development`);
   log('');
 
-  const prefixes = TARGET_PREFIXES[target];
+  const prefixes = [...TARGET_PREFIXES[target], ...SHARED_PREFIXES];
   const files = getAllFiles(TEMPLATES_DIR).filter(
     f => prefixes.some(p => f.startsWith(p))
   );
