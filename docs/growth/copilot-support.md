@@ -27,10 +27,11 @@ Add GitHub Copilot as a supported AI coding assistant alongside Claude Code. Cur
   - Touches: `bin/cli.mjs`, `test/cli.test.mjs`
   - Done: Banner now tool-agnostic. Help text documents --target with examples. Next steps show copilot-instructions.md for copilot target, Claude commands for claude target, both for all. 2 new tests (61 total).
 
-- ⬜ Stage 4: Copilot template content integrity tests
+- ✅ Stage 4: Copilot template content integrity tests
   - Intent: Add detailed content verification tests for the Copilot instructions template, mirroring the existing CLAUDE.md integrity tests
   - Verify: Tests check for key sections (product context, tech stack, organic growth methodology, Copilot-specific guidance). All tests pass.
   - Touches: `test/cli.test.mjs`
+  - Done: 4 new tests verifying placeholders, Copilot-oriented framing (no Claude-specific concepts), quality tools/growth plan sections, and stage marker documentation. 65 tests pass.
 
 - ⬜ Stage 5: Update README and documentation
   - Intent: Document Copilot support in README, update product-dna.md, mention --target flag
@@ -47,3 +48,4 @@ Add GitHub Copilot as a supported AI coding assistant alongside Claude Code. Cur
 - 2026-02-13: Stage 1 ✅ — Created `templates/.github/copilot-instructions.md` with standalone project context + adapted organic growth methodology. CLI auto-installs it (recursive copy). Added template completeness test (7→8 files) and content integrity test. 55 tests pass.
 - 2026-02-13: Stage 2 ✅ — Added `--target <claude|copilot|all>` flag with TARGET_PREFIXES filtering. Default `all` preserves backward compat. 4 new tests for all modes. 59 tests pass.
 - 2026-02-13: Stage 3 ✅ — Banner, help text, and next-steps now tool-agnostic and target-aware. Copilot-only output shows only copilot-instructions.md guidance. 61 tests pass.
+- 2026-02-13: Stage 4 ✅ — 4 new content integrity tests for copilot-instructions.md: placeholders present, Copilot framing (no Claude agent commands), quality tools + growth plan sections, stage marker docs. 65 tests pass.

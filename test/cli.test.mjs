@@ -194,6 +194,87 @@ describe('Template content integrity', () => {
     }
   });
 
+  it('copilot-instructions.md has fill-in placeholders for project context', () => {
+    const { tmp } = runCLI();
+    const content = readFileSync(join(tmp, '.github', 'copilot-instructions.md'), 'utf8');
+
+    const placeholders = [
+      '[One sentence',
+      '[Who uses it',
+      '[What pain does it solve',
+      '[3-7 terms',
+      '[Greenfield',
+    ];
+    for (const placeholder of placeholders) {
+      assert.ok(
+        content.includes(placeholder),
+        `copilot-instructions.md should contain placeholder "${placeholder}"`
+      );
+    }
+  });
+
+  it('copilot-instructions.md uses Copilot-oriented framing (not Claude agent commands)', () => {
+    const { tmp } = runCLI();
+    const content = readFileSync(join(tmp, '.github', 'copilot-instructions.md'), 'utf8');
+
+    // Should have chat-oriented guidance
+    assert.ok(
+      content.includes('How to Work With Me'),
+      'should use "How to Work With Me" framing for Copilot'
+    );
+
+    // Should NOT contain Claude Code-specific concepts
+    const claudeOnlyConcepts = [
+      'Mode: PLAN',
+      'Mode: GROW',
+      'Mode: REPLAN',
+      '/seed',
+      '/next',
+      '/replan',
+      '/review',
+      'gardener agent',
+    ];
+    for (const concept of claudeOnlyConcepts) {
+      assert.ok(
+        !content.includes(concept),
+        `copilot-instructions.md should NOT contain Claude-specific concept "${concept}"`
+      );
+    }
+  });
+
+  it('copilot-instructions.md contains quality tools and growth plan sections', () => {
+    const { tmp } = runCLI();
+    const content = readFileSync(join(tmp, '.github', 'copilot-instructions.md'), 'utf8');
+
+    const sections = [
+      'Quality tools',
+      'Priorities',
+      'Growth Plans',
+      'Commit Convention',
+      'feat(scope)',
+    ];
+    for (const section of sections) {
+      assert.ok(
+        content.includes(section),
+        `copilot-instructions.md should contain "${section}"`
+      );
+    }
+  });
+
+  it('copilot-instructions.md documents growth plan stage markers', () => {
+    const { tmp } = runCLI();
+    const content = readFileSync(join(tmp, '.github', 'copilot-instructions.md'), 'utf8');
+
+    assert.ok(
+      content.includes('not started'),
+      'should explain the open stage marker'
+    );
+    assert.ok(
+      content.includes('completed'),
+      'should explain the completed stage marker'
+    );
+  });
+
   it('all commands have a description in frontmatter', () => {
     const { tmp } = runCLI();
     const commands = ['seed', 'grow', 'next', 'replan', 'review'];
