@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, existsSync, statSync, writeFileSync, readFileSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, existsSync, statSync, writeFileSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
@@ -531,5 +531,166 @@ describe('CLI DNA document handling', () => {
       output.includes('DNA file not found'),
       'should warn about missing DNA file'
     );
+  });
+});
+
+// --- Sync subcommand tests ---
+
+/** Set up a temp directory with project-context.md and a target file containing markers. */
+function setupSyncEnv({ contextContent, targetContent } = {}) {
+  const tmp = mkdtempSync(join(tmpdir(), 'og-sync-'));
+
+  // Create docs/project-context.md
+  if (contextContent !== undefined) {
+    mkdirSync(join(tmp, 'docs'), { recursive: true });
+    writeFileSync(join(tmp, 'docs', 'project-context.md'), contextContent);
+  }
+
+  // Create .github/copilot-instructions.md with markers
+  if (targetContent !== undefined) {
+    mkdirSync(join(tmp, '.github'), { recursive: true });
+    writeFileSync(join(tmp, '.github', 'copilot-instructions.md'), targetContent);
+  }
+
+  return tmp;
+}
+
+function runSync(cwd, extraArgs = []) {
+  return execFileSync('node', [CLI_PATH, 'sync', ...extraArgs], {
+    cwd,
+    encoding: 'utf8',
+    timeout: 5000,
+  });
+}
+
+describe('CLI sync subcommand', () => {
+  it('replaces content between markers in copilot-instructions.md', () => {
+    const context = '# My Project\n\n**What:** A test project\n**For whom:** Developers';
+    const target = [
+      '<!-- BEGIN PROJECT CONTEXT — synced from docs/project-context.md -->',
+      '',
+      'Old placeholder content here',
+      '',
+      '<!-- END PROJECT CONTEXT -->',
+      '',
+      '# Methodology section (unchanged)',
+    ].join('\n');
+
+    const tmp = setupSyncEnv({ contextContent: context, targetContent: target });
+    const output = runSync(tmp);
+
+    assert.ok(output.includes('synced'), 'should report synced');
+
+    const result = readFileSync(join(tmp, '.github', 'copilot-instructions.md'), 'utf8');
+    assert.ok(result.includes('A test project'), 'should contain new project context');
+    assert.ok(result.includes('Methodology section (unchanged)'), 'should preserve content after END marker');
+    assert.ok(!result.includes('Old placeholder content'), 'should replace old content');
+    assert.ok(result.includes('<!-- BEGIN PROJECT CONTEXT'), 'should preserve BEGIN marker');
+    assert.ok(result.includes('<!-- END PROJECT CONTEXT -->'), 'should preserve END marker');
+  });
+
+  it('reports "already up to date" when content has not changed', () => {
+    const context = '# My Project';
+    // First sync to establish the format, then sync again to verify "unchanged"
+    const target = [
+      '<!-- BEGIN PROJECT CONTEXT — synced from docs/project-context.md -->',
+      '',
+      'Old content',
+      '',
+      '<!-- END PROJECT CONTEXT -->',
+    ].join('\n');
+
+    const tmp = setupSyncEnv({ contextContent: context, targetContent: target });
+    // First sync replaces old content
+    runSync(tmp);
+    // Second sync should detect no changes
+    const output = runSync(tmp);
+
+    assert.ok(output.includes('already up to date'), 'should report unchanged on second sync');
+  });
+
+  it('handles missing docs/project-context.md gracefully', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-sync-'));
+    // No project-context.md, no target files
+
+    try {
+      runSync(tmp);
+      assert.fail('should have exited with error');
+    } catch (err) {
+      assert.ok(err.status !== 0, 'should exit with non-zero status');
+      assert.ok(
+        err.stdout.includes('project-context.md not found'),
+        'should report missing file'
+      );
+    }
+  });
+
+  it('warns when target file does not exist', () => {
+    const context = '# My Project';
+    const tmp = setupSyncEnv({ contextContent: context });
+    // No copilot-instructions.md file
+
+    const output = runSync(tmp);
+    assert.ok(output.includes('file not found'), 'should warn about missing target');
+  });
+
+  it('warns when target file has no sync markers', () => {
+    const context = '# My Project';
+    const tmp = setupSyncEnv({ contextContent: context });
+    mkdirSync(join(tmp, '.github'), { recursive: true });
+    writeFileSync(join(tmp, '.github', 'copilot-instructions.md'), '# No markers here\n');
+
+    const output = runSync(tmp);
+    assert.ok(output.includes('no sync markers'), 'should warn about missing markers');
+  });
+
+  it('--target copilot syncs only copilot config', () => {
+    const context = '# My Project\n\n**What:** Filtered sync test';
+    const target = [
+      '<!-- BEGIN PROJECT CONTEXT — synced from docs/project-context.md -->',
+      '',
+      'Old content',
+      '',
+      '<!-- END PROJECT CONTEXT -->',
+    ].join('\n');
+
+    const tmp = setupSyncEnv({ contextContent: context, targetContent: target });
+    const output = runSync(tmp, ['--target', 'copilot']);
+
+    assert.ok(output.includes('synced'), 'should report synced');
+    const result = readFileSync(join(tmp, '.github', 'copilot-instructions.md'), 'utf8');
+    assert.ok(result.includes('Filtered sync test'), 'should contain updated content');
+  });
+
+  it('sync --help shows help text', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-sync-'));
+    const output = execFileSync('node', [CLI_PATH, 'sync', '--help'], {
+      cwd: tmp,
+      encoding: 'utf8',
+      timeout: 5000,
+    });
+
+    assert.ok(output.includes('Usage:'), 'should print usage section');
+    assert.ok(output.includes('sync'), 'should mention sync command');
+  });
+
+  it('preserves the BEGIN marker comment text exactly', () => {
+    const context = '# Updated Context';
+    const beginLine = '<!-- BEGIN PROJECT CONTEXT — synced from docs/project-context.md -->';
+    const target = [
+      beginLine,
+      '',
+      'Old content',
+      '',
+      '<!-- END PROJECT CONTEXT -->',
+      '',
+      '# After',
+    ].join('\n');
+
+    const tmp = setupSyncEnv({ contextContent: context, targetContent: target });
+    runSync(tmp);
+
+    const result = readFileSync(join(tmp, '.github', 'copilot-instructions.md'), 'utf8');
+    assert.ok(result.startsWith(beginLine), 'should preserve the exact BEGIN marker line');
   });
 });

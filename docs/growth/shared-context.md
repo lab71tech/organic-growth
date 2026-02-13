@@ -28,10 +28,13 @@ Project context (product, tech stack, quality tools, priorities) is currently du
   - 1 new test verifying markers exist and are in correct order; 69 tests total
   - Re-evaluated plan: adjusted stage 5 scope (/seed already done in stage 2)
 
-- ⬜ Stage 4: Implement `sync` subcommand in CLI
-  - Intent: `npx organic-growth sync` reads docs/project-context.md and injects its content between markers in target config files
-  - Verify: `node bin/cli.mjs sync` replaces content between markers in copilot-instructions.md; handles missing project-context.md gracefully; reports what was synced; `--target` flag filters which files to sync
-  - Touches: `bin/cli.mjs`, `test/cli.test.mjs`
+- ✅ Stage 4: Implement `sync` subcommand in CLI
+  - `npx organic-growth sync` reads docs/project-context.md and replaces content between BEGIN/END markers in target config files
+  - Supports `--target copilot` to filter which files to sync, `--help` for usage info
+  - Handles missing project-context.md (exit 1 with message), missing target files, and files without markers gracefully
+  - Reports synced/unchanged/missing/no-markers status per file; idempotent (second sync reports "already up to date")
+  - Help text updated to document the sync command with examples
+  - 8 new sync tests; 77 tests total, all passing
 
 - ⬜ Stage 5: Update CLI install output for shared context architecture
   - Intent: CLI "next steps" guide users to edit project-context.md as the single file; suggest sync for non-Claude tools
@@ -51,3 +54,4 @@ Project context (product, tech stack, quality tools, priorities) is currently du
 - 2026-02-13: Stage 1 ✅ — shared project-context.md template installed via CLI (68 tests)
 - 2026-02-13: Stage 2 ✅ — CLAUDE.md reference-only, gardener + /seed read project-context.md
 - 2026-02-13: Stage 3 ✅ — sync markers in copilot-instructions.md (69 tests)
+- 2026-02-13: Stage 4 ✅ — sync subcommand reads project-context.md and injects into target files (77 tests)

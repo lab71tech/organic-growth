@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { existsSync, mkdirSync, copyFileSync, readFileSync, readdirSync, statSync } from 'fs';
+import { existsSync, mkdirSync, copyFileSync, readFileSync, writeFileSync, readdirSync, statSync } from 'fs';
 import { join, dirname, relative } from 'path';
 import { fileURLToPath } from 'url';
 import { createInterface } from 'readline';
@@ -54,24 +54,39 @@ function printHelp() {
   log(`${GREEN}🌱 Organic Growth${RESET} — setup for incremental development`);
   log('');
   log(`${CYAN}Usage:${RESET}`);
-  log(`  npx organic-growth [options] [dna-file.md]`);
+  log(`  npx organic-growth [options] [dna-file.md]    Install templates`);
+  log(`  npx organic-growth sync [--target <name>]     Sync project context to tool configs`);
   log('');
   log(`${CYAN}Options:${RESET}`);
   log(`  -f, --force              Overwrite existing files without prompting`);
-  log(`  --target <claude|copilot|all>  Which AI tool config to install (default: all)`);
+  log(`  --target <claude|copilot|all>  Which AI tool config to install/sync (default: all)`);
   log(`  -h, --help               Show this help message`);
   log(`  -v, --version            Show version number`);
   log('');
   log(`${CYAN}Arguments:${RESET}`);
   log(`  dna-file.md     Path to a product DNA document to copy into docs/`);
   log('');
+  log(`${CYAN}Commands:${RESET}`);
+  log(`  sync            Sync docs/project-context.md into tool config files`);
+  log(`                  Replaces content between sync markers in target files`);
+  log('');
   log(`${CYAN}Examples:${RESET}`);
   log(`  npx organic-growth                        Install all templates (prompts on conflicts)`);
   log(`  npx organic-growth --target claude         Install only Claude Code config`);
   log(`  npx organic-growth --target copilot        Install only GitHub Copilot config`);
   log(`  npx organic-growth --force spec.md         Install all + copy DNA document`);
+  log(`  npx organic-growth sync                    Sync project context to all tool configs`);
+  log(`  npx organic-growth sync --target copilot   Sync only to Copilot config`);
   log('');
 }
+
+const BEGIN_MARKER = '<!-- BEGIN PROJECT CONTEXT';
+const END_MARKER = '<!-- END PROJECT CONTEXT -->';
+
+// Files that contain sync markers, keyed by target name
+const SYNC_TARGETS = {
+  copilot: '.github/copilot-instructions.md',
+};
 
 const VALID_TARGETS = ['claude', 'copilot', 'all'];
 const TARGET_PREFIXES = {
@@ -89,6 +104,112 @@ function parseTarget(args) {
     process.exit(1);
   }
   return value;
+}
+
+function syncFile(filePath, contextContent) {
+  if (!existsSync(filePath)) {
+    return { status: 'missing' };
+  }
+
+  const content = readFileSync(filePath, 'utf8');
+  const beginIdx = content.indexOf(BEGIN_MARKER);
+  const endIdx = content.indexOf(END_MARKER);
+
+  if (beginIdx === -1 || endIdx === -1 || beginIdx >= endIdx) {
+    return { status: 'no-markers' };
+  }
+
+  // Find the end of the BEGIN marker line
+  const beginLineEnd = content.indexOf('\n', beginIdx);
+  if (beginLineEnd === -1) {
+    return { status: 'no-markers' };
+  }
+
+  // Build the replacement: keep the BEGIN marker line, inject content, then END marker
+  const before = content.substring(0, beginLineEnd + 1);
+  const after = content.substring(endIdx);
+  const newContent = before + '\n' + contextContent + '\n' + after;
+
+  if (newContent === content) {
+    return { status: 'unchanged' };
+  }
+
+  writeFileSync(filePath, newContent, 'utf8');
+  return { status: 'synced' };
+}
+
+function parseSyncTarget(args) {
+  const idx = args.indexOf('--target');
+  if (idx === -1) return 'all';
+  const value = args[idx + 1];
+  const validSyncTargets = [...Object.keys(SYNC_TARGETS), 'all'];
+  if (!value || !validSyncTargets.includes(value)) {
+    console.error(`Error: --target must be one of: ${validSyncTargets.join(', ')}`);
+    process.exit(1);
+  }
+  return value;
+}
+
+function sync() {
+  const args = process.argv.slice(3); // skip 'node', 'cli.mjs', 'sync'
+
+  if (args.includes('--help') || args.includes('-h')) {
+    printHelp();
+    return;
+  }
+
+  const target = parseSyncTarget(args);
+
+  log('');
+  log(`${GREEN}🌱 Organic Growth${RESET} — sync project context`);
+  log('');
+
+  // Read project-context.md
+  const contextPath = join(TARGET_DIR, 'docs', 'project-context.md');
+  if (!existsSync(contextPath)) {
+    warn('docs/project-context.md not found.');
+    info(`Run ${CYAN}npx organic-growth${RESET} to install templates first.`);
+    log('');
+    process.exit(1);
+  }
+
+  const contextContent = readFileSync(contextPath, 'utf8').trimEnd();
+
+  // Determine which files to sync
+  const targets = target === 'all'
+    ? Object.entries(SYNC_TARGETS)
+    : [[target, SYNC_TARGETS[target]]];
+
+  let syncedCount = 0;
+
+  for (const [name, relPath] of targets) {
+    const fullPath = join(TARGET_DIR, relPath);
+    const result = syncFile(fullPath, contextContent);
+
+    switch (result.status) {
+      case 'synced':
+        success(`${relPath} — synced`);
+        syncedCount++;
+        break;
+      case 'unchanged':
+        info(`${relPath} — already up to date`);
+        break;
+      case 'missing':
+        warn(`${relPath} — file not found (run ${CYAN}npx organic-growth --target ${name}${RESET} to install)`);
+        break;
+      case 'no-markers':
+        warn(`${relPath} — no sync markers found`);
+        break;
+    }
+  }
+
+  log('');
+  if (syncedCount > 0) {
+    log(`${GREEN}Done!${RESET} Synced ${syncedCount} file${syncedCount > 1 ? 's' : ''} from docs/project-context.md`);
+  } else {
+    log(`${DIM}Nothing to sync. All files are up to date.${RESET}`);
+  }
+  log('');
 }
 
 async function install() {
@@ -226,7 +347,19 @@ async function install() {
   log('');
 }
 
-install().catch(err => {
-  console.error('Error:', err.message);
-  process.exit(1);
-});
+// Route subcommands
+const subcommand = process.argv[2];
+
+if (subcommand === 'sync') {
+  try {
+    sync();
+  } catch (err) {
+    console.error('Error:', err.message);
+    process.exit(1);
+  }
+} else {
+  install().catch(err => {
+    console.error('Error:', err.message);
+    process.exit(1);
+  });
+}
