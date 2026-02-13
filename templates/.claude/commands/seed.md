@@ -9,8 +9,8 @@ Plant the seed for a new project.
 
    **Path A — DNA exists:**
    - Read the document
-   - Distill it into CLAUDE.md Product section (~10 lines: what, for whom,
-     core problem, key domain concepts, current state)
+   - Distill it into `docs/project-context.md` (~10 lines: what, for whom,
+     core problem, key domain concepts, current state, tech stack, priorities)
    - Copy/move the full document to `docs/product-dna.md` if not already there
    - Confirm with the user: "Here's what I extracted. Anything to adjust?"
 
@@ -22,16 +22,21 @@ Plant the seed for a new project.
      - What tech stack do you want? (or: should I suggest one?)
      - Any hard constraints? (hosting, budget, compliance, language)
      - What's the priority: speed to MVP, production quality, or learning?
-   - Fill in CLAUDE.md Product section from answers
+   - Fill in `docs/project-context.md` from answers
 
-2. In both paths, also fill in:
-   - Tech Stack (THE SOIL): from DNA or interview + scan of existing project files
-   - Priorities (LIGHT & WATER): from DNA or interview
+2. In both paths, fill in all sections of `docs/project-context.md`:
+   - Product: from DNA or interview
+   - Tech Stack: from DNA or interview + scan of existing project files
+   - Quality tools: exact commands for build, lint, type check, test, smoke
+   - Priorities: from DNA or interview
 
-3. Check if CLAUDE.md already has a filled Product section.
-   If yes, ask: "Product context already exists. Overwrite or update?"
+3. Check if `docs/project-context.md` already has filled content (no placeholders).
+   If yes, ask: "Project context already exists. Overwrite or update?"
 
-4. Generate `docs/growth/project-bootstrap.md` — the first growth plan:
+4. If Copilot is installed (`.github/copilot-instructions.md` exists), remind
+   the user: "Run `npx organic-growth sync` to update Copilot instructions."
+
+5. Generate `docs/growth/project-bootstrap.md` — the first growth plan:
    - Stage 1: Initialize project (build tool, dependencies, empty build passes)
    - Stage 2: Hello World endpoint/page (proves stack works end-to-end)
    - Stage 3: First domain concept with hardcoded data
@@ -39,6 +44,6 @@ Plant the seed for a new project.
    - Stage 5: First real behavior with real data
    Adjust these based on the specific stack and domain from DNA/interview.
 
-5. Ask: "Seed planted. Start growing stage 1?"
+6. Ask: "Seed planted. Start growing stage 1?"
 
 Input: $ARGUMENTS

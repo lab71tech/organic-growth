@@ -282,6 +282,20 @@ describe('Template content integrity', () => {
     }
   });
 
+  it('seed command targets docs/project-context.md', () => {
+    const { tmp } = runCLI();
+    const content = readFileSync(join(tmp, '.claude', 'commands', 'seed.md'), 'utf8');
+
+    assert.ok(
+      content.includes('project-context.md'),
+      'seed should reference project-context.md'
+    );
+    assert.ok(
+      !content.includes('CLAUDE.md Product section'),
+      'seed should NOT reference CLAUDE.md Product section'
+    );
+  });
+
   it('all commands have a description in frontmatter', () => {
     const { tmp } = runCLI();
     const commands = ['seed', 'grow', 'next', 'replan', 'review'];
