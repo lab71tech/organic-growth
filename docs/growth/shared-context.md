@@ -21,20 +21,23 @@ Project context (product, tech stack, quality tools, priorities) is currently du
   - /seed command fills project-context.md instead of CLAUDE.md
   - Tests updated: CLAUDE.md checks reference + no placeholders; gardener checks project-context.md reference
 
-- ⬜ Stage 3: Add sync markers to copilot-instructions.md
-  - Intent: Copilot config has marker placeholders ready for the sync command to inject shared context
-  - Verify: copilot-instructions.md has `<!-- BEGIN PROJECT CONTEXT -->` / `<!-- END PROJECT CONTEXT -->` markers with placeholder text; Copilot-specific methodology sections unchanged
-  - Touches: `templates/.github/copilot-instructions.md`, `test/cli.test.mjs`
+- ✅ Stage 3: Add sync markers to copilot-instructions.md
+  - Added `<!-- BEGIN PROJECT CONTEXT -->` / `<!-- END PROJECT CONTEXT -->` markers wrapping the project context section
+  - Comment notes the sync command: `Run npx organic-growth sync to update this section`
+  - Copilot-specific methodology sections unchanged below the markers
+  - 1 new test verifying markers exist and are in correct order; 69 tests total
+  - Re-evaluated plan: adjusted stage 5 scope (/seed already done in stage 2)
 
 - ⬜ Stage 4: Implement `sync` subcommand in CLI
   - Intent: `npx organic-growth sync` reads docs/project-context.md and injects its content between markers in target config files
   - Verify: `node bin/cli.mjs sync` replaces content between markers in copilot-instructions.md; handles missing project-context.md gracefully; reports what was synced; `--target` flag filters which files to sync
   - Touches: `bin/cli.mjs`, `test/cli.test.mjs`
 
-- ⬜ Stage 5: Update /seed command and CLI output for shared context architecture
-  - Intent: /seed populates project-context.md; CLI next steps guide users to edit the shared file; suggest sync after editing
-  - Verify: /seed instructions reference project-context.md as the file to fill in; CLI "next steps" mention project-context.md; suggest running sync for non-Claude tools
-  - Touches: `templates/.claude/commands/seed.md`, `templates/.claude/commands/grow.md`, `bin/cli.mjs` (output messages), `test/cli.test.mjs`
+- ⬜ Stage 5: Update CLI install output for shared context architecture
+  - Intent: CLI "next steps" guide users to edit project-context.md as the single file; suggest sync for non-Claude tools
+  - Verify: CLI output mentions project-context.md as the file to edit; suggests running sync when copilot is installed; help text documents sync subcommand
+  - Touches: `bin/cli.mjs` (output messages + help), `test/cli.test.mjs`
+  - Note: /seed was already updated in stage 2; /grow delegates to gardener which already reads project-context.md
 
 ### Horizon (rough outline of what comes after)
 - opencode template (`templates/.opencode/`) with sync markers + CLI target support
@@ -47,3 +50,4 @@ Project context (product, tech stack, quality tools, priorities) is currently du
 ## Growth Log
 - 2026-02-13: Stage 1 ✅ — shared project-context.md template installed via CLI (68 tests)
 - 2026-02-13: Stage 2 ✅ — CLAUDE.md reference-only, gardener + /seed read project-context.md
+- 2026-02-13: Stage 3 ✅ — sync markers in copilot-instructions.md (69 tests)

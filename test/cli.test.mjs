@@ -267,6 +267,28 @@ describe('Template content integrity', () => {
     }
   });
 
+  it('copilot-instructions.md has sync markers for project context', () => {
+    const { tmp } = runCLI();
+    const content = readFileSync(join(tmp, '.github', 'copilot-instructions.md'), 'utf8');
+
+    assert.ok(
+      content.includes('<!-- BEGIN PROJECT CONTEXT'),
+      'should have BEGIN PROJECT CONTEXT marker'
+    );
+    assert.ok(
+      content.includes('<!-- END PROJECT CONTEXT -->'),
+      'should have END PROJECT CONTEXT marker'
+    );
+
+    // BEGIN marker should come before END marker
+    const beginIdx = content.indexOf('<!-- BEGIN PROJECT CONTEXT');
+    const endIdx = content.indexOf('<!-- END PROJECT CONTEXT -->');
+    assert.ok(
+      beginIdx < endIdx,
+      'BEGIN marker should come before END marker'
+    );
+  });
+
   it('copilot-instructions.md documents growth plan stage markers', () => {
     const { tmp } = runCLI();
     const content = readFileSync(join(tmp, '.github', 'copilot-instructions.md'), 'utf8');

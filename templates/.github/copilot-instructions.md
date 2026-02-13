@@ -1,3 +1,6 @@
+<!-- BEGIN PROJECT CONTEXT — synced from docs/project-context.md -->
+<!-- Run `npx organic-growth sync` to update this section -->
+
 # Project Context
 
 ## Product
@@ -25,6 +28,8 @@
 
 - [e.g.: "MVP speed over production polish"]
 - [e.g.: "Security is non-negotiable, even for MVP"]
+
+<!-- END PROJECT CONTEXT -->
 
 ---
 
