@@ -1,7 +1,7 @@
 {
   "name": "organic-growth",
   "version": "1.0.1",
-  "description": "Claude Code setup for incremental software development — grow features in natural stages",
+  "description": "AI-assisted incremental software development — grow features in natural stages. Supports Claude Code and GitHub Copilot.",
   "bin": {
     "organic-growth": "bin/cli.mjs"
   },
@@ -11,6 +11,7 @@
   ],
   "keywords": [
     "claude-code",
+    "github-copilot",
     "ai",
     "agents",
     "agile",
