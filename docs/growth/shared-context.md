@@ -15,10 +15,11 @@ Project context (product, tech stack, quality tools, priorities) is currently du
   - 3 new tests: content integrity, placeholders, target-independence; tarball test updated
   - 68 tests passing (up from 65)
 
-- ⬜ Stage 2: Update CLAUDE.md template to reference shared context
-  - Intent: CLAUDE.md becomes reference-only for project context; gardener agent reads project-context.md explicitly
-  - Verify: CLAUDE.md template has no fill-in placeholders for product/tech/priorities; has reference to `docs/project-context.md`; gardener.md reads project-context.md in PLAN mode; existing tests updated
-  - Touches: `templates/.claude/CLAUDE.md`, `templates/.claude/agents/gardener.md`, `templates/.claude/commands/seed.md`, `test/cli.test.mjs`
+- ✅ Stage 2: Update CLAUDE.md template to reference shared context
+  - CLAUDE.md now reference-only: points to project-context.md, keeps methodology
+  - Gardener agent reads project-context.md in PLAN mode (description + steps updated)
+  - /seed command fills project-context.md instead of CLAUDE.md
+  - Tests updated: CLAUDE.md checks reference + no placeholders; gardener checks project-context.md reference
 
 - ⬜ Stage 3: Add sync markers to copilot-instructions.md
   - Intent: Copilot config has marker placeholders ready for the sync command to inject shared context
@@ -45,3 +46,4 @@ Project context (product, tech stack, quality tools, priorities) is currently du
 
 ## Growth Log
 - 2026-02-13: Stage 1 ✅ — shared project-context.md template installed via CLI (68 tests)
+- 2026-02-13: Stage 2 ✅ — CLAUDE.md reference-only, gardener + /seed read project-context.md

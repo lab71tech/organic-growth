@@ -1,44 +1,10 @@
 # Project Context
 
-## Product (THE SEED — fill this in)
+Project identity lives in `docs/project-context.md` — the single source of truth
+for product, tech stack, quality tools, and priorities. Read it before any work.
 
-<!-- Without this section, the agent grows weeds. Be brief but specific. -->
-<!-- If you have a full product document, put it in docs/product-dna.md -->
-<!-- This section is the distilled version — what the agent sees always. -->
-<!-- The DNA document is read only during planning (/grow, /replan). -->
-
-**What:** [One sentence. What is this product?]
-**For whom:** [Who uses it? What's their context?]
-**Core problem:** [What pain does it solve?]
-**Key domain concepts:** [3-7 terms that someone new needs to understand]
-**Current state:** [Greenfield / MVP exists / Production system]
-**Full DNA:** [docs/product-dna.md if exists, otherwise "N/A"]
-
-## Tech Stack (THE SOIL — auto-discovered, but document the non-obvious)
-
-<!-- Claude Code reads your build files. Only add what it CAN'T discover. -->
-
-- [Any non-standard commands, e.g.: `./gradlew test --profile staging`]
-- [Unusual conventions, e.g.: "endpoint names in Polish"]
-- [Hard constraints, e.g.: "no Lombok", "Flyway not Liquibase"]
-
-### Quality tools (fill in for your project)
-
-<!-- Gardener runs these after every stage. List the exact commands. -->
-
-- **Build:** [e.g.: `./gradlew build` or `npm run build`]
-- **Lint:** [e.g.: `./gradlew ktlintCheck` or `npm run lint`]
-- **Type check:** [e.g.: `tsc --noEmit` or N/A for dynamic languages]
-- **Test:** [e.g.: `./gradlew test` or `npm test`]
-- **Smoke:** [e.g.: `curl http://localhost:8080/health` or `npm run dev` + check]
-
-## Priorities (LIGHT & WATER — what matters now)
-
-<!-- This changes. Update it when priorities shift. -->
-
-- [e.g.: "MVP speed over production polish"]
-- [e.g.: "Must work offline first"]
-- [e.g.: "Security is non-negotiable, even for MVP"]
+**Before starting:** Read `docs/project-context.md` to understand the product (seed),
+stack (soil), and current priorities (light & water).
 
 ---
 

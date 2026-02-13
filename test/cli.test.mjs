@@ -139,14 +139,12 @@ describe('CLI --version flag', () => {
 });
 
 describe('Template content integrity', () => {
-  it('CLAUDE.md contains key section markers', () => {
+  it('CLAUDE.md references shared project context and contains methodology', () => {
     const { tmp } = runCLI();
     const content = readFileSync(join(tmp, '.claude', 'CLAUDE.md'), 'utf8');
 
     const markers = [
-      'THE SEED',
-      'THE SOIL',
-      'LIGHT & WATER',
+      'project-context.md',
       'Organic Growth',
       'Growth Rules',
     ];
@@ -156,9 +154,15 @@ describe('Template content integrity', () => {
         `CLAUDE.md should contain "${marker}"`
       );
     }
+
+    // Should NOT contain fill-in placeholders (those live in project-context.md now)
+    assert.ok(
+      !content.includes('[One sentence'),
+      'CLAUDE.md should not contain fill-in placeholders'
+    );
   });
 
-  it('gardener agent contains all three modes and quality gate', () => {
+  it('gardener agent contains all three modes, quality gate, and reads project-context.md', () => {
     const { tmp } = runCLI();
     const content = readFileSync(join(tmp, '.claude', 'agents', 'gardener.md'), 'utf8');
 
@@ -167,6 +171,7 @@ describe('Template content integrity', () => {
       'Mode: GROW',
       'Mode: REPLAN',
       'Quality gate',
+      'project-context.md',
     ];
     for (const marker of markers) {
       assert.ok(
