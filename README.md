@@ -2,7 +2,7 @@
 
 [![Test](https://github.com/lab71tech/organic-growth/actions/workflows/test.yml/badge.svg)](https://github.com/lab71tech/organic-growth/actions/workflows/test.yml) [![GitHub Release](https://img.shields.io/github/v/release/lab71tech/organic-growth)](https://github.com/lab71tech/organic-growth/releases)
 
-Claude Code setup for incremental software development.
+AI-assisted incremental software development. Supports Claude Code and GitHub Copilot.
 
 Grow features in natural stages, where each stage delivers a complete, working system.
 
@@ -26,24 +26,38 @@ bunx organic-growth docs/my-product-spec.md
 
 # Force overwrite existing files:
 bunx organic-growth --force
+
+# Install for Claude Code only:
+bunx organic-growth --target claude
+
+# Install for GitHub Copilot only:
+bunx organic-growth --target copilot
+
+# Install for all supported tools (default):
+bunx organic-growth --target all
 ```
 
-This copies the `.claude/` configuration into your project. No runtime dependencies.
+This copies configuration files into your project. No runtime dependencies.
 
 ## What You Get
 
 ```
-.claude/
-├── CLAUDE.md              # Project context template + growth philosophy
+.claude/                              # Claude Code configuration
+├── CLAUDE.md                         # Project context template + growth philosophy
 ├── agents/
-│   └── gardener.md        # Plans, implements, and validates growth stages
+│   └── gardener.md                   # Plans, implements, and validates growth stages
 └── commands/
-    ├── seed.md            # /seed  — bootstrap new project
-    ├── grow.md            # /grow  — plan a new feature
-    ├── next.md            # /next  — implement next stage
-    ├── replan.md          # /replan — adjust when things change
-    └── review.md          # /review — deep quality review
+    ├── seed.md                       # /seed  — bootstrap new project
+    ├── grow.md                       # /grow  — plan a new feature
+    ├── next.md                       # /next  — implement next stage
+    ├── replan.md                     # /replan — adjust when things change
+    └── review.md                     # /review — deep quality review
+
+.github/                              # GitHub Copilot configuration
+└── copilot-instructions.md           # Project context + growth methodology for Copilot
 ```
+
+Use `--target claude` or `--target copilot` to install only one tool's configuration.
 
 ## Workflow
 
@@ -75,9 +89,15 @@ This copies the `.claude/` configuration into your project. No runtime dependenc
 
 ## After Install
 
+**Claude Code:**
 1. Edit `.claude/CLAUDE.md` — fill in the Product section (or run `/seed`)
 2. Fill in Quality Tools section with your project's lint/test commands
 3. Start building with `/grow`
+
+**GitHub Copilot:**
+1. Edit `.github/copilot-instructions.md` — fill in the Product Context section
+2. Fill in Quality Tools section with your project's lint/test commands
+3. Use the organic growth methodology described in the instructions
 
 ## Releases
 

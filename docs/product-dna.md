@@ -1,10 +1,10 @@
 # Organic Growth — Product DNA
 
 ## What
-An npm package (`organic-growth`) that installs a Claude Code configuration for incremental software development using thin vertical slices.
+An npm package (`organic-growth`) that installs AI coding assistant configuration for incremental software development using thin vertical slices. Supports Claude Code (`.claude/`) and GitHub Copilot (`.github/copilot-instructions.md`).
 
 ## For Whom
-Developers using Claude Code who want a structured, controlled workflow instead of "fire and forget" autonomous coding.
+Developers using Claude Code or GitHub Copilot who want a structured, controlled workflow instead of "fire and forget" autonomous coding.
 
 ## Core Problem
 Claude Code without structure produces inconsistent results — sprawling changes, lost context over long sessions, no clear checkpoints. Developers need a methodology that works WITH LLM limitations (context window degradation, weak self-review) rather than ignoring them.
@@ -25,7 +25,8 @@ Claude Code without structure produces inconsistent results — sprawling change
 
 ## Tech Stack
 - Node.js CLI (bin/cli.mjs) — zero dependencies, pure Node.js
-- Templates in `templates/.claude/` — markdown files
+- Templates in `templates/.claude/` and `templates/.github/` — markdown files
+- `--target` flag selects which tool configs to install (`claude`, `copilot`, or `all`)
 - Published to npm, invoked via `bunx organic-growth` or `npx organic-growth`
 
 ## Constraints
@@ -42,7 +43,8 @@ v0.1.0 — Post-MVP, infrastructure mature. CLI installs templates with all comm
 - Automated daily release workflow (configurable bump, dry-run mode, loop prevention)
 - Release notes with changelog categories
 - Dependabot for GitHub Actions (grouped minor/patch updates)
-- 53 tests, 13 suites, zero failures
+- Multi-tool support: Claude Code + GitHub Copilot via `--target` flag
+- 65 tests, 14 suites, zero failures
 
 ## Priorities
 1. Correctness of templates (gardener instructions, command definitions)

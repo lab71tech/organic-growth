@@ -1,6 +1,6 @@
 # Feature: GitHub Copilot Support
 Created: 2026-02-13
-Status: 🌱 Growing
+Status: 🌳 Mature
 
 ## Seed (what & why)
 Add GitHub Copilot as a supported AI coding assistant alongside Claude Code. Currently the package only installs `.claude/` configuration. Copilot users should be able to get the organic growth methodology via `.github/copilot-instructions.md`. A `--target` CLI flag lets users choose which AI tool configs to install (`claude`, `copilot`, or `all`).
@@ -33,10 +33,11 @@ Add GitHub Copilot as a supported AI coding assistant alongside Claude Code. Cur
   - Touches: `test/cli.test.mjs`
   - Done: 4 new tests verifying placeholders, Copilot-oriented framing (no Claude-specific concepts), quality tools/growth plan sections, and stage marker documentation. 65 tests pass.
 
-- ⬜ Stage 5: Update README and documentation
+- ✅ Stage 5: Update README and documentation
   - Intent: Document Copilot support in README, update product-dna.md, mention --target flag
   - Verify: README mentions Copilot, shows usage examples with --target flag. Product DNA reflects multi-tool support.
   - Touches: `README.md`, `docs/product-dna.md`
+  - Done: README tagline now tool-agnostic, Install section shows --target examples, What You Get shows .github/ tree, After Install has Copilot instructions. Product DNA updated with multi-tool description, --target flag in tech stack, 65 tests/14 suites in current state.
 
 ### Horizon (rough outline of what comes after)
 - Support for Cursor (.cursorrules), Windsurf, and other AI assistants
@@ -49,3 +50,4 @@ Add GitHub Copilot as a supported AI coding assistant alongside Claude Code. Cur
 - 2026-02-13: Stage 2 ✅ — Added `--target <claude|copilot|all>` flag with TARGET_PREFIXES filtering. Default `all` preserves backward compat. 4 new tests for all modes. 59 tests pass.
 - 2026-02-13: Stage 3 ✅ — Banner, help text, and next-steps now tool-agnostic and target-aware. Copilot-only output shows only copilot-instructions.md guidance. 61 tests pass.
 - 2026-02-13: Stage 4 ✅ — 4 new content integrity tests for copilot-instructions.md: placeholders present, Copilot framing (no Claude agent commands), quality tools + growth plan sections, stage marker docs. 65 tests pass.
+- 2026-02-13: Stage 5 ✅ — README updated: tool-agnostic tagline, --target examples in Install, .github/ in What You Get, Copilot path in After Install. Product DNA updated: multi-tool What/For Whom, templates/.github/ in Tech Stack, 65 tests in Current State. Feature complete.
