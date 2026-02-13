@@ -1,6 +1,6 @@
 # Feature: Shared Project Context
 Created: 2026-02-13
-Status: 🌳 Complete
+Status: 🌱 Growing (phase 2)
 
 ## Seed (what & why)
 Project context (product, tech stack, quality tools, priorities) is currently duplicated across tool-specific config files (CLAUDE.md, copilot-instructions.md). When users change priorities, they update multiple files. Adding new tools (opencode, VSCode) would mean more duplication. This feature extracts project context into a single shared file (`docs/project-context.md`) that serves as the source of truth. Claude Code references it dynamically (gardener reads the file). Other tools get context injected via a CLI `sync` command that replaces content between markers.
@@ -43,13 +43,32 @@ Project context (product, tech stack, quality tools, priorities) is currently du
   - Removed old "Edit .claude/CLAUDE.md" and "Edit .github/copilot-instructions.md" lines
   - 3 new tests (project-context.md guidance, sync suggestion, no direct config edit); 80 tests total
 
+- ✅ Stage 6: Validate project-context.md for placeholder text during sync
+  - Added `hasPlaceholders()` function with regex matching template placeholder patterns (e.g., `[One sentence...`, `[e.g.: ...`)
+  - `sync` prints a non-blocking warning when placeholders detected, then continues syncing normally
+  - 2 new tests: warns on template defaults, silent on filled-in content; 82 tests total
+  - Re-evaluation point (stage 6): remaining stages 7-9 still appropriate, no changes needed
+
+- ⬜ Stage 7: Update README to explain shared context architecture
+  - Intent: The "After Install" and "What You Get" sections still tell users to edit CLAUDE.md and copilot-instructions.md directly. Update to reflect the new single-file workflow: edit project-context.md, run sync
+  - Verify: README mentions `docs/project-context.md` as the file to edit, documents the `sync` command, file tree includes `docs/project-context.md`, "After Install" steps are correct for both tools
+  - Touches: `README.md`, `test/cli.test.mjs` (optional: test that README is consistent, or skip if not warranted)
+
+- ⬜ Stage 8: Update product-dna.md to reflect shared context architecture
+  - Intent: The product DNA document is outdated -- references 65 tests, doesn't mention shared context, sync command, or project-context.md. Update to accurately describe the current system so future planning sessions have correct context
+  - Verify: product-dna.md mentions project-context.md, sync command, current test count, shared context as an architectural concept
+  - Touches: `docs/product-dna.md`
+
+- ⬜ Stage 9: Add `sync --watch` mode for auto-syncing on file changes
+  - Intent: Running `sync` manually after every edit is friction. `sync --watch` uses `fs.watch` to monitor `docs/project-context.md` and auto-sync to all targets when it changes. Exits on Ctrl+C
+  - Verify: `--watch` flag accepted, initial sync runs on start, file change triggers re-sync, Ctrl+C exits cleanly; test covers at least: watch starts, detects a change, syncs; help text documents `--watch`
+  - Touches: `bin/cli.mjs` (sync function, fs.watch), `test/cli.test.mjs` (watch tests), help text
+
 ### Horizon (rough outline of what comes after)
 - opencode template (`templates/.opencode/`) with sync markers + CLI target support
 - VSCode template (`.vscode/settings.json` or similar) with sync support
-- `sync --watch` mode for auto-syncing on project-context.md changes
-- Validation: warn if project-context.md still has placeholder text
-- Update README to explain the shared context architecture
-- Update product-dna.md to reflect multi-tool architecture
+- `sync --dry-run` mode to preview what would change without writing
+- `sync` auto-detect: warn when target files are stale (older sync timestamp than project-context.md mtime)
 
 ## Growth Log
 - 2026-02-13: Stage 1 ✅ — shared project-context.md template installed via CLI (68 tests)
@@ -58,3 +77,5 @@ Project context (product, tech stack, quality tools, priorities) is currently du
 - 2026-02-13: Stage 4 ✅ — sync subcommand reads project-context.md and injects into target files (77 tests)
 - 2026-02-13: Stage 5 ✅ — install output guides users to project-context.md as single source of truth (80 tests)
 - 2026-02-13: Feature COMPLETE — all 5 concrete stages done. Shared context architecture is fully functional.
+- 2026-02-13: REPLAN — Phase 2 started. Added stages 6-9: validation, README update, product-dna update, sync --watch mode.
+- 2026-02-13: Stage 6 ✅ — placeholder validation during sync warns users about unfilled template text (82 tests)

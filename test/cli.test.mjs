@@ -710,6 +710,79 @@ describe('CLI sync subcommand', () => {
     assert.ok(output.includes('sync'), 'should mention sync command');
   });
 
+  it('warns when project-context.md contains unfilled placeholder text', () => {
+    // Use the default template content which has placeholders like "[One sentence..."
+    const templateContent = readFileSync(
+      join(import.meta.dirname, '..', 'templates', 'docs', 'project-context.md'),
+      'utf8'
+    );
+    const target = [
+      '<!-- BEGIN PROJECT CONTEXT — synced from docs/project-context.md -->',
+      '',
+      'Old content',
+      '',
+      '<!-- END PROJECT CONTEXT -->',
+    ].join('\n');
+
+    const tmp = setupSyncEnv({ contextContent: templateContent, targetContent: target });
+    const output = runSync(tmp);
+
+    assert.ok(
+      output.includes('unfilled placeholder text'),
+      'should warn about placeholder text'
+    );
+    assert.ok(
+      output.includes('bracketed instructions'),
+      'should hint to replace bracketed instructions'
+    );
+    // Sync should still proceed (non-blocking)
+    assert.ok(output.includes('synced'), 'should still sync despite placeholders');
+  });
+
+  it('does not warn when project-context.md has been filled in', () => {
+    const filledContent = [
+      '# Project Context',
+      '',
+      '## Product',
+      '',
+      '**What:** A task management CLI for solo developers',
+      '**For whom:** Individual developers who want lightweight project tracking',
+      '**Core problem:** Existing tools are bloated for solo use',
+      '**Key domain concepts:** task, project, sprint, backlog',
+      '**Current state:** Greenfield',
+      '',
+      '## Tech Stack',
+      '',
+      '- Node.js 20+',
+      '- SQLite for persistence',
+      '',
+      '### Quality tools',
+      '',
+      '- **Build:** npm run build',
+      '- **Test:** npm test',
+      '',
+      '## Priorities',
+      '',
+      '- MVP speed over production polish',
+    ].join('\n');
+    const target = [
+      '<!-- BEGIN PROJECT CONTEXT — synced from docs/project-context.md -->',
+      '',
+      'Old content',
+      '',
+      '<!-- END PROJECT CONTEXT -->',
+    ].join('\n');
+
+    const tmp = setupSyncEnv({ contextContent: filledContent, targetContent: target });
+    const output = runSync(tmp);
+
+    assert.ok(
+      !output.includes('unfilled placeholder text'),
+      'should NOT warn when context is filled in'
+    );
+    assert.ok(output.includes('synced'), 'should sync normally');
+  });
+
   it('preserves the BEGIN marker comment text exactly', () => {
     const context = '# Updated Context';
     const beginLine = '<!-- BEGIN PROJECT CONTEXT — synced from docs/project-context.md -->';

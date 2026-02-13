@@ -150,6 +150,14 @@ function parseSyncTarget(args) {
   return value;
 }
 
+// Detect unfilled placeholder text like "[One sentence..." or "[e.g.: ..."
+// These are template defaults that users should replace with real content.
+const PLACEHOLDER_PATTERN = /\[(?:One sentence|Who uses|What pain|3-7 terms|Greenfield|docs\/product-dna\.md if|Any non-standard|Hard constraints|e\.g\.:|N\/A for)/;
+
+function hasPlaceholders(content) {
+  return PLACEHOLDER_PATTERN.test(content);
+}
+
 function sync() {
   const args = process.argv.slice(3); // skip 'node', 'cli.mjs', 'sync'
 
@@ -174,6 +182,13 @@ function sync() {
   }
 
   const contextContent = readFileSync(contextPath, 'utf8').trimEnd();
+
+  // Warn if project-context.md still has unfilled placeholder text
+  if (hasPlaceholders(contextContent)) {
+    warn(`docs/project-context.md still has unfilled placeholder text.`);
+    info(`Edit it to replace ${DIM}[bracketed instructions]${RESET} with your project details.`);
+    log('');
+  }
 
   // Determine which files to sync
   const targets = target === 'all'
