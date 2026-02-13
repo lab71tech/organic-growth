@@ -31,7 +31,7 @@ describe('CLI smoke test', () => {
 });
 
 describe('CLI template completeness', () => {
-  it('installs all 7 template files', () => {
+  it('installs all 8 template files', () => {
     const { tmp } = runCLI();
 
     const expectedFiles = [
@@ -42,6 +42,7 @@ describe('CLI template completeness', () => {
       '.claude/commands/next.md',
       '.claude/commands/replan.md',
       '.claude/commands/review.md',
+      '.github/copilot-instructions.md',
     ];
 
     for (const file of expectedFiles) {
@@ -169,6 +170,25 @@ describe('Template content integrity', () => {
       assert.ok(
         content.includes(marker),
         `gardener.md should contain "${marker}"`
+      );
+    }
+  });
+
+  it('copilot-instructions.md contains key sections', () => {
+    const { tmp } = runCLI();
+    const content = readFileSync(join(tmp, '.github', 'copilot-instructions.md'), 'utf8');
+
+    const markers = [
+      'Product',
+      'Tech Stack',
+      'Organic Growth',
+      'Quality gate',
+      'Vertical, not horizontal',
+    ];
+    for (const marker of markers) {
+      assert.ok(
+        content.includes(marker),
+        `copilot-instructions.md should contain "${marker}"`
       );
     }
   });
