@@ -169,10 +169,11 @@ function runSyncOnce(target) {
   // Read project-context.md
   const contextPath = join(TARGET_DIR, 'docs', 'project-context.md');
   if (!existsSync(contextPath)) {
-    warn('docs/project-context.md not found.');
+    const msg = 'docs/project-context.md not found.';
+    warn(msg);
     info(`Run ${CYAN}npx organic-growth${RESET} to install templates first.`);
     log('');
-    process.exit(1);
+    throw new Error(msg);
   }
 
   const contextContent = readFileSync(contextPath, 'utf8').trimEnd();
@@ -230,8 +231,13 @@ function sync() {
   log(`${GREEN}🌱 Organic Growth${RESET} — sync project context`);
   log('');
 
-  // Initial sync
-  const { syncedCount } = runSyncOnce(target);
+  // Initial sync — exit on error for non-watch mode
+  let syncedCount;
+  try {
+    ({ syncedCount } = runSyncOnce(target));
+  } catch (err) {
+    process.exit(1);
+  }
 
   log('');
   if (syncedCount > 0) {
@@ -266,6 +272,13 @@ function sync() {
         warn(`Sync failed: ${err.message}`);
       }
     }, 150);
+  });
+
+  watcher.on('error', (err) => {
+    warn(`Watcher error: ${err.message}`);
+    info('Stopping watcher.');
+    if (debounceTimer) clearTimeout(debounceTimer);
+    watcher.close();
   });
 
   // Clean up on SIGINT (Ctrl+C)

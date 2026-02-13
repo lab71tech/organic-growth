@@ -95,3 +95,4 @@ Project context (product, tech stack, quality tools, priorities) is currently du
 - 2026-02-13: Stage 8 ✅ — product-dna.md updated with shared context architecture, sync command, accurate test counts (82 tests)
 - 2026-02-13: Stage 9 ✅ — sync --watch auto-syncs on file changes via fs.watch with debounce (86 tests)
 - 2026-02-13: Phase 2 COMPLETE — all 4 stages (6-9) done. Validation, docs, and watch mode fully functional.
+- 2026-02-13: REVIEW fixes — runSyncOnce throws instead of process.exit (watch-safe), watcher error handler added, copilot template preserves sync instruction in BEGIN marker, fragile test assertion fixed, product-dna.md test count updated (86 tests)

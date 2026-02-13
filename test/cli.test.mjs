@@ -508,11 +508,11 @@ describe('CLI --target flag', () => {
     const nextSteps = output.substring(nextStepsIdx);
 
     assert.ok(
-      !nextSteps.includes('Edit') || !nextSteps.includes('CLAUDE.md'),
+      !nextSteps.includes('Edit .claude/CLAUDE.md'),
       'should NOT tell users to edit CLAUDE.md directly'
     );
     assert.ok(
-      !nextSteps.includes('Edit') || !nextSteps.includes('copilot-instructions.md'),
+      !nextSteps.includes('Edit .github/copilot-instructions.md'),
       'should NOT tell users to edit copilot-instructions.md directly'
     );
   });

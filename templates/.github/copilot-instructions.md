@@ -1,5 +1,4 @@
-<!-- BEGIN PROJECT CONTEXT — synced from docs/project-context.md -->
-<!-- Run `npx organic-growth sync` to update this section -->
+<!-- BEGIN PROJECT CONTEXT — synced from docs/project-context.md | Run `npx organic-growth sync` to update -->
 
 # Project Context
 

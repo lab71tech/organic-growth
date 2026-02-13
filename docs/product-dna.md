@@ -50,7 +50,7 @@ v0.1.0 — Post-MVP, infrastructure mature. CLI installs templates with all comm
 - Dependabot for GitHub Actions (grouped minor/patch updates)
 - Multi-tool support: Claude Code + GitHub Copilot via `--target` flag
 - Shared context architecture: `docs/project-context.md` as single source of truth, `sync` command to push context into tool configs, placeholder validation warns on unfilled templates
-- 82 tests, 15 suites, zero failures
+- 86 tests, 16 suites, zero failures
 
 ## Priorities
 1. Correctness of templates (gardener instructions, command definitions)
