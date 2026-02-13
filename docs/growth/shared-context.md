@@ -1,6 +1,6 @@
 # Feature: Shared Project Context
 Created: 2026-02-13
-Status: 🌱 Growing
+Status: 🌳 Complete
 
 ## Seed (what & why)
 Project context (product, tech stack, quality tools, priorities) is currently duplicated across tool-specific config files (CLAUDE.md, copilot-instructions.md). When users change priorities, they update multiple files. Adding new tools (opencode, VSCode) would mean more duplication. This feature extracts project context into a single shared file (`docs/project-context.md`) that serves as the source of truth. Claude Code references it dynamically (gardener reads the file). Other tools get context injected via a CLI `sync` command that replaces content between markers.
@@ -36,11 +36,12 @@ Project context (product, tech stack, quality tools, priorities) is currently du
   - Help text updated to document the sync command with examples
   - 8 new sync tests; 77 tests total, all passing
 
-- ⬜ Stage 5: Update CLI install output for shared context architecture
-  - Intent: CLI "next steps" guide users to edit project-context.md as the single file; suggest sync for non-Claude tools
-  - Verify: CLI output mentions project-context.md as the file to edit; suggests running sync when copilot is installed; help text documents sync subcommand
-  - Touches: `bin/cli.mjs` (output messages + help), `test/cli.test.mjs`
-  - Note: /seed was already updated in stage 2; /grow delegates to gardener which already reads project-context.md
+- ✅ Stage 5: Update CLI install output for shared context architecture
+  - "Next steps" now guides users to edit `docs/project-context.md` as the single file
+  - When copilot is installed, suggests `npx organic-growth sync` to push context
+  - /seed suggestion updated: "in Claude Code to fill project-context.md via interview"
+  - Removed old "Edit .claude/CLAUDE.md" and "Edit .github/copilot-instructions.md" lines
+  - 3 new tests (project-context.md guidance, sync suggestion, no direct config edit); 80 tests total
 
 ### Horizon (rough outline of what comes after)
 - opencode template (`templates/.opencode/`) with sync markers + CLI target support
@@ -55,3 +56,5 @@ Project context (product, tech stack, quality tools, priorities) is currently du
 - 2026-02-13: Stage 2 ✅ — CLAUDE.md reference-only, gardener + /seed read project-context.md
 - 2026-02-13: Stage 3 ✅ — sync markers in copilot-instructions.md (69 tests)
 - 2026-02-13: Stage 4 ✅ — sync subcommand reads project-context.md and injects into target files (77 tests)
+- 2026-02-13: Stage 5 ✅ — install output guides users to project-context.md as single source of truth (80 tests)
+- 2026-02-13: Feature COMPLETE — all 5 concrete stages done. Shared context architecture is fully functional.

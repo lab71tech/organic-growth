@@ -323,16 +323,18 @@ async function install() {
   const installedClaude = target === 'claude' || target === 'all';
   const installedCopilot = target === 'copilot' || target === 'all';
 
+  info(`Edit ${CYAN}docs/project-context.md${RESET} to fill in your product, tech stack, and priorities`);
+
   if (installedClaude) {
     if (dna) {
       info(`Run ${CYAN}/seed docs/product-dna.md${RESET} to bootstrap from your DNA document`);
     } else {
-      info(`Run ${CYAN}/seed${RESET} to bootstrap a new project (interview mode)`);
+      info(`Run ${CYAN}/seed${RESET} in Claude Code to fill project-context.md via interview`);
     }
-    info(`Edit ${CYAN}.claude/CLAUDE.md${RESET} to fill in your project context`);
   }
+
   if (installedCopilot) {
-    info(`Edit ${CYAN}.github/copilot-instructions.md${RESET} to fill in your project context`);
+    info(`Run ${CYAN}npx organic-growth sync${RESET} to push context to copilot config`);
   }
 
   if (installedClaude) {

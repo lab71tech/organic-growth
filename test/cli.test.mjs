@@ -468,16 +468,52 @@ describe('CLI --target flag', () => {
   it('--target copilot shows copilot-specific next steps', () => {
     const { output } = runCLI(['--target', 'copilot']);
 
-    assert.ok(output.includes('copilot-instructions.md'), 'should mention copilot-instructions.md');
+    assert.ok(output.includes('project-context.md'), 'should mention project-context.md as the file to edit');
+    assert.ok(output.includes('npx organic-growth sync'), 'should suggest running sync for copilot');
     assert.ok(!output.includes('/seed'), 'should NOT show Claude Code commands');
   });
 
   it('--target claude shows claude-specific next steps', () => {
     const { output } = runCLI(['--target', 'claude']);
 
-    assert.ok(output.includes('CLAUDE.md'), 'should mention CLAUDE.md');
+    assert.ok(output.includes('project-context.md'), 'should mention project-context.md as the file to edit');
     assert.ok(output.includes('/seed'), 'should show Claude Code commands');
-    assert.ok(!output.includes('copilot-instructions.md'), 'should NOT mention copilot');
+    assert.ok(!output.includes('npx organic-growth sync'), 'should NOT suggest sync when copilot not installed');
+  });
+
+  it('default install guides users to project-context.md as the single file to edit', () => {
+    const { output } = runCLI();
+
+    assert.ok(output.includes('project-context.md'), 'should mention project-context.md');
+    assert.ok(
+      output.includes('product, tech stack, and priorities'),
+      'should describe what to fill in'
+    );
+  });
+
+  it('default install suggests sync when copilot is installed', () => {
+    const { output } = runCLI();
+
+    assert.ok(output.includes('npx organic-growth sync'), 'should suggest running sync');
+  });
+
+  it('install output does not tell users to edit tool-specific config files directly', () => {
+    const { output } = runCLI();
+
+    // The "Next steps" section should not guide users to edit CLAUDE.md or copilot-instructions.md directly
+    // (CLAUDE.md may still appear in the "Installed:" file listing, so check only the "Next steps" part)
+    const nextStepsIdx = output.indexOf('Next steps:');
+    assert.ok(nextStepsIdx !== -1, 'should have a Next steps section');
+    const nextSteps = output.substring(nextStepsIdx);
+
+    assert.ok(
+      !nextSteps.includes('Edit') || !nextSteps.includes('CLAUDE.md'),
+      'should NOT tell users to edit CLAUDE.md directly'
+    );
+    assert.ok(
+      !nextSteps.includes('Edit') || !nextSteps.includes('copilot-instructions.md'),
+      'should NOT tell users to edit copilot-instructions.md directly'
+    );
   });
 });
 
