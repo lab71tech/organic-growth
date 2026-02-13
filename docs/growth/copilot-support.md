@@ -21,10 +21,11 @@ Add GitHub Copilot as a supported AI coding assistant alongside Claude Code. Cur
   - Touches: `bin/cli.mjs`, `test/cli.test.mjs`
   - Done: Added parseTarget() + TARGET_PREFIXES filtering. 4 new tests (59 total). Invalid target exits with error.
 
-- ⬜ Stage 3: Adapt CLI messaging for multi-tool support
+- ✅ Stage 3: Adapt CLI messaging for multi-tool support
   - Intent: Update banner, help text, and "next steps" output to reflect multi-tool support. Show tool-appropriate next steps based on what was installed.
-  - Verify: Help text shows --target option. Banner says "AI coding assistant setup" instead of "Claude Code setup". Next steps adapt based on target. Tests verify help output.
+  - Verify: Help text shows --target option. Banner says "setup for incremental development" (tool-agnostic). Next steps adapt based on target. Tests verify help output.
   - Touches: `bin/cli.mjs`, `test/cli.test.mjs`
+  - Done: Banner now tool-agnostic. Help text documents --target with examples. Next steps show copilot-instructions.md for copilot target, Claude commands for claude target, both for all. 2 new tests (61 total).
 
 - ⬜ Stage 4: Copilot template content integrity tests
   - Intent: Add detailed content verification tests for the Copilot instructions template, mirroring the existing CLAUDE.md integrity tests
@@ -45,3 +46,4 @@ Add GitHub Copilot as a supported AI coding assistant alongside Claude Code. Cur
 ## Growth Log
 - 2026-02-13: Stage 1 ✅ — Created `templates/.github/copilot-instructions.md` with standalone project context + adapted organic growth methodology. CLI auto-installs it (recursive copy). Added template completeness test (7→8 files) and content integrity test. 55 tests pass.
 - 2026-02-13: Stage 2 ✅ — Added `--target <claude|copilot|all>` flag with TARGET_PREFIXES filtering. Default `all` preserves backward compat. 4 new tests for all modes. 59 tests pass.
+- 2026-02-13: Stage 3 ✅ — Banner, help text, and next-steps now tool-agnostic and target-aware. Copilot-only output shows only copilot-instructions.md guidance. 61 tests pass.

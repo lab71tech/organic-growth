@@ -86,6 +86,7 @@ describe('CLI --help flag', () => {
 
     assert.ok(output.includes('Usage:'), 'should print usage section');
     assert.ok(output.includes('--force'), 'should document --force flag');
+    assert.ok(output.includes('--target'), 'should document --target flag');
     assert.ok(output.includes('--help'), 'should document --help flag');
     assert.ok(output.includes('--version'), 'should document --version flag');
     assert.ok(!existsSync(join(tmp, '.claude')), 'should not install templates');
@@ -306,6 +307,21 @@ describe('CLI --target flag', () => {
 
     assert.ok(existsSync(join(tmp, '.claude', 'CLAUDE.md')), 'should install .claude/CLAUDE.md');
     assert.ok(existsSync(join(tmp, '.github', 'copilot-instructions.md')), 'should install copilot-instructions.md');
+  });
+
+  it('--target copilot shows copilot-specific next steps', () => {
+    const { output } = runCLI(['--target', 'copilot']);
+
+    assert.ok(output.includes('copilot-instructions.md'), 'should mention copilot-instructions.md');
+    assert.ok(!output.includes('/seed'), 'should NOT show Claude Code commands');
+  });
+
+  it('--target claude shows claude-specific next steps', () => {
+    const { output } = runCLI(['--target', 'claude']);
+
+    assert.ok(output.includes('CLAUDE.md'), 'should mention CLAUDE.md');
+    assert.ok(output.includes('/seed'), 'should show Claude Code commands');
+    assert.ok(!output.includes('copilot-instructions.md'), 'should NOT mention copilot');
   });
 });
 

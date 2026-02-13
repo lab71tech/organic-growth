@@ -51,23 +51,25 @@ function readVersion() {
 
 function printHelp() {
   log('');
-  log(`${GREEN}🌱 Organic Growth${RESET} — Claude Code setup for incremental development`);
+  log(`${GREEN}🌱 Organic Growth${RESET} — setup for incremental development`);
   log('');
   log(`${CYAN}Usage:${RESET}`);
   log(`  npx organic-growth [options] [dna-file.md]`);
   log('');
   log(`${CYAN}Options:${RESET}`);
-  log(`  -f, --force     Overwrite existing files without prompting`);
-  log(`  -h, --help      Show this help message`);
-  log(`  -v, --version   Show version number`);
+  log(`  -f, --force              Overwrite existing files without prompting`);
+  log(`  --target <claude|copilot|all>  Which AI tool config to install (default: all)`);
+  log(`  -h, --help               Show this help message`);
+  log(`  -v, --version            Show version number`);
   log('');
   log(`${CYAN}Arguments:${RESET}`);
   log(`  dna-file.md     Path to a product DNA document to copy into docs/`);
   log('');
   log(`${CYAN}Examples:${RESET}`);
-  log(`  npx organic-growth                  Install templates (prompts on conflicts)`);
-  log(`  npx organic-growth --force          Install templates (overwrite existing)`);
-  log(`  npx organic-growth spec.md          Install templates + copy DNA document`);
+  log(`  npx organic-growth                        Install all templates (prompts on conflicts)`);
+  log(`  npx organic-growth --target claude         Install only Claude Code config`);
+  log(`  npx organic-growth --target copilot        Install only GitHub Copilot config`);
+  log(`  npx organic-growth --force spec.md         Install all + copy DNA document`);
   log('');
 }
 
@@ -107,7 +109,7 @@ async function install() {
   const dna = args.find(a => !a.startsWith('-') && a.endsWith('.md'));
 
   log('');
-  log(`${GREEN}🌱 Organic Growth${RESET} — Claude Code setup for incremental development`);
+  log(`${GREEN}🌱 Organic Growth${RESET} — setup for incremental development`);
   log('');
 
   const prefixes = TARGET_PREFIXES[target];
@@ -174,20 +176,31 @@ async function install() {
   log('');
   log(`${GREEN}Done!${RESET} Next steps:`);
   log('');
-  if (dna) {
-    info(`Run ${CYAN}/seed docs/product-dna.md${RESET} to bootstrap from your DNA document`);
-  } else {
-    info(`Run ${CYAN}/seed${RESET} to bootstrap a new project (interview mode)`);
-    info(`Or: ${CYAN}/seed path/to/product-doc.md${RESET} if you have a product document`);
+
+  const installedClaude = target === 'claude' || target === 'all';
+  const installedCopilot = target === 'copilot' || target === 'all';
+
+  if (installedClaude) {
+    if (dna) {
+      info(`Run ${CYAN}/seed docs/product-dna.md${RESET} to bootstrap from your DNA document`);
+    } else {
+      info(`Run ${CYAN}/seed${RESET} to bootstrap a new project (interview mode)`);
+    }
+    info(`Edit ${CYAN}.claude/CLAUDE.md${RESET} to fill in your project context`);
   }
-  info(`Edit ${CYAN}.claude/CLAUDE.md${RESET} to fill in your tech stack and quality tools`);
-  log('');
-  log(`${DIM}Commands available after setup:${RESET}`);
-  log(`  ${CYAN}/seed${RESET}    — bootstrap project (interview or DNA document)`);
-  log(`  ${CYAN}/grow${RESET}    — plan and start a new feature`);
-  log(`  ${CYAN}/next${RESET}    — implement the next growth stage`);
-  log(`  ${CYAN}/replan${RESET}  — re-evaluate when things change`);
-  log(`  ${CYAN}/review${RESET}  — deep quality review of recent stages`);
+  if (installedCopilot) {
+    info(`Edit ${CYAN}.github/copilot-instructions.md${RESET} to fill in your project context`);
+  }
+
+  if (installedClaude) {
+    log('');
+    log(`${DIM}Claude Code commands available after setup:${RESET}`);
+    log(`  ${CYAN}/seed${RESET}    — bootstrap project (interview or DNA document)`);
+    log(`  ${CYAN}/grow${RESET}    — plan and start a new feature`);
+    log(`  ${CYAN}/next${RESET}    — implement the next growth stage`);
+    log(`  ${CYAN}/replan${RESET}  — re-evaluate when things change`);
+    log(`  ${CYAN}/review${RESET}  — deep quality review of recent stages`);
+  }
   log('');
 }
 
