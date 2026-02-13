@@ -71,6 +71,24 @@ function printHelp() {
   log('');
 }
 
+const VALID_TARGETS = ['claude', 'copilot', 'all'];
+const TARGET_PREFIXES = {
+  claude: ['.claude/'],
+  copilot: ['.github/'],
+  all: ['.claude/', '.github/'],
+};
+
+function parseTarget(args) {
+  const idx = args.indexOf('--target');
+  if (idx === -1) return 'all';
+  const value = args[idx + 1];
+  if (!value || !VALID_TARGETS.includes(value)) {
+    console.error(`Error: --target must be one of: ${VALID_TARGETS.join(', ')}`);
+    process.exit(1);
+  }
+  return value;
+}
+
 async function install() {
   const args = process.argv.slice(2);
 
@@ -85,13 +103,17 @@ async function install() {
   }
 
   const force = args.includes('--force') || args.includes('-f');
+  const target = parseTarget(args);
   const dna = args.find(a => !a.startsWith('-') && a.endsWith('.md'));
 
   log('');
   log(`${GREEN}🌱 Organic Growth${RESET} — Claude Code setup for incremental development`);
   log('');
 
-  const files = getAllFiles(TEMPLATES_DIR);
+  const prefixes = TARGET_PREFIXES[target];
+  const files = getAllFiles(TEMPLATES_DIR).filter(
+    f => prefixes.some(p => f.startsWith(p))
+  );
   const created = [];
   const skipped = [];
 

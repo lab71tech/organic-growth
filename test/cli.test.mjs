@@ -278,6 +278,37 @@ describe('Package publish readiness', () => {
   });
 });
 
+describe('CLI --target flag', () => {
+  it('--target claude installs only .claude/ files', () => {
+    const { tmp } = runCLI(['--target', 'claude']);
+
+    assert.ok(existsSync(join(tmp, '.claude', 'CLAUDE.md')), 'should install .claude/CLAUDE.md');
+    assert.ok(existsSync(join(tmp, '.claude', 'agents', 'gardener.md')), 'should install gardener agent');
+    assert.ok(!existsSync(join(tmp, '.github', 'copilot-instructions.md')), 'should NOT install copilot-instructions.md');
+  });
+
+  it('--target copilot installs only .github/ files', () => {
+    const { tmp } = runCLI(['--target', 'copilot']);
+
+    assert.ok(existsSync(join(tmp, '.github', 'copilot-instructions.md')), 'should install copilot-instructions.md');
+    assert.ok(!existsSync(join(tmp, '.claude')), 'should NOT install .claude/ directory');
+  });
+
+  it('--target all installs both', () => {
+    const { tmp } = runCLI(['--target', 'all']);
+
+    assert.ok(existsSync(join(tmp, '.claude', 'CLAUDE.md')), 'should install .claude/CLAUDE.md');
+    assert.ok(existsSync(join(tmp, '.github', 'copilot-instructions.md')), 'should install copilot-instructions.md');
+  });
+
+  it('default (no --target) installs both', () => {
+    const { tmp } = runCLI();
+
+    assert.ok(existsSync(join(tmp, '.claude', 'CLAUDE.md')), 'should install .claude/CLAUDE.md');
+    assert.ok(existsSync(join(tmp, '.github', 'copilot-instructions.md')), 'should install copilot-instructions.md');
+  });
+});
+
 describe('CLI DNA document handling', () => {
   it('copies a DNA file to docs/product-dna.md', () => {
     const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));

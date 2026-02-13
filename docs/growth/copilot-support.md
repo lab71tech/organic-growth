@@ -15,10 +15,11 @@ Add GitHub Copilot as a supported AI coding assistant alongside Claude Code. Cur
   - Touches: `templates/.github/copilot-instructions.md` (new), `test/cli.test.mjs`
   - Done: Template created with product context placeholders, adapted methodology (no agents/commands, chat-oriented guidance), growth plan references. 2 new tests (55 total).
 
-- ⬜ Stage 2: --target flag for CLI
+- ✅ Stage 2: --target flag for CLI
   - Intent: Add `--target <claude|copilot|all>` flag to CLI. Default is `all`. Filters which template subdirectories get installed. Only `.claude/` for claude, only `.github/` for copilot, both for all.
   - Verify: `npx organic-growth --target claude` installs only `.claude/` files. `--target copilot` installs only `.github/` files. `--target all` (or no flag) installs both. Tests cover all three modes.
   - Touches: `bin/cli.mjs`, `test/cli.test.mjs`
+  - Done: Added parseTarget() + TARGET_PREFIXES filtering. 4 new tests (59 total). Invalid target exits with error.
 
 - ⬜ Stage 3: Adapt CLI messaging for multi-tool support
   - Intent: Update banner, help text, and "next steps" output to reflect multi-tool support. Show tool-appropriate next steps based on what was installed.
@@ -43,3 +44,4 @@ Add GitHub Copilot as a supported AI coding assistant alongside Claude Code. Cur
 
 ## Growth Log
 - 2026-02-13: Stage 1 ✅ — Created `templates/.github/copilot-instructions.md` with standalone project context + adapted organic growth methodology. CLI auto-installs it (recursive copy). Added template completeness test (7→8 files) and content integrity test. 55 tests pass.
+- 2026-02-13: Stage 2 ✅ — Added `--target <claude|copilot|all>` flag with TARGET_PREFIXES filtering. Default `all` preserves backward compat. 4 new tests for all modes. 59 tests pass.
