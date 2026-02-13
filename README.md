@@ -42,8 +42,11 @@ This copies configuration files into your project. No runtime dependencies.
 ## What You Get
 
 ```
+docs/
+└── project-context.md                # Single source of truth for project identity
+
 .claude/                              # Claude Code configuration
-├── CLAUDE.md                         # Project context template + growth philosophy
+├── CLAUDE.md                         # References project-context.md + growth philosophy
 ├── agents/
 │   └── gardener.md                   # Plans, implements, and validates growth stages
 └── commands/
@@ -54,10 +57,10 @@ This copies configuration files into your project. No runtime dependencies.
     └── review.md                     # /review — deep quality review
 
 .github/                              # GitHub Copilot configuration
-└── copilot-instructions.md           # Project context + growth methodology for Copilot
+└── copilot-instructions.md           # Growth methodology for Copilot (context synced from project-context.md)
 ```
 
-Use `--target claude` or `--target copilot` to install only one tool's configuration.
+Use `--target claude` or `--target copilot` to install only one tool's configuration. The shared `docs/project-context.md` is always installed regardless of target.
 
 ## Workflow
 
@@ -85,19 +88,30 @@ Use `--target claude` or `--target copilot` to install only one tool's configura
 - **Rolling plan:** 3-5 stages ahead, re-evaluate every 3
 - **Two-layer quality:** deterministic tools after every stage, LLM review on demand
 - **Context hygiene:** fresh session every 3 stages
-- **Product context required:** fill in CLAUDE.md or provide a DNA document
+- **Product context required:** fill in `docs/project-context.md` or provide a DNA document
 
 ## After Install
 
-**Claude Code:**
-1. Edit `.claude/CLAUDE.md` — fill in the Product section (or run `/seed`)
-2. Fill in Quality Tools section with your project's lint/test commands
-3. Start building with `/grow`
+1. Edit `docs/project-context.md` -- fill in Product, Tech Stack, Quality Tools, and Priorities
+2. Start building:
 
-**GitHub Copilot:**
-1. Edit `.github/copilot-instructions.md` — fill in the Product Context section
-2. Fill in Quality Tools section with your project's lint/test commands
-3. Use the organic growth methodology described in the instructions
+**Claude Code:** Run `/seed` to fill in project-context.md via interview, then `/grow` to plan your first feature.
+
+**GitHub Copilot:** Run `npx organic-growth sync` to push your project context into the Copilot config, then use the organic growth methodology described in the instructions.
+
+### Keeping context in sync
+
+`docs/project-context.md` is the single source of truth. When you update it, run:
+
+```bash
+# Sync to all tool configs:
+npx organic-growth sync
+
+# Sync to a specific tool:
+npx organic-growth sync --target copilot
+```
+
+Claude Code reads `docs/project-context.md` directly (no sync needed). Other tools receive context via sync markers in their config files.
 
 ## Releases
 

@@ -49,10 +49,13 @@ Project context (product, tech stack, quality tools, priorities) is currently du
   - 2 new tests: warns on template defaults, silent on filled-in content; 82 tests total
   - Re-evaluation point (stage 6): remaining stages 7-9 still appropriate, no changes needed
 
-- ⬜ Stage 7: Update README to explain shared context architecture
-  - Intent: The "After Install" and "What You Get" sections still tell users to edit CLAUDE.md and copilot-instructions.md directly. Update to reflect the new single-file workflow: edit project-context.md, run sync
-  - Verify: README mentions `docs/project-context.md` as the file to edit, documents the `sync` command, file tree includes `docs/project-context.md`, "After Install" steps are correct for both tools
-  - Touches: `README.md`, `test/cli.test.mjs` (optional: test that README is consistent, or skip if not warranted)
+- ✅ Stage 7: Update README to explain shared context architecture
+  - File tree now shows `docs/project-context.md` as the top-level entry and single source of truth
+  - "After Install" rewritten: step 1 is edit project-context.md, step 2 is tool-specific (Claude: /seed + /grow, Copilot: sync)
+  - New "Keeping context in sync" subsection documents the `sync` command with examples
+  - Philosophy bullet updated: references `docs/project-context.md` instead of CLAUDE.md
+  - No old instructions remain telling users to edit .claude/CLAUDE.md or .github/copilot-instructions.md directly
+  - No new tests needed (documentation-only change); 82 tests still passing
 
 - ⬜ Stage 8: Update product-dna.md to reflect shared context architecture
   - Intent: The product DNA document is outdated -- references 65 tests, doesn't mention shared context, sync command, or project-context.md. Update to accurately describe the current system so future planning sessions have correct context
@@ -79,3 +82,4 @@ Project context (product, tech stack, quality tools, priorities) is currently du
 - 2026-02-13: Feature COMPLETE — all 5 concrete stages done. Shared context architecture is fully functional.
 - 2026-02-13: REPLAN — Phase 2 started. Added stages 6-9: validation, README update, product-dna update, sync --watch mode.
 - 2026-02-13: Stage 6 ✅ — placeholder validation during sync warns users about unfilled template text (82 tests)
+- 2026-02-13: Stage 7 ✅ — README documents shared context workflow: file tree, after-install steps, sync command (82 tests)
