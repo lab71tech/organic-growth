@@ -1,6 +1,6 @@
 # Feature: README Section Explaining Property-Based Approach
 Created: 2026-02-14
-Status: 🌱 Growing
+Status: 🌳 Complete
 
 ## Seed (what & why)
 
@@ -46,7 +46,7 @@ New users reading the README encounter "property-based planning" in passing (Phi
   - Touches: `test/cli.test.mjs`
   - Done: Added 3 tests in "README property-based planning section" describe block. Tests use regex/key phrases, not exact wording. Validates heading position, good/bad example pair, and accumulation concept. All 64 tests pass.
 
-- ⬜ Stage 3: Connect Philosophy bullets to the new section
+- ✅ Stage 3: Connect Philosophy bullets to the new section
   - Intent: Update the existing Philosophy section to reference the new property-based planning section, creating a coherent reading path from overview to detail
   - Properties:
     - P11: The Philosophy bullet about quality mentions or links to the property-based planning section [transition]
@@ -58,7 +58,7 @@ New users reading the README encounter "property-based planning" in passing (Phi
     - P7 (from Stage 1): Existing content intact [still holds]
   - Depends on: P1, P5, P7, P8
   - Touches: `README.md`
-  - Implementation hint: Minimal edit — likely changing one Philosophy bullet to mention properties and possibly reordering or adding a sentence in After Install. Do not restructure the entire README.
+  - Done: Added anchor link from Philosophy "Two-layer quality" bullet to #property-based-planning. Updated After Install example link text to reference "properties, stages, and accumulation" — terms the reader just learned above. All 64 tests pass.
 
 ### Horizon (rough outline of what comes after)
 - Consider whether the README property section should show a mini growth plan snippet (2-3 lines) inline, or if linking to the example is sufficient
@@ -68,3 +68,4 @@ New users reading the README encounter "property-based planning" in passing (Phi
 <!-- Auto-updated after each stage -->
 - 2026-02-14: Stage 1 complete. Added "Property-Based Planning" section to README between Philosophy and After Install. Explains what/why/example, mentions accumulation, defers taxonomy to gardener. All 61 tests pass.
 - 2026-02-14: Stage 2 complete. Added 3 tests validating heading position, example pair, and accumulation concept. Key-phrase matching allows prose to evolve. All 64 tests pass.
+- 2026-02-14: Stage 3 complete. Philosophy bullet links to property section. After Install example link contextualized with property terminology. Feature complete. All 64 tests pass.

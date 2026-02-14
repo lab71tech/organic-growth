@@ -69,7 +69,7 @@ This copies the `.claude/` configuration into your project. No runtime dependenc
 
 - **One stage = one intent = one commit**
 - **Rolling plan:** 3-5 stages ahead, re-evaluate every 3
-- **Two-layer quality:** deterministic tools after every stage, LLM review on demand
+- **Two-layer quality:** [properties](#property-based-planning) before code, deterministic tools after every stage, LLM review on demand
 - **Context hygiene:** fresh session every 3 stages
 - **Product context required:** fill in CLAUDE.md or provide a DNA document
 
@@ -97,7 +97,7 @@ The gardener agent handles the full property format (categories, "Captures" clau
 2. Fill in Quality Tools section with your project's lint/test commands
 3. Start building with `/grow`
 
-See [example growth plan](docs/example-growth-plan.md) for a complete example of what a growth plan looks like with property-based planning.
+See the [example growth plan](docs/example-growth-plan.md) to see properties, stages, and accumulation in action.
 
 ## Releases
 
