@@ -36,7 +36,7 @@ node bin/cli.mjs --force
 
 ## Development Philosophy
 
-This project follows the **Organic Growth** methodology: features are grown in stages from seed to maturity. Each stage produces a complete, working system. See `.claude/CLAUDE.md` for the full development philosophy.
+This project follows the **Organic Growth** methodology: features are grown in stages from seed to maturity. Each stage produces a complete, working system. See `CLAUDE.md` for the full development philosophy.
 
 ## Reporting Issues
 

@@ -62,10 +62,11 @@ This is a structural/refactoring feature. The template content stays the same; o
 
 ### Horizon (rough outline of what comes after)
 - Migration guidance for existing users: detect `.claude/CLAUDE.md` from previous install and suggest moving it
-- Update CONTRIBUTING.md if it exists and references CLAUDE.md path
+- ~~Update CONTRIBUTING.md if it exists and references CLAUDE.md path~~ (done in replan)
 
 ## Growth Log
 <!-- Auto-updated after each stage -->
 - 2026-02-14: Stage 1 complete. Moved `templates/.claude/CLAUDE.md` to `templates/CLAUDE.md`. Updated CLI post-install message from `.claude/CLAUDE.md` to `CLAUDE.md`. Updated all 6 test path references to read from project root. All 78 tests pass.
 - 2026-02-14: Stage 2 complete. Updated README "What You Get" tree to show CLAUDE.md at project root. Updated install description and "After Install" instructions. Updated product DNA tech stack. All 78 tests pass.
 - 2026-02-14: Stage 3 complete. Moved project's own `.claude/CLAUDE.md` to root `CLAUDE.md`. Updated tech stack description, stale test count (61→78), and command count (five→six). All 78 tests pass. Feature complete.
+- 2026-02-14: REPLAN — Updated CONTRIBUTING.md reference from `.claude/CLAUDE.md` to `CLAUDE.md` (horizon item). All 78 tests pass.
