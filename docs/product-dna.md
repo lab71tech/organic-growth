@@ -43,7 +43,7 @@ v1.0.1 — Post-MVP, infrastructure mature. CLI installs templates with all comm
 - Manual release workflow (configurable bump, dry-run mode, loop prevention)
 - Release notes with changelog categories
 - Dependabot for GitHub Actions (grouped minor/patch updates)
-- 61 tests, 14 suites, zero failures
+- 78 tests, 19 suites, zero failures
 
 ## Priorities
 1. Correctness of templates (gardener instructions, command definitions)
