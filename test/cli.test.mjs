@@ -790,6 +790,71 @@ describe('Post-stage review hook (project)', () => {
   });
 });
 
+describe('Post-stage review hook documentation', () => {
+  const README_PATH = join(import.meta.dirname, '..', 'README.md');
+  const DNA_PATH = join(import.meta.dirname, '..', 'docs', 'product-dna.md');
+
+  it('README mentions automatic post-stage review (P14)', () => {
+    const content = readFileSync(README_PATH, 'utf8');
+
+    assert.ok(
+      /post-stage review/i.test(content),
+      'README should mention "post-stage review"'
+    );
+  });
+
+  it('README explains what triggers the hook and what it does (P15)', () => {
+    const content = readFileSync(README_PATH, 'utf8');
+
+    // Should explain the trigger: stage commits
+    assert.ok(
+      /stage.*commit/i.test(content) || /commit.*stage/i.test(content),
+      'README should explain that the hook triggers on stage commits'
+    );
+
+    // Should explain the effect: diff for review
+    assert.ok(
+      /diff/i.test(content),
+      'README should mention diff injection for review context'
+    );
+  });
+
+  it('product DNA reflects automatic review capability (P16)', () => {
+    const content = readFileSync(DNA_PATH, 'utf8');
+
+    assert.ok(
+      /automatic.*review|auto.*review|post-stage.*review/i.test(content),
+      'product DNA should mention automatic/post-stage review capability'
+    );
+  });
+
+  it('all existing README headings remain intact in order (P17)', () => {
+    const content = readFileSync(README_PATH, 'utf8');
+
+    const expectedHeadings = [
+      '## Install',
+      '## What You Get',
+      '## Workflow',
+      '## Philosophy',
+      '## Property-Based Planning',
+      '## After Install',
+      '## Parallel Growth with Worktrees',
+      '## Releases',
+      '## License',
+    ];
+
+    let lastIdx = -1;
+    for (const heading of expectedHeadings) {
+      const idx = content.indexOf(heading);
+      assert.ok(
+        idx > lastIdx,
+        `README heading "${heading}" should exist and appear after previous heading (found at ${idx}, previous at ${lastIdx})`
+      );
+      lastIdx = idx;
+    }
+  });
+});
+
 describe('CLI DNA document handling', () => {
   it('copies a DNA file to docs/product-dna.md', () => {
     const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));

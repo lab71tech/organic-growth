@@ -1,6 +1,6 @@
 # Feature: Post-Stage Review Hook
 Created: 2026-02-14
-Status: 🌱 Growing
+Status: 🌳 Done
 
 ## Seed (what & why)
 
@@ -51,7 +51,7 @@ The organic growth workflow emphasizes quality gates after every stage, but code
   - Touches: `templates/.claude/hooks/post-stage-review.sh`, `templates/.claude/settings.json`, `bin/cli.mjs` (if needed), `test/cli.test.mjs`
   - Implementation hint: Copy project hook as template. CLI's `getAllFiles` already recurses `templates/`, so new files are auto-discovered. Update template count test from 8 to 10.
 
-- ⬜ Stage 3: Documentation
+- ✅ Stage 3: Documentation
   - Intent: Document the automatic review hook in README and product DNA so users discover and understand it
   - Properties:
     - P14: README contains a section or mention of automatic post-stage review [invariant]
@@ -76,3 +76,4 @@ The organic growth workflow emphasizes quality gates after every stage, but code
 <!-- Auto-updated after each stage -->
 - 2026-02-14: Stage 1 complete. Created `.claude/hooks/post-stage-review.sh` (bash + jq, detects stage commits via commit message pattern, outputs diff as `additionalContext` JSON) and `.claude/settings.json` (PostToolUse hook wired to Bash matcher). Uses `bash` invocation to avoid executable-bit issues. Added 6 tests (P1-P6) in "Post-stage review hook (project)" describe block. All 85 tests pass.
 - 2026-02-14: Stage 2 complete. Added `templates/.claude/hooks/post-stage-review.sh` and `templates/.claude/settings.json` (identical to project versions). CLI auto-discovers new files via `getAllFiles` — no CLI code changes needed. Updated template completeness test from 8 to 10 files. Added 3 tests (P8/P11, P9/P12, P13) in "Post-stage review hook (template)" describe block. All 88 tests pass.
+- 2026-02-14: Stage 3 complete. Updated README "What You Get" tree to include hooks/ and settings.json. Added paragraph explaining the post-stage review hook (trigger: stage commits, effect: diff injected as review context). Updated product DNA "How It Works" to mention automatic post-stage review. Added 4 tests (P14-P17) in "Post-stage review hook documentation" describe block. All 92 tests pass.

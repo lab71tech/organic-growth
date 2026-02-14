@@ -33,18 +33,23 @@ This installs `CLAUDE.md` at your project root and a `.claude/` directory with a
 ## What You Get
 
 ```
-CLAUDE.md                    # Project context template + growth philosophy
+CLAUDE.md                           # Project context template + growth philosophy
 .claude/
 ├── agents/
-│   └── gardener.md          # Plans, implements, and validates growth stages
-└── commands/
-    ├── seed.md              # /seed     — bootstrap new project
-    ├── grow.md              # /grow     — plan a new feature
-    ├── next.md              # /next     — implement next stage
-    ├── replan.md            # /replan   — adjust when things change
-    ├── review.md            # /review   — deep quality review
-    └── worktree.md          # /worktree — parallel feature in a worktree
+│   └── gardener.md                 # Plans, implements, and validates growth stages
+├── commands/
+│   ├── seed.md                     # /seed     — bootstrap new project
+│   ├── grow.md                     # /grow     — plan a new feature
+│   ├── next.md                     # /next     — implement next stage
+│   ├── replan.md                   # /replan   — adjust when things change
+│   ├── review.md                   # /review   — deep quality review
+│   └── worktree.md                 # /worktree — parallel feature in a worktree
+├── hooks/
+│   └── post-stage-review.sh        # Automatic diff review after stage commits
+└── settings.json                   # Claude Code hook configuration
 ```
+
+A **post-stage review hook** runs automatically after every stage commit. When you commit with a message matching the stage pattern (e.g. `feat(auth): stage 2 — ...`), the hook captures the diff and injects it back into the conversation as review context. This gives the gardener agent an immediate second look at what just changed — no manual `/review` needed for quick feedback.
 
 ## Workflow
 
