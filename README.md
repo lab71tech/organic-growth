@@ -79,6 +79,8 @@ This copies the `.claude/` configuration into your project. No runtime dependenc
 2. Fill in Quality Tools section with your project's lint/test commands
 3. Start building with `/grow`
 
+See [example growth plan](docs/example-growth-plan.md) for a complete example of what a growth plan looks like with property-based planning.
+
 ## Releases
 
 Releases are triggered manually via the [Release](.github/workflows/release.yml) workflow. When triggered, it:

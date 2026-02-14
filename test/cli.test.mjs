@@ -315,6 +315,85 @@ describe('Package publish readiness', () => {
   });
 });
 
+describe('Example growth plan documentation', () => {
+  const EXAMPLE_PATH = join(import.meta.dirname, '..', 'docs', 'example-growth-plan.md');
+
+  it('example growth plan exists and contains at least 3 stages with Properties sections', () => {
+    // P19: example exists with 3+ stages having Properties sections
+    assert.ok(existsSync(EXAMPLE_PATH), 'docs/example-growth-plan.md should exist');
+    const content = readFileSync(EXAMPLE_PATH, 'utf8');
+
+    // Count stages that have a Properties section (Stage N: ... followed by Properties:)
+    const stageHeaders = content.match(/^[-*] .* Stage \d+:/gm);
+    assert.ok(
+      stageHeaders && stageHeaders.length >= 3,
+      `should have at least 3 stages, found ${stageHeaders ? stageHeaders.length : 0}`
+    );
+
+    const propertiesSections = content.match(/Properties:/g);
+    assert.ok(
+      propertiesSections && propertiesSections.length >= 3,
+      `should have at least 3 Properties: sections, found ${propertiesSections ? propertiesSections.length : 0}`
+    );
+  });
+
+  it('example demonstrates all four property categories', () => {
+    // P20: all four categories appear across stages
+    const content = readFileSync(EXAMPLE_PATH, 'utf8');
+
+    const categories = ['invariant', 'transition', 'roundtrip', 'boundary'];
+    for (const category of categories) {
+      assert.ok(
+        content.includes(`[${category}]`),
+        `example should demonstrate [${category}] property category`
+      );
+    }
+  });
+
+  it('example shows property accumulation via Depends on references', () => {
+    // P21: later stages reference earlier properties
+    const content = readFileSync(EXAMPLE_PATH, 'utf8');
+
+    const dependsOnLines = content.match(/Depends on:/g);
+    assert.ok(
+      dependsOnLines && dependsOnLines.length >= 1,
+      'example should have at least one "Depends on:" line'
+    );
+
+    // At least one Depends on should reference a property from an earlier stage
+    assert.ok(
+      /Depends on:.*P\d/m.test(content),
+      'at least one "Depends on:" should reference a property like P1, P2, etc.'
+    );
+  });
+
+  it('example shows completed and pending stages', () => {
+    // P22: mix of completed (Done:) and pending stages
+    const content = readFileSync(EXAMPLE_PATH, 'utf8');
+
+    assert.ok(
+      content.includes('Done:'),
+      'example should have at least one completed stage with a Done: line'
+    );
+    // Pending stages use the unchecked marker (⬜) or have no Done: line
+    // Check for ⬜ (U+2B1C white large square)
+    assert.ok(
+      content.includes('\u2b1c'),
+      'example should have at least one pending stage (marked with \u2b1c)'
+    );
+  });
+
+  it('README references the example growth plan', () => {
+    // P23: README contains a link to the example
+    const readme = readFileSync(join(import.meta.dirname, '..', 'README.md'), 'utf8');
+
+    assert.ok(
+      readme.includes('example-growth-plan'),
+      'README should reference the example growth plan'
+    );
+  });
+});
+
 describe('CLI DNA document handling', () => {
   it('copies a DNA file to docs/product-dna.md', () => {
     const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));

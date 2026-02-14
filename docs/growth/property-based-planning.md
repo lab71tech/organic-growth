@@ -95,8 +95,24 @@ Shift the review gate from code (300-line diffs after implementation) to propert
   - Touches: `templates/.claude/CLAUDE.md`, `.claude/CLAUDE.md`
   - Done: Updated Growth Rule 1 from "one intent = one test = one commit" to "one intent = one commit" with two new bullets: "defines properties before implementation" and "properties become tests — write tests first". Both CLAUDE.md files synced. All 56 tests pass.
 
+- ✅ Stage 8: Example growth plan showing property-based planning in action
+  - Intent: Create a realistic example growth plan (a todo-list CLI feature) that demonstrates all property-based planning concepts — the four property categories, Captures lines, Depends on chains, accumulation across stages, and a mix of completed/pending stages. Add it to `docs/` and reference it from the README.
+  - Properties:
+    - P19: Example growth plan exists at `docs/example-growth-plan.md` and contains at least 3 stages with Properties sections [invariant]
+      Captures: Users have no concrete reference for what the gardener produces — they read the template instructions but can't picture the output
+    - P20: Example demonstrates all four property categories (invariant, transition, roundtrip, boundary) across its stages [invariant]
+      Captures: Users only learn one or two property types and miss the full taxonomy
+    - P21: Example shows property accumulation — later stages reference earlier properties via "Depends on" [invariant]
+      Captures: Users don't understand the accumulation concept — they treat each stage's properties as independent
+    - P22: Example shows at least one completed stage (with Done line) and at least one pending stage [boundary]
+      Captures: Users only see the planning format but not what a stage looks like after implementation
+    - P23: README contains a link or reference to the example growth plan [invariant]
+      Captures: Example exists but users never find it — buried in docs/ without a pointer
+  - Depends on: P1, P2, P3, P4, P15, P16
+  - Touches: `docs/example-growth-plan.md` (new), `README.md`, `test/cli.test.mjs`
+  - Done: Created example growth plan using "Task Completion" feature in a todo CLI domain. 4 stages (2 completed with Done lines, 2 pending), 13 properties across all four categories, accumulation via Depends on chains, Captures on every property. Added README link in After Install section. 5 new tests for P19-P23. All 61 tests pass.
+
 ### Horizon (rough outline of what comes after)
-- Example growth plan demonstrating property-based planning (docs or README)
 - README section explaining the property-based approach for new users
 - Consider a `/validate` command that checks accumulated properties still hold
 
@@ -106,3 +122,5 @@ Shift the review gate from code (300-line diffs after implementation) to propert
 - 2026-02-14: Stage 5 complete. Review fixes: GROW mode indentation, grow.md deduplication (~60 lines removed), boundary requirement softened, YAML frontmatter restored to 2-space, trailing newlines added, .claude/ synced with templates/.claude/. All 54 tests pass.
 - 2026-02-14: Stage 6 complete. Added test validating property-based planning markers and all four property categories in gardener template. All 55 tests pass.
 - 2026-02-14: Stage 7 complete. Updated template CLAUDE.md Growth Rule 1 to reference properties as the stage definition mechanism. Removed old "one test" formulation. Synced .claude/CLAUDE.md. Added test for P17/P18. All 56 tests pass.
+- 2026-02-14: REPLAN — promoted "Example growth plan" from horizon to Stage 8. Added properties P19-P23 covering example existence, taxonomy coverage, accumulation demonstration, completed/pending mix, and README discoverability.
+- 2026-02-14: Stage 8 complete. Created docs/example-growth-plan.md with todo CLI "Task Completion" feature. 4 stages, 13 properties, all four categories, accumulation chains, 2 completed + 2 pending stages. README linked. 5 new tests. All 61 tests pass.
