@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { mkdtempSync, existsSync, statSync, writeFileSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -1428,6 +1428,140 @@ describe('Visual progress map in GROW mode report (Stage 1)', () => {
     assert.ok(
       progressMapIdx > whatsNextIdx,
       `progress/stage map (at ${progressMapIdx}) should come after "What's next" (at ${whatsNextIdx})`
+    );
+  });
+});
+
+describe('Hook visual feedback — end-to-end stderr verification (Stage 3)', () => {
+  /**
+   * Helper: set up a temp directory with installed templates, a git repo,
+   * a stage commit, and a CLAUDE.md with a real test command.
+   * Returns { tmp } ready for hook execution.
+   */
+  function setupHookEnv({ claudeMd } = {}) {
+    const { tmp } = runCLI();
+
+    // Write a CLAUDE.md with a real test command (or custom content)
+    writeFileSync(
+      join(tmp, 'CLAUDE.md'),
+      claudeMd || '- **Test:** `echo test-passed`\n'
+    );
+
+    // Create a git repo with a stage commit so the guards pass
+    execFileSync('git', ['init'], { cwd: tmp, encoding: 'utf8' });
+    execFileSync('git', ['config', 'user.email', 'test@test.com'], { cwd: tmp });
+    execFileSync('git', ['config', 'user.name', 'Test'], { cwd: tmp });
+    writeFileSync(join(tmp, 'dummy.txt'), 'hello');
+    execFileSync('git', ['add', '.'], { cwd: tmp, encoding: 'utf8' });
+    execFileSync('git', ['commit', '-m', 'feat(test): stage 1 — initial'], {
+      cwd: tmp,
+      encoding: 'utf8',
+    });
+
+    return { tmp };
+  }
+
+  it('P11: test hook end-to-end — stderr contains emoji feedback for a stage commit', () => {
+    const { tmp } = setupHookEnv();
+
+    const stdinJSON = JSON.stringify({
+      tool_input: { command: 'git commit -m "feat(test): stage 1"' },
+    });
+    const hookPath = join(tmp, '.claude', 'hooks', 'post-stage-test.sh');
+
+    const result = spawnSync('bash', [hookPath], {
+      cwd: tmp,
+      encoding: 'utf8',
+      input: stdinJSON,
+      timeout: 10000,
+    });
+
+    assert.equal(result.status, 0, `hook should exit 0, got ${result.status}`);
+
+    const stderr = result.stderr;
+
+    // Must contain the test-tube emoji (before tests)
+    assert.ok(
+      stderr.includes('\u{1F9EA}'),
+      `stderr should contain test tube emoji (🧪), got: ${stderr}`
+    );
+
+    // Must contain the check-mark emoji (tests passed)
+    assert.ok(
+      stderr.includes('\u2705'),
+      `stderr should contain check mark emoji (✅), got: ${stderr}`
+    );
+  });
+
+  it('P12: review hook end-to-end — stderr contains emoji feedback for a stage commit', () => {
+    const { tmp } = setupHookEnv();
+
+    const stdinJSON = JSON.stringify({
+      tool_input: { command: 'git commit -m "feat(review): stage 1"' },
+    });
+    const hookPath = join(tmp, '.claude', 'hooks', 'post-stage-review.sh');
+
+    const result = spawnSync('bash', [hookPath], {
+      cwd: tmp,
+      encoding: 'utf8',
+      input: stdinJSON,
+      timeout: 10000,
+    });
+
+    assert.equal(result.status, 0, `hook should exit 0, got ${result.status}`);
+
+    const stderr = result.stderr;
+
+    // Must contain the magnifying glass emoji (gathering context)
+    assert.ok(
+      stderr.includes('\u{1F50D}'),
+      `stderr should contain magnifying glass emoji (🔍), got: ${stderr}`
+    );
+
+    // Must contain the clipboard emoji (context ready)
+    assert.ok(
+      stderr.includes('\u{1F4CB}'),
+      `stderr should contain clipboard emoji (📋), got: ${stderr}`
+    );
+  });
+
+  it('P13: existing test hook e2e stdout JSON test still passes — regression guard', () => {
+    // This is a lightweight regression check that the existing e2e test pattern
+    // (P21 at line ~581) still works: stage commit + hook = valid JSON stdout.
+    // The actual existing test is in the "Post-stage test hook (template)" describe
+    // block — this just verifies the same thing with spawnSync to confirm
+    // stdout is unaffected by the stderr additions.
+    const { tmp } = setupHookEnv();
+
+    const stdinJSON = JSON.stringify({
+      tool_input: { command: 'git commit -m "feat(test): stage 1"' },
+    });
+    const hookPath = join(tmp, '.claude', 'hooks', 'post-stage-test.sh');
+
+    const result = spawnSync('bash', [hookPath], {
+      cwd: tmp,
+      encoding: 'utf8',
+      input: stdinJSON,
+      timeout: 10000,
+    });
+
+    assert.equal(result.status, 0, `hook should exit 0, got ${result.status}`);
+
+    // stdout must be valid JSON with hookSpecificOutput.additionalContext
+    const parsed = JSON.parse(result.stdout);
+    assert.ok(
+      parsed.hookSpecificOutput,
+      'stdout should have hookSpecificOutput'
+    );
+    assert.ok(
+      parsed.hookSpecificOutput.additionalContext.includes('All tests passed'),
+      `additionalContext should include "All tests passed", got: ${parsed.hookSpecificOutput.additionalContext}`
+    );
+
+    // stderr must NOT appear in stdout (no cross-contamination)
+    assert.ok(
+      !result.stdout.includes('\u{1F9EA}'),
+      'stdout should not contain emoji — emoji belongs in stderr only'
     );
   });
 });

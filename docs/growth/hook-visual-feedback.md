@@ -1,6 +1,6 @@
 # 🌱 Feature: Hook Visual Feedback
 Created: 2026-02-15
-Status: 🌱 Growing
+Status: 🌳 Complete
 
 ## Seed (what & why)
 
@@ -47,7 +47,7 @@ The post-stage hooks (test and review) run silently — they produce JSON on std
   - Touches: `.claude/hooks/post-stage-review.sh`, `templates/.claude/hooks/post-stage-review.sh`, `test/cli.test.mjs`
   - Done: Added two stderr messages to both review hooks (magnifying glass for gathering, clipboard for ready). 5 property tests added (P6-P10). All 77 tests pass.
 
-🌱 Stage 3: End-to-end stderr verification
+🌳 Stage 3: End-to-end stderr verification
   - Intent: Add end-to-end tests that actually execute the hooks and verify stderr contains the expected emoji, complementing the existing stdout JSON tests
   - Properties:
     - P11: An end-to-end test executes the test hook with a simulated stage commit and verifies stderr contains emoji feedback [invariant]
@@ -59,6 +59,7 @@ The post-stage hooks (test and review) run silently — they produce JSON on std
     - P1-P10 from Stages 1-2 still hold [regression]
   - Depends on: P1-P5, P6-P10
   - Touches: `test/cli.test.mjs`
+  - Done: Added 3 end-to-end tests using spawnSync to capture stderr separately from stdout. Test hook e2e verifies test-tube and check-mark emoji. Review hook e2e verifies magnifying-glass and clipboard emoji. Regression guard confirms stdout JSON is uncontaminated. All 80 tests pass (118 total including all suites).
 
 ─── 🌿 Horizon ───
 
@@ -83,3 +84,10 @@ Added emoji-prefixed stderr messages to both project and template review hooks:
 - `echo "📋 Review context ready for: ${SUBJECT}" >&2` after context assembly, before JSON output
 All output goes to stderr; stdout JSON remains untouched.
 5 property tests (P6-P10) added and passing. Total: 77/77 tests pass.
+
+### 2026-02-15 — Stage 3 complete (feature complete)
+Added 3 end-to-end tests using `spawnSync` to capture stderr separately from stdout:
+- P11: Test hook e2e — verifies stderr contains test-tube emoji (before tests) and check-mark emoji (tests passed)
+- P12: Review hook e2e — verifies stderr contains magnifying-glass emoji (gathering) and clipboard emoji (ready)
+- P13: Regression guard — confirms stdout JSON is valid and uncontaminated by emoji
+All 118 tests pass. Feature status set to complete.
