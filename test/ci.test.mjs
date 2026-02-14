@@ -171,7 +171,7 @@ describe('Release workflow', () => {
     assert.ok(content.includes('git commit'), 'should commit the version bump');
     assert.ok(content.includes('git tag'), 'should create a git tag');
     assert.ok(content.includes('git push'), 'should push to remote');
-    assert.ok(content.includes('--follow-tags'), 'should push tags along with commits');
+    assert.ok(content.includes('"v$NEW_VERSION"'), 'should push the version tag');
   });
 
   it('creates a GitHub Release with auto-generated notes', () => {
@@ -206,7 +206,7 @@ describe('Release workflow', () => {
   });
 
   it('commit/tag/push step checks dry-run flag', () => {
-    const commitStepMatch = content.match(/Commit version bump and tag[\s\S]*?if:([^\n]+)/);
+    const commitStepMatch = content.match(/Commit version bump, tag, and push[\s\S]*?if:([^\n]+)/);
     assert.ok(commitStepMatch, 'should find the commit step with an if condition');
     assert.ok(
       commitStepMatch[1].includes("github.event.inputs.dry-run != 'true'"),
