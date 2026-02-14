@@ -73,6 +73,24 @@ This copies the `.claude/` configuration into your project. No runtime dependenc
 - **Context hygiene:** fresh session every 3 stages
 - **Product context required:** fill in CLAUDE.md or provide a DNA document
 
+## Property-Based Planning
+
+Each growth stage defines **properties** — rules that must be true about the system — before any code is written.
+
+Properties are not test cases or user stories. A test says "when I do X, Y happens." A property says "this rule always holds."
+
+```
+❌ Bad (scenario):  "When I click delete, the item is removed from the list"
+✅ Good (property): "Deleting an item persists to storage and the item
+                     count decreases by exactly one" [invariant]
+```
+
+**Why this matters for LLM-assisted development:** When Claude generates a stage, you review 3-5 properties instead of a 300-line diff. If the properties are right, the code is constrained to be right. The review shifts from "is this code correct?" to "are these rules complete?"
+
+Properties **accumulate** across stages. Stage 3 must still satisfy the properties from stages 1 and 2. They are permanent commitments, not checkboxes to discard. This is what prevents regressions as the feature grows.
+
+The gardener agent handles the full property format (categories, "Captures" clauses, dependency tracking). See the [example growth plan](docs/example-growth-plan.md) for what this looks like in practice.
+
 ## After Install
 
 1. Edit `.claude/CLAUDE.md` — fill in the Product section (or run `/seed`)
