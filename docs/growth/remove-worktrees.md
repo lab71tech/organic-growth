@@ -1,6 +1,6 @@
 # 🌱 Feature: Remove Worktrees Functionality
 Created: 2026-02-14
-Status: 🌱 Growing
+Status: 🌳 Complete
 
 ## Seed (what & why)
 
@@ -45,7 +45,7 @@ The worktrees feature (guidance, `/worktree` command, gardener awareness, README
   - Depends on: P1 (command already removed — no point keeping awareness for a nonexistent command)
   - Touches: `templates/.claude/agents/gardener.md`, `.claude/agents/gardener.md`, `templates/CLAUDE.md`, `CLAUDE.md`, `test/cli.test.mjs`
 
-- 🌱 Stage 3: Remove README worktree section, product DNA reference, heading tests, and growth plan
+- 🌳 Stage 3: Remove README worktree section, product DNA reference, heading tests, and growth plan
   - Intent: Remove the "Parallel Growth with Worktrees" section from README, the `/worktree` entry from product DNA, update heading-order tests, remove worktree-specific test blocks, and delete the original growth plan
   - Properties:
     - P12: README has no section with a worktree-related heading [invariant]
@@ -78,3 +78,4 @@ The worktrees feature (guidance, `/worktree` command, gardener awareness, README
 <!-- Auto-updated after each stage -->
 - 2026-02-14: Stage 1 complete. Deleted `templates/.claude/commands/worktree.md` and `.claude/commands/worktree.md`. Updated template completeness test (11→10 files), removed `worktree` from frontmatter commands list, removed "Worktree command content" test block (3 tests). 115 tests pass (was 118).
 - 2026-02-14: Stage 2 complete. Removed step 3a (worktree suggestion for parallel features) from gardener PLAN mode and worktree mention from GROW mode step 8, in both template and project copies. Removed worktree line from CLAUDE.md context hygiene rule in both template and project copies. Removed "Gardener and CLAUDE.md worktree awareness" test block (4 tests). 111 tests pass (was 115).
+- 2026-02-14: Stage 3 complete. Removed "Parallel Growth with Worktrees" section from README. Removed `worktree.md` from "What You Get" file tree. Removed `/worktree` from product DNA Key Commands and updated "six commands" to "five commands". Removed "README worktree section" (5 tests) and "Product DNA documentation" (1 test) test blocks. Updated both heading-order tests. Deleted `docs/growth/worktrees.md`. 105 tests pass (was 111). Feature complete.

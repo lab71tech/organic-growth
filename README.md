@@ -42,8 +42,7 @@ CLAUDE.md                           # Project context template + growth philosop
 │   ├── grow.md                     # /grow     — plan a new feature
 │   ├── next.md                     # /next     — implement next stage
 │   ├── replan.md                   # /replan   — adjust when things change
-│   ├── review.md                   # /review   — deep quality review
-│   └── worktree.md                 # /worktree — parallel feature in a worktree
+│   └── review.md                   # /review   — deep quality review
 ├── hooks/
 │   ├── post-stage-test.sh          # Automatic test run after stage commits
 │   └── post-stage-review.sh        # Automatic diff review after stage commits
@@ -112,31 +111,6 @@ The gardener agent handles the full property format — categories, failure anal
 3. Start building with `/grow`
 
 See the [example growth plan](docs/example-growth-plan.md) to see properties, stages, and accumulation in action.
-
-## Parallel Growth with Worktrees
-
-Organic growth uses `/clear` every 3 stages for temporal context hygiene — a fresh session prevents accumulated confusion. Git worktrees add a **spatial** dimension: each feature gets its own working directory. This lets you grow features in parallel, `/review` one while `/next`-ing another, or pause a feature without stashing.
-
-Use `/worktree <feature-name>` to create a worktree with the right naming convention automatically.
-
-**Naming convention:** match branch names to growth plan files. If the plan is `docs/growth/auth.md`, the branch is `auth`:
-
-```bash
-# Quick setup with the /worktree command
-> /worktree auth
-
-# Or manually:
-git worktree add ../myproject-auth -b auth
-
-# Work in it — separate directory, separate Claude Code session
-cd ../myproject-auth && claude
-> /grow Add user authentication
-
-# When done, merge and clean up
-git worktree remove ../myproject-auth
-```
-
-Each worktree has its own working tree, so `docs/growth/auth.md` lives on the `auth` branch and doesn't collide with growth plans on other branches.
 
 ## Releases
 
