@@ -447,6 +447,72 @@ describe('README property-based planning section', () => {
   });
 });
 
+describe('README worktree section', () => {
+  const README_PATH = join(import.meta.dirname, '..', 'README.md');
+
+  it('contains a worktree-related heading between After Install and Releases', () => {
+    // P6: worktree heading exists in correct position
+    const content = readFileSync(README_PATH, 'utf8');
+
+    assert.ok(
+      /## .*[Ww]orktree/.test(content),
+      'README should have a heading containing "worktree" or "Worktree"'
+    );
+
+    // Verify ordering: After Install -> Worktree section -> Releases
+    const afterInstallIdx = content.indexOf('## After Install');
+    const worktreeIdx = content.search(/## .*[Ww]orktree/);
+    const releasesIdx = content.indexOf('## Releases');
+
+    assert.ok(afterInstallIdx < worktreeIdx, 'Worktree section should come after After Install');
+    assert.ok(worktreeIdx < releasesIdx, 'Worktree section should come before Releases');
+  });
+
+  it('includes at least one git worktree command example', () => {
+    // P7: concrete commands, not just conceptual text
+    const content = readFileSync(README_PATH, 'utf8');
+
+    assert.ok(
+      /git worktree/.test(content),
+      'README should contain a "git worktree" command example'
+    );
+  });
+
+  it('connects worktrees to organic growth concepts', () => {
+    // P8: not generic git docs — references methodology
+    const content = readFileSync(README_PATH, 'utf8');
+
+    // Extract the worktree section (from heading to next ## heading)
+    const worktreeMatch = content.match(/## .*[Ww]orktree[\s\S]*?(?=\n## )/);
+    assert.ok(worktreeMatch, 'should find worktree section');
+    const section = worktreeMatch[0];
+
+    // Must reference at least one organic growth concept
+    const hasGrowthConcept =
+      /growth plan|\/grow|\/next|\/review|\/clear|context hygiene|parallel.*feature|feature.*parallel/i.test(section);
+    assert.ok(
+      hasGrowthConcept,
+      'Worktree section should reference organic growth concepts (growth plan, /grow, /next, /review, /clear, context hygiene, or parallel features)'
+    );
+  });
+
+  it('mentions naming convention linking branches to growth plan files', () => {
+    // P9: traceability between worktree branches and docs/growth/ plans
+    const content = readFileSync(README_PATH, 'utf8');
+
+    // Extract the worktree section
+    const worktreeMatch = content.match(/## .*[Ww]orktree[\s\S]*?(?=\n## )/);
+    assert.ok(worktreeMatch, 'should find worktree section');
+    const section = worktreeMatch[0];
+
+    // Must mention both branch naming and growth plan files
+    assert.ok(
+      /branch/i.test(section) && /docs\/growth|growth plan/i.test(section),
+      'Worktree section should mention a naming convention linking branches to growth plan files'
+    );
+  });
+});
+
 describe('CLI DNA document handling', () => {
   it('copies a DNA file to docs/product-dna.md', () => {
     const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));

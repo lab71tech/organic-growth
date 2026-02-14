@@ -28,7 +28,7 @@ This is a documentation/guidance feature, not a code feature. The value is telli
   - Depends on: none (first stage)
   - Touches: `README.md`
 
-- Stage 2: Tests for README worktree section
+- ✅ Stage 2: Tests for README worktree section
   - Intent: Add test assertions validating that the README contains the worktree guidance section with its essential elements, preventing future edits from accidentally removing it
   - Properties:
     - P6: Test validates README contains a worktree-related heading [invariant]
@@ -86,3 +86,4 @@ This is a documentation/guidance feature, not a code feature. The value is telli
 ## Growth Log
 <!-- Auto-updated after each stage -->
 - 2026-02-14: Stage 1 complete. Added "Parallel Growth with Worktrees" section to README between After Install and Releases. Explains spatial context hygiene, parallel feature growth, and review isolation. Includes create/work/cleanup commands and branch-to-growth-plan naming convention. All 65 tests pass.
+- 2026-02-14: Stage 2 complete. Added 4 tests in "README worktree section" describe block. Tests validate heading position, git worktree command presence, connection to organic growth concepts, and naming convention linking branches to growth plans. Key-phrase matching allows prose to evolve. All 69 tests pass.
