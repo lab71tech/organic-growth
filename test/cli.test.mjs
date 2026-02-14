@@ -1264,6 +1264,49 @@ describe('Visual markers regression guard (Stage 3)', () => {
   });
 });
 
+describe('Visual growth plan documentation (Stage 4)', () => {
+  const README_PATH = join(import.meta.dirname, '..', 'README.md');
+
+  it('P13: README mentions the visual/plant-themed format of growth plans', () => {
+    const content = readFileSync(README_PATH, 'utf8');
+
+    // The README should mention that growth plans use plant-themed visual markers
+    // somewhere in the existing content — not necessarily a new section
+    assert.ok(
+      /plant.themed|plant.inspired|growth.themed|organic.*marker|plant.*marker|plant.*visual|visual.*marker.*growth/i.test(content),
+      'README should mention the plant-themed visual format of growth plans'
+    );
+  });
+
+  it('P14: all existing README headings remain intact and in order', () => {
+    // This property is also checked by the existing test at "Post-stage review hook documentation"
+    // but we verify it explicitly here for the Stage 4 contract
+    const content = readFileSync(README_PATH, 'utf8');
+
+    const expectedHeadings = [
+      '## Install',
+      '## What You Get',
+      '## Workflow',
+      '## Philosophy',
+      '## Property-Based Planning',
+      '## After Install',
+      '## Parallel Growth with Worktrees',
+      '## Releases',
+      '## License',
+    ];
+
+    let lastIdx = -1;
+    for (const heading of expectedHeadings) {
+      const idx = content.indexOf(heading);
+      assert.ok(
+        idx > lastIdx,
+        `README heading "${heading}" should exist and appear after previous heading (found at ${idx}, previous at ${lastIdx})`
+      );
+      lastIdx = idx;
+    }
+  });
+});
+
 describe('Visual progress map in GROW mode report (Stage 1)', () => {
   const { tmp } = runCLI();
 

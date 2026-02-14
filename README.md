@@ -50,6 +50,8 @@ CLAUDE.md                           # Project context template + growth philosop
 └── settings.json                   # Claude Code hook configuration
 ```
 
+Growth plan files (`docs/growth/*.md`) use plant-themed visual markers -- seedlings for pending stages, trees for completed ones, vines between sections -- so you can tell at a glance where a feature stands.
+
 A **post-stage test** hook and a **post-stage review** hook run automatically after every stage commit, in order:
 
 1. **Test hook** — runs your test suite (discovered from the `**Test:**` field in CLAUDE.md) and injects pass/fail results into the conversation. On failure, tells Claude to fix before continuing.

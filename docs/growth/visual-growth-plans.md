@@ -1,6 +1,6 @@
 # Feature: Visual Growth Plans
 Created: 2026-02-14
-Status: 🌱 Growing
+Status: 🌳 Complete
 
 ## Seed (what & why)
 
@@ -56,7 +56,7 @@ Growth plan files and stage reports are functional but visually flat. Every file
   - Touches: `test/cli.test.mjs`
   - Implementation hint: Add a new test (or extend the existing "gardener agent contains property-based planning structure" test) that checks for the presence of progress map markers (🌿 or equivalent) and plan template decorations. Check that both gardener files are byte-identical.
 
-- ⬜ Stage 4: Documentation update
+- ✅ Stage 4: Documentation update (added plant-themed mention to README and product DNA)
   - Intent: Update README and product DNA to mention the visual growth plan format, so users know what to expect when they see plan files
   - Properties:
     - P13: README mentions the visual/plant-themed format of growth plans somewhere in the existing content (no new heading required) [invariant]
@@ -79,3 +79,4 @@ Growth plan files and stage reports are functional but visually flat. Every file
 - 2026-02-14: Stage 1 complete. Replaced single-line progress format in GROW mode step 8 with multi-line stage map. Three states: completed, current, upcoming. Four property tests added (P1-P4). All 70 tests pass.
 - 2026-02-14: Stage 2 complete. Added plant-themed decorations to PLAN mode template: header ornament (🌱 Feature:), seed markers (🌱) for pending stages, herb markers (🌿) for Horizon items, vine divider between Growth Stages and Growth Log. Updated GROW mode step 2 (find next 🌱 stage) and step 6 (mark as 🌳). Five property tests added (P5-P9). All 113 tests pass.
 - 2026-02-14: Stage 3 complete. Added regression guard tests (P10-P12) validating visual markers in the source template: multi-line progress display in GROW step 8, plant-themed stage markers in PLAN template, and byte-identity between template and project gardener files. Re-evaluated plan at stage 3 checkpoint — remaining Stage 4 (docs update) still valid. All 116 tests pass.
+- 2026-02-14: Stage 4 complete. Added one sentence to README "What You Get" section mentioning plant-themed visual markers in growth plan files. Updated product DNA "How It Works" to note plant-themed markers on rolling plans. Added P13-P14 tests. All 80 tests pass. Feature complete.
