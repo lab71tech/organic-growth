@@ -25,7 +25,7 @@ Growth plan files and stage reports are functional but visually flat. Every file
   - Touches: `templates/.claude/agents/gardener.md` (GROW mode step 8), `.claude/agents/gardener.md`
   - Implementation hint: Replace the `Progress: "Stage 4/~12 — ..."` line in step 8 with a multi-line progress map format. Use plant markers for states: 🌱 for completed, 🌿 for current/active, ⬜ for upcoming. The format should look like a stage list the agent renders from the plan file.
 
-- ⬜ Stage 2: Plant-themed decorations in growth plan file format
+- ✅ Stage 2: Plant-themed decorations in growth plan file format (added 🌱 header ornament, 🌱/🌳 stage markers, 🌿 Horizon markers, vine divider)
   - Intent: Add plant/growth-themed visual markers to the growth plan markdown template in PLAN mode — header ornaments, section dividers, and stage status markers that reinforce the organic metaphor
   - Properties:
     - P5: The growth plan template in PLAN mode contains at least one plant-themed section divider or ornament character beyond the existing status markers [invariant]
@@ -77,3 +77,4 @@ Growth plan files and stage reports are functional but visually flat. Every file
 ## Growth Log
 <!-- Auto-updated after each stage -->
 - 2026-02-14: Stage 1 complete. Replaced single-line progress format in GROW mode step 8 with multi-line stage map. Three states: completed, current, upcoming. Four property tests added (P1-P4). All 70 tests pass.
+- 2026-02-14: Stage 2 complete. Added plant-themed decorations to PLAN mode template: header ornament (🌱 Feature:), seed markers (🌱) for pending stages, herb markers (🌿) for Horizon items, vine divider between Growth Stages and Growth Log. Updated GROW mode step 2 (find next 🌱 stage) and step 6 (mark as 🌳). Five property tests added (P5-P9). All 113 tests pass.

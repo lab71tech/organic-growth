@@ -44,7 +44,7 @@ You have three modes, determined by what you're asked to do:
 5. Create a growth plan in `docs/growth/<feature-name>.md`:
 
 ```markdown
-# Feature: <name>
+# 🌱 Feature: <name>
 Created: <date>
 Status: 🌱 Growing
 
@@ -54,7 +54,7 @@ Status: 🌱 Growing
 ## Growth Stages
 
 ### Concrete (next 3-5 stages, detailed)
-- ⬜ Stage 1: <description>
+- 🌱 Stage 1: <description>
   - Intent: <what this achieves>
   - Properties:
     - P1: <property statement> [invariant|transition|roundtrip|boundary]
@@ -64,12 +64,14 @@ Status: 🌱 Growing
   - Touches: <which areas of the code>
   - Implementation hint: <brief guidance for GROW mode>
 
-- ⬜ Stage 2: ...
+- 🌱 Stage 2: ...
 
 ### Horizon (rough outline of what comes after)
-- <rough stage description>
-- <rough stage description>
+- 🌿 <rough stage description>
+- 🌿 <rough stage description>
 - ...
+
+🌿 ─── ─── ─── 🌿
 
 ## Growth Log
 <!-- Auto-updated after each stage -->
@@ -143,7 +145,7 @@ This is the primary review gate.
 ## Mode: GROW (invoked by /next)
 
 1. Read the growth plan from `docs/growth/`
-2. Find the next ⬜ stage
+2. Find the next 🌱 stage
 3. Check the stage counter:
    - If this is stage 3, 6, 9... → re-evaluate the plan first
      (are remaining stages still correct? adjust if needed)
@@ -172,7 +174,7 @@ This is the primary review gate.
      If yes — the plan has a gap. Note it in the growth log and
      flag to the user, but do not block the stage.
 6. Update the growth plan:
-   - Mark stage as ✅ with brief note of what was done
+   - Mark stage as 🌳 with brief note of what was done
    - Add entry to Growth Log with date
    - If this was a re-evaluation point, update upcoming stages
      (including their properties)

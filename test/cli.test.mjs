@@ -1090,6 +1090,113 @@ describe('CLI DNA document handling', () => {
   });
 });
 
+describe('Plant-themed decorations in growth plan template (Stage 2)', () => {
+  const { tmp } = runCLI();
+
+  /**
+   * Helper: extract the PLAN mode section 5 plan template from gardener.
+   * The template is inside a markdown code block starting with "```markdown"
+   * in step 5 of PLAN mode.
+   */
+  function getPlanTemplate(content) {
+    const match = content.match(/5\. Create a growth plan[\s\S]*?```markdown\n([\s\S]*?)```/);
+    assert.ok(match, 'should find plan template code block in PLAN mode step 5');
+    return match[1];
+  }
+
+  it('P5: plan template contains at least one plant-themed section divider or ornament beyond status markers', () => {
+    const content = readFileSync(join(tmp, '.claude', 'agents', 'gardener.md'), 'utf8');
+    const template = getPlanTemplate(content);
+
+    // Plant-themed Unicode characters beyond the status markers (🌱 Growing / 🌳 Complete)
+    // Look for plant emojis used as dividers or ornaments: 🌿, 🌻, 🍃, 🌾, 🪴, etc.
+    // or plant-themed ASCII art dividers
+    const plantDividerPattern = /🌿|🍃|🌾|🪴|🌻|─.*🌱.*─|─.*🌿.*─|╌|leaf|vine/i;
+    assert.ok(
+      plantDividerPattern.test(template),
+      'plan template should contain at least one plant-themed divider or ornament character'
+    );
+  });
+
+  it('P6: stage markers use plant-themed symbols — completed = mature marker, pending = seed/sprout marker', () => {
+    const content = readFileSync(join(tmp, '.claude', 'agents', 'gardener.md'), 'utf8');
+    const template = getPlanTemplate(content);
+
+    // Pending stages should use a seed/sprout marker (🌱) instead of ⬜
+    assert.ok(
+      /- 🌱 Stage \d+:/.test(template),
+      'pending stages in template should use 🌱 (seed/sprout) marker'
+    );
+
+    // The template should NOT use generic ⬜ for pending stages
+    assert.ok(
+      !/- ⬜ Stage \d+:/.test(template),
+      'pending stages should not use generic ⬜ checkbox marker'
+    );
+  });
+
+  it('P7: plan template header includes a plant-themed visual element', () => {
+    const content = readFileSync(join(tmp, '.claude', 'agents', 'gardener.md'), 'utf8');
+    const template = getPlanTemplate(content);
+
+    // The header line (first line, starting with #) should include a plant emoji
+    const headerLine = template.split('\n').find(line => line.startsWith('#'));
+    assert.ok(headerLine, 'template should have a header line starting with #');
+
+    const plantEmoji = /🌱|🌿|🌳|🌻|🍃|🌾|🪴|🪻/;
+    assert.ok(
+      plantEmoji.test(headerLine),
+      `template header should include a plant-themed emoji, got: "${headerLine}"`
+    );
+  });
+
+  it('P8: all decorative markers are valid Unicode that render in standard markdown viewers', () => {
+    const content = readFileSync(join(tmp, '.claude', 'agents', 'gardener.md'), 'utf8');
+    const template = getPlanTemplate(content);
+
+    // Extract all emoji/special characters from the template
+    // Check that none are from Private Use Areas (U+E000-F8FF, U+F0000-FFFFD, U+100000-10FFFD)
+    const codePoints = [...template].map(ch => ch.codePointAt(0));
+    const privateUse = codePoints.filter(
+      cp => (cp >= 0xE000 && cp <= 0xF8FF) ||
+            (cp >= 0xF0000 && cp <= 0xFFFFD) ||
+            (cp >= 0x100000 && cp <= 0x10FFFD)
+    );
+    assert.equal(
+      privateUse.length,
+      0,
+      `template should not contain Private Use Area characters, found ${privateUse.length}`
+    );
+
+    // Verify plant emojis used are from standard Unicode blocks (Emoji, Misc Symbols)
+    // All plant emojis we use (🌱🌿🌳🌻🍃🌾🪴) are in ranges U+1F300-1F9FF
+    // This is a sanity check — they should all be valid
+    const emojiPattern = /[\u{1F300}-\u{1F9FF}]/u;
+    assert.ok(
+      emojiPattern.test(template),
+      'template should contain at least one standard Unicode emoji'
+    );
+  });
+
+  it('P9: Status field still uses 🌱 Growing and 🌳 Complete — decorations do not replace semantic markers', () => {
+    const content = readFileSync(join(tmp, '.claude', 'agents', 'gardener.md'), 'utf8');
+    const template = getPlanTemplate(content);
+
+    // Status line must still contain 🌱 Growing
+    assert.ok(
+      /Status: 🌱 Growing/.test(template),
+      'template should still have "Status: 🌱 Growing"'
+    );
+
+    // Check that the gardener instructions still reference 🌳 Complete
+    // (this is in PLAN mode step 6 / update section, not necessarily in the template itself)
+    assert.ok(
+      /🌳 Complete/.test(content),
+      'gardener template should still reference 🌳 Complete for finished plans'
+    );
+  });
+});
+
 describe('Visual progress map in GROW mode report (Stage 1)', () => {
   const { tmp } = runCLI();
 
