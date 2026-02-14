@@ -25,6 +25,7 @@ concurrency:
 permissions:
   contents: write
   pull-requests: write
+  id-token: write
 
 jobs:
   release:
@@ -37,6 +38,7 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 22
+          registry-url: https://registry.npmjs.org
 
       - name: Run tests
         run: node --test
@@ -78,6 +80,13 @@ jobs:
               console.log(major + '.' + minor + '.' + (patch + 1));
             }
           " "$BUMP")
+
+          # Fail early if this version was already tagged (e.g. from a previous partial run)
+          if git rev-parse "v$NEW_VERSION" >/dev/null 2>&1; then
+            echo "::error::Tag v$NEW_VERSION already exists. Delete the orphan tag before re-running."
+            exit 1
+          fi
+
           npm version "$NEW_VERSION" --no-git-tag-version
           echo "NEW_VERSION=$NEW_VERSION" >> "$GITHUB_ENV"
 
@@ -108,6 +117,12 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release create "v$NEW_VERSION" --generate-notes
+
+      - name: Publish to npm
+        if: steps.changes.outputs.has_changes == 'true' && github.event.inputs.dry-run != 'true'
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Dry run summary
         if: steps.changes.outputs.has_changes == 'true' && github.event.inputs.dry-run == 'true'

@@ -223,6 +223,17 @@ describe('Release workflow', () => {
     );
   });
 
+  it('publishes to npm after creating the release', () => {
+    assert.ok(
+      content.includes('name: Publish to npm'),
+      'should have a Publish to npm step'
+    );
+    assert.ok(content.includes('npm publish'), 'should run npm publish');
+    assert.ok(content.includes('--provenance'), 'should use --provenance flag');
+    assert.ok(content.includes('NPM_TOKEN'), 'should reference NPM_TOKEN secret');
+    assert.ok(content.includes('id-token: write'), 'should have id-token write permission for provenance');
+  });
+
   it('has a dry-run summary step that outputs the preview', () => {
     assert.ok(
       content.includes('name: Dry run summary'),
