@@ -31,7 +31,7 @@ describe('CLI smoke test', () => {
 });
 
 describe('CLI template completeness', () => {
-  it('installs all 7 template files', () => {
+  it('installs all 8 template files', () => {
     const { tmp } = runCLI();
 
     const expectedFiles = [
@@ -42,6 +42,7 @@ describe('CLI template completeness', () => {
       '.claude/commands/next.md',
       '.claude/commands/replan.md',
       '.claude/commands/review.md',
+      '.claude/commands/worktree.md',
     ];
 
     for (const file of expectedFiles) {
@@ -232,7 +233,7 @@ describe('Template content integrity', () => {
 
   it('all commands have a description in frontmatter', () => {
     const { tmp } = runCLI();
-    const commands = ['seed', 'grow', 'next', 'replan', 'review'];
+    const commands = ['seed', 'grow', 'next', 'replan', 'review', 'worktree'];
 
     for (const cmd of commands) {
       const content = readFileSync(join(tmp, '.claude', 'commands', `${cmd}.md`), 'utf8');
