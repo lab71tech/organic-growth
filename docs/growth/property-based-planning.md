@@ -84,7 +84,7 @@ Shift the review gate from code (300-line diffs after implementation) to propert
   - Touches: `test/cli.test.mjs`
   - Done: Added "gardener agent contains property-based planning structure" test in Template content integrity suite. Checks 5 property markers (Properties:, Depends on:, Captures:, Property-Based Planning, Plan Self-Check) and all 4 categories (INVARIANTS, STATE TRANSITIONS, ROUNDTRIPS, BOUNDARIES). All 55 tests pass.
 
-- ⬜ Stage 7: Update template CLAUDE.md Growth Rules to reference properties
+- ✅ Stage 7: Update template CLAUDE.md Growth Rules to reference properties
   - Intent: The template CLAUDE.md shipped to users still says "one test" in rule 1 — update to mention properties as the planning mechanism, consistent with the gardener agent.
   - Properties:
     - P17: Template CLAUDE.md Growth Rules mention properties as the stage definition mechanism [invariant]
@@ -93,7 +93,7 @@ Shift the review gate from code (300-line diffs after implementation) to propert
       Captures: CLAUDE.md describes old workflow (Verify:) while gardener uses new workflow (Properties:)
   - Depends on: P1, P14
   - Touches: `templates/.claude/CLAUDE.md`, `.claude/CLAUDE.md`
-  - Implementation hint: Update Growth Rules section — keep it light, don't duplicate the taxonomy. Reference "properties defined in the growth plan" rather than repeating the full system.
+  - Done: Updated Growth Rule 1 from "one intent = one test = one commit" to "one intent = one commit" with two new bullets: "defines properties before implementation" and "properties become tests — write tests first". Both CLAUDE.md files synced. All 56 tests pass.
 
 ### Horizon (rough outline of what comes after)
 - Example growth plan demonstrating property-based planning (docs or README)
@@ -105,3 +105,4 @@ Shift the review gate from code (300-line diffs after implementation) to propert
 - 2026-02-14: Stages 1-4 implemented in initial session. Property-based stage format, taxonomy with four categories, self-check, properties-first GROW mode, accumulation in REPLAN, critical rules updated.
 - 2026-02-14: Stage 5 complete. Review fixes: GROW mode indentation, grow.md deduplication (~60 lines removed), boundary requirement softened, YAML frontmatter restored to 2-space, trailing newlines added, .claude/ synced with templates/.claude/. All 54 tests pass.
 - 2026-02-14: Stage 6 complete. Added test validating property-based planning markers and all four property categories in gardener template. All 55 tests pass.
+- 2026-02-14: Stage 7 complete. Updated template CLAUDE.md Growth Rule 1 to reference properties as the stage definition mechanism. Removed old "one test" formulation. Synced .claude/CLAUDE.md. Added test for P17/P18. All 56 tests pass.

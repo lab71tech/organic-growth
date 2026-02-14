@@ -207,6 +207,29 @@ describe('Template content integrity', () => {
     }
   });
 
+  it('CLAUDE.md Growth Rules reference properties as stage definition mechanism', () => {
+    const { tmp } = runCLI();
+    const content = readFileSync(join(tmp, '.claude', 'CLAUDE.md'), 'utf8');
+
+    // P17: Growth Rules mention properties as the planning mechanism
+    assert.ok(
+      content.includes('properties'),
+      'CLAUDE.md Growth Rules should mention properties'
+    );
+
+    // P18: no contradiction — should NOT say "one test" as the sole stage definition
+    assert.ok(
+      !content.includes('one intent = one test = one commit'),
+      'CLAUDE.md should not use old "one test" formulation that contradicts property-based workflow'
+    );
+
+    // P18: should not mention "Verify:" as the stage check mechanism
+    assert.ok(
+      !content.includes('Verify:'),
+      'CLAUDE.md should not reference "Verify:" which contradicts property-based gardener'
+    );
+  });
+
   it('all commands have a description in frontmatter', () => {
     const { tmp } = runCLI();
     const commands = ['seed', 'grow', 'next', 'replan', 'review'];

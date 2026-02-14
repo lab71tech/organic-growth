@@ -51,9 +51,10 @@ A seedling is a whole plant, not 10% of a tree.
 
 ## Growth Rules
 
-1. **One stage = one intent = one test = one commit**
+1. **One stage = one intent = one commit**
    - Each stage has a single purpose
-   - Each stage has at least one test proving it works
+   - Each stage defines properties (rules that must be true) before implementation
+   - Properties become tests — write tests first, then code to pass them
    - Each stage is committed separately with a clear message
    - The app builds, tests pass, and runs after every stage
 
