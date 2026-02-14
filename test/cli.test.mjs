@@ -593,6 +593,41 @@ describe('Gardener and CLAUDE.md worktree awareness', () => {
   });
 });
 
+describe('Worktree command content', () => {
+  it('mentions git worktree as the underlying mechanism', () => {
+    // P27: command contains actual worktree instruction, not generic branching
+    const { tmp } = runCLI();
+    const content = readFileSync(join(tmp, '.claude', 'commands', 'worktree.md'), 'utf8');
+
+    assert.ok(
+      /git worktree/.test(content),
+      'worktree command should mention "git worktree"'
+    );
+  });
+
+  it('mentions /grow as the next step after creating a worktree', () => {
+    // P28: user knows to run /grow in the new worktree
+    const { tmp } = runCLI();
+    const content = readFileSync(join(tmp, '.claude', 'commands', 'worktree.md'), 'utf8');
+
+    assert.ok(
+      /\/grow/.test(content),
+      'worktree command should mention /grow as the next step'
+    );
+  });
+
+  it('references $ARGUMENTS for feature name input', () => {
+    // P29: command accepts feature name via $ARGUMENTS, not hardcoded
+    const { tmp } = runCLI();
+    const content = readFileSync(join(tmp, '.claude', 'commands', 'worktree.md'), 'utf8');
+
+    assert.ok(
+      /\$ARGUMENTS/.test(content),
+      'worktree command should reference $ARGUMENTS for feature name'
+    );
+  });
+});
+
 describe('CLI DNA document handling', () => {
   it('copies a DNA file to docs/product-dna.md', () => {
     const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
