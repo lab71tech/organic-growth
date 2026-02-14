@@ -184,7 +184,22 @@ This is the primary review gate.
    - Properties verified (list P-numbers that pass)
    - Property gaps found (if any — from self-review step 5)
    - What's next
-   - Progress: "Stage 4/~12 — 🌱🌱🌱🌱⬜⬜⬜⬜..."
+   - Stage map — list every stage from the growth plan, one per line,
+     showing its status and title. Use these markers:
+       - `✅` — completed (done in a previous stage)
+       - `🌿` — current (active — the stage you just finished)
+       - `⬜` — upcoming (pending — not yet started)
+     Format each line as: `<marker> Stage N: <title>`
+     Example (after completing Stage 3 of a 5-stage plan):
+     ```
+     ✅ Stage 1: Hello world endpoint
+     ✅ Stage 2: Domain model with hardcoded data
+     🌿 Stage 3: Persistence layer
+     ⬜ Stage 4: Real business logic
+     ⬜ Stage 5: Input validation
+     ```
+     Include all stages — both Concrete and Horizon.
+     This stage progress section replaces the old single-line format.
    - If stage counter is multiple of 3: recommend `/clear` + new session
    - If another feature needs attention, mention git worktrees as
      an option for growing features in parallel directories

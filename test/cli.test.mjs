@@ -1089,3 +1089,79 @@ describe('CLI DNA document handling', () => {
     );
   });
 });
+
+describe('Visual progress map in GROW mode report (Stage 1)', () => {
+  const { tmp } = runCLI();
+
+  /**
+   * Helper: extract GROW mode step 8 section from gardener template.
+   * Step 8 starts at "8. Report:" and ends at the next top-level
+   * section ("## Mode: REPLAN" or "# Critical").
+   */
+  function getStep8(content) {
+    const match = content.match(/8\. Report:[\s\S]*?(?=\n## Mode: REPLAN|\n# Critical)/);
+    assert.ok(match, 'should find step 8 (Report) in GROW mode');
+    return match[0];
+  }
+
+  it('P1: step 8 includes a multi-line stage progress section listing each stage with status and title', () => {
+    const content = readFileSync(join(tmp, '.claude', 'agents', 'gardener.md'), 'utf8');
+    const step8 = getStep8(content);
+
+    // Must contain multiple lines describing stages — look for a format
+    // that lists stage numbers with titles on separate lines
+    assert.ok(
+      /Stage \d+.*:/.test(step8),
+      'step 8 should contain stage listing with numbers and titles'
+    );
+
+    // The progress section must be multi-line — it should describe a
+    // format where each stage gets its own line
+    assert.ok(
+      /each stage/i.test(step8) || /every stage/i.test(step8) || /all stages/i.test(step8),
+      'step 8 should instruct listing each/every/all stage(s)'
+    );
+  });
+
+  it('P2: progress section distinguishes at least three states — completed, current, and upcoming', () => {
+    const content = readFileSync(join(tmp, '.claude', 'agents', 'gardener.md'), 'utf8');
+    const step8 = getStep8(content);
+
+    // Must mention or show three distinct state markers
+    const hasCompleted = /completed|done|finished/i.test(step8);
+    const hasCurrent = /current|active|in.progress/i.test(step8);
+    const hasUpcoming = /upcoming|pending|next|remaining|future/i.test(step8);
+
+    assert.ok(hasCompleted, 'step 8 should describe a completed state');
+    assert.ok(hasCurrent, 'step 8 should describe a current/active state');
+    assert.ok(hasUpcoming, 'step 8 should describe an upcoming/pending state');
+  });
+
+  it('P3: exactly one progress display specification in step 8 — no duplication', () => {
+    const content = readFileSync(join(tmp, '.claude', 'agents', 'gardener.md'), 'utf8');
+    const step8 = getStep8(content);
+
+    // The old single-line format should NOT be present
+    assert.ok(
+      !step8.includes('\uD83C\uDF31\uD83C\uDF31\uD83C\uDF31\uD83C\uDF31\u2B1C\u2B1C\u2B1C\u2B1C'),
+      'step 8 should not contain the old single-line progress format (emoji string)'
+    );
+  });
+
+  it('P4: progress section is positioned after "What\'s next" in the report', () => {
+    const content = readFileSync(join(tmp, '.claude', 'agents', 'gardener.md'), 'utf8');
+    const step8 = getStep8(content);
+
+    // Find position of "What's next" and the progress/stage map section
+    const whatsNextIdx = step8.search(/what.*next/i);
+    assert.ok(whatsNextIdx >= 0, 'step 8 should contain "What\'s next"');
+
+    // The stage map / progress section should come after "What's next"
+    const progressMapIdx = step8.search(/Stage map|Progress map|stage progress/i);
+    assert.ok(progressMapIdx >= 0, 'step 8 should contain a stage/progress map section');
+    assert.ok(
+      progressMapIdx > whatsNextIdx,
+      `progress/stage map (at ${progressMapIdx}) should come after "What's next" (at ${whatsNextIdx})`
+    );
+  });
+});
