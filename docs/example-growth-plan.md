@@ -30,7 +30,7 @@ Add the ability to mark tasks as complete in the todo CLI. Currently users can a
   - Properties:
     - P5: Completed tasks display with a checkmark prefix, pending tasks with an empty box [invariant]
       Captures: No visual distinction — user can't tell what's done
-    - P6: Summary line shows "N/M tasks completed" matching actual completed count [roundtrip]
+    - P6: Summary line shows "N/M tasks completed" matching actual completed count [invariant]
       Captures: Summary count drifting from actual state — off-by-one or stale cache
     - P7: List with zero tasks prints "No tasks yet" instead of empty output [boundary]
       Captures: Blank terminal output — user unsure if command worked
