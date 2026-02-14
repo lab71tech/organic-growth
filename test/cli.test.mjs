@@ -173,6 +173,40 @@ describe('Template content integrity', () => {
     }
   });
 
+  it('gardener agent contains property-based planning structure', () => {
+    const { tmp } = runCLI();
+    const content = readFileSync(join(tmp, '.claude', 'agents', 'gardener.md'), 'utf8');
+
+    // P15: property-related markers are present
+    const propertyMarkers = [
+      'Properties:',
+      'Depends on:',
+      'Captures:',
+      'Property-Based Planning',
+      'Plan Self-Check',
+    ];
+    for (const marker of propertyMarkers) {
+      assert.ok(
+        content.includes(marker),
+        `gardener.md should contain property marker "${marker}"`
+      );
+    }
+
+    // P16: all four property categories are present
+    const categories = [
+      'INVARIANTS',
+      'STATE TRANSITIONS',
+      'ROUNDTRIPS',
+      'BOUNDARIES',
+    ];
+    for (const category of categories) {
+      assert.ok(
+        content.includes(category),
+        `gardener.md should contain property category "${category}"`
+      );
+    }
+  });
+
   it('all commands have a description in frontmatter', () => {
     const { tmp } = runCLI();
     const commands = ['seed', 'grow', 'next', 'replan', 'review'];
