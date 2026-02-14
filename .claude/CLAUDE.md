@@ -11,7 +11,7 @@
 **For whom:** Developers using Claude Code who want structured, controlled workflow instead of autonomous coding.
 **Core problem:** Claude Code without structure produces sprawling changes, lost context, and no checkpoints. Developers need methodology that works with LLM limitations.
 **Key domain concepts:** Growth stage, gardener agent, rolling plan, DNA document, quality gate, context hygiene, vertical slice
-**Current state:** v0.1.0 — Post-MVP, infrastructure mature (CLI, full CI/CD, automated releases, dependabot, 53 tests)
+**Current state:** v1.0.1 — Post-MVP, infrastructure mature (CLI, full CI/CD, automated releases, dependabot, 61 tests)
 **Full DNA:** docs/product-dna.md
 
 ## Tech Stack (THE SOIL — auto-discovered, but document the non-obvious)

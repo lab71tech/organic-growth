@@ -67,7 +67,7 @@ This copies the `.claude/` configuration into your project. No runtime dependenc
 
 ## Philosophy
 
-- **One stage = one intent = one test = one commit**
+- **One stage = one intent = one commit**
 - **Rolling plan:** 3-5 stages ahead, re-evaluate every 3
 - **Two-layer quality:** deterministic tools after every stage, LLM review on demand
 - **Context hygiene:** fresh session every 3 stages

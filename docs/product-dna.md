@@ -12,7 +12,7 @@ Claude Code without structure produces inconsistent results — sprawling change
 ## How It Works
 - **One agent (gardener)** with three modes: PLAN, GROW, REPLAN
 - **Rolling plans** stored in `docs/growth/<feature>.md` — 3-5 concrete stages + horizon
-- **One stage = one intent = one test = one commit**
+- **One stage = one intent = one commit**
 - **Two-layer quality:** deterministic tools (build/lint/typecheck/test) after every stage, LLM deep review on demand
 - **Context hygiene:** fresh session every 3 stages, plan file provides continuity
 
@@ -36,13 +36,13 @@ Claude Code without structure produces inconsistent results — sprawling change
 - Package size under 50KB
 
 ## Current State
-v0.1.0 — Post-MVP, infrastructure mature. CLI installs templates with all commands and agent defined. Full CI/CD pipeline in place:
+v1.0.1 — Post-MVP, infrastructure mature. CLI installs templates with all commands and agent defined. Full CI/CD pipeline in place:
 - Test workflow (Node 20/22 + bun matrix)
 - Publish workflow (npm with provenance on version tags)
-- Automated daily release workflow (configurable bump, dry-run mode, loop prevention)
+- Manual release workflow (configurable bump, dry-run mode, loop prevention)
 - Release notes with changelog categories
 - Dependabot for GitHub Actions (grouped minor/patch updates)
-- 53 tests, 13 suites, zero failures
+- 61 tests, 14 suites, zero failures
 
 ## Priorities
 1. Correctness of templates (gardener instructions, command definitions)
