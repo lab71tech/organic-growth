@@ -26,7 +26,7 @@ Claude Code without structure produces inconsistent results — sprawling change
 
 ## Tech Stack
 - Node.js CLI (bin/cli.mjs) — zero dependencies, pure Node.js
-- Templates in `templates/.claude/` — markdown files
+- Templates in `templates/` — `CLAUDE.md` at root, agents and commands under `templates/.claude/`
 - Published to npm, invoked via `bunx organic-growth` or `npx organic-growth`
 
 ## Constraints

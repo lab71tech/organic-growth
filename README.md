@@ -28,22 +28,22 @@ bunx organic-growth docs/my-product-spec.md
 bunx organic-growth --force
 ```
 
-This copies the `.claude/` configuration into your project. No runtime dependencies.
+This installs `CLAUDE.md` at your project root and a `.claude/` directory with agents and commands. No runtime dependencies.
 
 ## What You Get
 
 ```
+CLAUDE.md                    # Project context template + growth philosophy
 .claude/
-├── CLAUDE.md              # Project context template + growth philosophy
 ├── agents/
-│   └── gardener.md        # Plans, implements, and validates growth stages
+│   └── gardener.md          # Plans, implements, and validates growth stages
 └── commands/
-    ├── seed.md            # /seed     — bootstrap new project
-    ├── grow.md            # /grow     — plan a new feature
-    ├── next.md            # /next     — implement next stage
-    ├── replan.md          # /replan   — adjust when things change
-    ├── review.md          # /review   — deep quality review
-    └── worktree.md        # /worktree — parallel feature in a worktree
+    ├── seed.md              # /seed     — bootstrap new project
+    ├── grow.md              # /grow     — plan a new feature
+    ├── next.md              # /next     — implement next stage
+    ├── replan.md            # /replan   — adjust when things change
+    ├── review.md            # /review   — deep quality review
+    └── worktree.md          # /worktree — parallel feature in a worktree
 ```
 
 ## Workflow
@@ -94,7 +94,7 @@ The gardener agent handles the full property format — categories, failure anal
 
 ## After Install
 
-1. Edit `.claude/CLAUDE.md` — fill in the Product section (or run `/seed`)
+1. Edit `CLAUDE.md` — fill in the Product section (or run `/seed`)
 2. Fill in Quality Tools section with your project's lint/test commands
 3. Start building with `/grow`
 
