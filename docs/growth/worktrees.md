@@ -1,6 +1,6 @@
 # Feature: Git Worktree Guidance for Parallel Feature Growth
 Created: 2026-02-14
-Status: 🌱 Growing
+Status: 🌳 Complete
 
 ## Seed (what & why)
 
@@ -63,7 +63,7 @@ This is a documentation/guidance feature, not a code feature. The value is telli
   - Depends on: P1, P2 (worktree concepts established in README)
   - Touches: `templates/.claude/agents/gardener.md`, `.claude/agents/gardener.md`, `templates/.claude/CLAUDE.md`, `.claude/CLAUDE.md`
 
-- Stage 4: Tests for gardener and CLAUDE.md worktree awareness
+- ✅ Stage 4: Tests for gardener and CLAUDE.md worktree awareness
   - Intent: Add test assertions validating that the gardener template and CLAUDE.md template contain worktree-related guidance
   - Properties:
     - P17: Test validates gardener template mentions worktrees in context of context hygiene or stage reporting [invariant]
@@ -88,3 +88,4 @@ This is a documentation/guidance feature, not a code feature. The value is telli
 - 2026-02-14: Stage 1 complete. Added "Parallel Growth with Worktrees" section to README between After Install and Releases. Explains spatial context hygiene, parallel feature growth, and review isolation. Includes create/work/cleanup commands and branch-to-growth-plan naming convention. All 65 tests pass.
 - 2026-02-14: Stage 2 complete. Added 4 tests in "README worktree section" describe block. Tests validate heading position, git worktree command presence, connection to organic growth concepts, and naming convention linking branches to growth plans. Key-phrase matching allows prose to evolve. All 69 tests pass.
 - 2026-02-14: Stage 3 complete. Added worktree awareness to gardener template (PLAN mode step 3a checks for in-progress plans; GROW mode step 8 mentions worktrees at context hygiene boundary) and CLAUDE.md template (1 line in context hygiene rule). Both template/project pairs synchronized. Worktrees always presented as optional. All 69 tests pass.
+- 2026-02-14: Stage 4 complete. Added 4 tests in "Gardener and CLAUDE.md worktree awareness" describe block. P17: GROW mode mentions worktrees with parallel/reporting context. P18: PLAN mode mentions worktrees with in-progress plan context. P19: no mandatory language ("must"/"always") on worktree lines. P20: CLAUDE.md context hygiene section includes worktree mention. All 73 tests pass. Feature complete 🌳

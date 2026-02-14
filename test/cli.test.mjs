@@ -513,6 +513,85 @@ describe('README worktree section', () => {
   });
 });
 
+describe('Gardener and CLAUDE.md worktree awareness', () => {
+  it('gardener template mentions worktrees in context of stage reporting or context hygiene', () => {
+    // P17: worktree guidance in GROW mode reporting
+    const { tmp } = runCLI();
+    const content = readFileSync(join(tmp, '.claude', 'agents', 'gardener.md'), 'utf8');
+
+    // Extract GROW mode section (from "Mode: GROW" to the next "Mode:" or "# Critical")
+    const growMatch = content.match(/## Mode: GROW[\s\S]*?(?=\n## Mode:|\n# )/);
+    assert.ok(growMatch, 'should find GROW mode section');
+    const growSection = growMatch[0];
+
+    assert.ok(
+      /worktree/i.test(growSection),
+      'GROW mode section should mention worktrees'
+    );
+
+    // Must be in context of reporting or context hygiene (parallel, /clear, session)
+    assert.ok(
+      /parallel|\/clear|session|report/i.test(growSection),
+      'worktree mention should be near reporting or context hygiene concepts'
+    );
+  });
+
+  it('gardener PLAN mode mentions worktrees in context of existing growth plans', () => {
+    // P18: PLAN mode checks for in-progress plans and suggests worktrees
+    const { tmp } = runCLI();
+    const content = readFileSync(join(tmp, '.claude', 'agents', 'gardener.md'), 'utf8');
+
+    // Extract PLAN mode section
+    const planMatch = content.match(/## Mode: PLAN[\s\S]*?(?=\n## Mode:)/);
+    assert.ok(planMatch, 'should find PLAN mode section');
+    const planSection = planMatch[0];
+
+    assert.ok(
+      /worktree/i.test(planSection),
+      'PLAN mode section should mention worktrees'
+    );
+
+    // Must be in context of existing plans or another feature growing
+    assert.ok(
+      /in-progress|another feature|other.*plan|existing/i.test(planSection),
+      'worktree mention should be in context of existing growth plans or another feature'
+    );
+  });
+
+  it('gardener template does not require worktrees — guidance is optional', () => {
+    // P19: no "must" or "always" adjacent to "worktree" — keeps P12
+    const { tmp } = runCLI();
+    const content = readFileSync(join(tmp, '.claude', 'agents', 'gardener.md'), 'utf8');
+
+    // Check that no line contains "must" or "always" on the same line as "worktree"
+    const lines = content.split('\n');
+    for (const line of lines) {
+      if (/worktree/i.test(line)) {
+        assert.ok(
+          !/\b(must|always)\b/i.test(line),
+          `worktree guidance should be optional, but found mandatory language: "${line.trim()}"`
+        );
+      }
+    }
+  });
+
+  it('CLAUDE.md template mentions worktrees in context hygiene section', () => {
+    // P20: context hygiene rule includes worktree mention
+    const { tmp } = runCLI();
+    const content = readFileSync(join(tmp, '.claude', 'CLAUDE.md'), 'utf8');
+
+    // Extract context hygiene section (numbered rule to next numbered rule)
+    const hygieneMatch = content.match(/Context hygiene[\s\S]*?(?=\n\d+\.\s\*\*)/);
+    assert.ok(hygieneMatch, 'should find context hygiene section');
+    const hygieneSection = hygieneMatch[0];
+
+    assert.ok(
+      /worktree/i.test(hygieneSection),
+      'Context hygiene section should mention worktrees'
+    );
+  });
+});
+
 describe('CLI DNA document handling', () => {
   it('copies a DNA file to docs/product-dna.md', () => {
     const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
