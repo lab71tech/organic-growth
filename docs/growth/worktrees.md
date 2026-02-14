@@ -43,7 +43,7 @@ This is a documentation/guidance feature, not a code feature. The value is telli
   - Depends on: P1, P3, P5
   - Touches: `test/cli.test.mjs`
 
-- Stage 3: Gardener agent and CLAUDE.md worktree awareness
+- ✅ Stage 3: Gardener agent and CLAUDE.md worktree awareness
   - Intent: Update the gardener agent template to mention worktrees at context hygiene boundaries, and update the CLAUDE.md template's context hygiene rule to mention worktrees as spatial complement to temporal `/clear`
   - Properties:
     - P10: Gardener template mentions worktrees in the context of stage reporting or context hygiene (every 3 stages) [invariant]
@@ -87,3 +87,4 @@ This is a documentation/guidance feature, not a code feature. The value is telli
 <!-- Auto-updated after each stage -->
 - 2026-02-14: Stage 1 complete. Added "Parallel Growth with Worktrees" section to README between After Install and Releases. Explains spatial context hygiene, parallel feature growth, and review isolation. Includes create/work/cleanup commands and branch-to-growth-plan naming convention. All 65 tests pass.
 - 2026-02-14: Stage 2 complete. Added 4 tests in "README worktree section" describe block. Tests validate heading position, git worktree command presence, connection to organic growth concepts, and naming convention linking branches to growth plans. Key-phrase matching allows prose to evolve. All 69 tests pass.
+- 2026-02-14: Stage 3 complete. Added worktree awareness to gardener template (PLAN mode step 3a checks for in-progress plans; GROW mode step 8 mentions worktrees at context hygiene boundary) and CLAUDE.md template (1 line in context hygiene rule). Both template/project pairs synchronized. Worktrees always presented as optional. All 69 tests pass.
