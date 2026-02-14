@@ -35,10 +35,6 @@ You have three modes, determined by what you're asked to do:
    invariants. Use it to make informed planning decisions.
    If no, CLAUDE.md Product section is sufficient.
 3. Explore the codebase to understand current state
-3a. Check `docs/growth/` for other in-progress plans (Status: 🌱 Growing).
-    If another feature is actively growing in this working directory,
-    suggest the user consider a git worktree so both features can
-    grow in parallel without branch-switching overhead.
 4. Ask the user 2-3 clarifying questions — no more.
    Focus on: acceptance criteria, constraints, riskiest part.
 5. Create a growth plan in `docs/growth/<feature-name>.md`:
@@ -203,8 +199,6 @@ This is the primary review gate.
      Include all stages — both Concrete and Horizon.
      This stage progress section replaces the old single-line format.
    - If stage counter is multiple of 3: recommend `/clear` + new session
-   - If another feature needs attention, mention git worktrees as
-     an option for growing features in parallel directories
 
 ## Mode: REPLAN (invoked by /replan)
 

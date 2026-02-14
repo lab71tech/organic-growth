@@ -26,7 +26,7 @@ The worktrees feature (guidance, `/worktree` command, gardener awareness, README
   - Depends on: none (first stage)
   - Touches: `templates/.claude/commands/worktree.md` (delete), `.claude/commands/worktree.md` (delete), `test/cli.test.mjs`
 
-- 🌱 Stage 2: Remove worktree awareness from gardener and CLAUDE.md templates
+- 🌳 Stage 2: Remove worktree awareness from gardener and CLAUDE.md templates
   - Intent: Remove worktree mentions from gardener agent (PLAN mode step 3a, GROW mode step 8) and CLAUDE.md context hygiene rule, plus their tests
   - Properties:
     - P6: Gardener PLAN mode has no step 3a and does not mention "worktree" [invariant]
@@ -77,3 +77,4 @@ The worktrees feature (guidance, `/worktree` command, gardener awareness, README
 ## Growth Log
 <!-- Auto-updated after each stage -->
 - 2026-02-14: Stage 1 complete. Deleted `templates/.claude/commands/worktree.md` and `.claude/commands/worktree.md`. Updated template completeness test (11→10 files), removed `worktree` from frontmatter commands list, removed "Worktree command content" test block (3 tests). 115 tests pass (was 118).
+- 2026-02-14: Stage 2 complete. Removed step 3a (worktree suggestion for parallel features) from gardener PLAN mode and worktree mention from GROW mode step 8, in both template and project copies. Removed worktree line from CLAUDE.md context hygiene rule in both template and project copies. Removed "Gardener and CLAUDE.md worktree awareness" test block (4 tests). 111 tests pass (was 115).

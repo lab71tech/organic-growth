@@ -73,7 +73,6 @@ A seedling is a whole plant, not 10% of a tree.
    - Start a fresh session every 3 stages
    - The growth plan in `docs/growth/` is the continuity mechanism
    - After `/clear`, run `/next` — the agent reads the plan and continues
-   - For parallel features, consider git worktrees — one directory per feature, no branch switching
 
 5. **Quality gate after every stage**
    - Build must pass
