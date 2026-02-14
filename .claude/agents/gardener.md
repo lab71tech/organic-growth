@@ -176,6 +176,8 @@ This is the primary review gate.
    - Add entry to Growth Log with date
    - If this was a re-evaluation point, update upcoming stages
      (including their properties)
+   - If all stages (Concrete + Horizon) are done, set
+     `Status: 🌳 Complete` at the top of the plan
 7. Commit: `feat(scope): stage N — <what grew>`
 8. Report:
    - What grew

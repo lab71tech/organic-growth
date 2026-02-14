@@ -137,8 +137,9 @@ describe('CLI --version flag', () => {
 });
 
 describe('Template content integrity', () => {
+  const { tmp } = runCLI();
+
   it('CLAUDE.md contains key section markers', () => {
-    const { tmp } = runCLI();
     const content = readFileSync(join(tmp, 'CLAUDE.md'), 'utf8');
 
     const markers = [
@@ -157,7 +158,6 @@ describe('Template content integrity', () => {
   });
 
   it('gardener agent contains all three modes and quality gate', () => {
-    const { tmp } = runCLI();
     const content = readFileSync(join(tmp, '.claude', 'agents', 'gardener.md'), 'utf8');
 
     const markers = [
@@ -175,7 +175,6 @@ describe('Template content integrity', () => {
   });
 
   it('gardener agent contains property-based planning structure', () => {
-    const { tmp } = runCLI();
     const content = readFileSync(join(tmp, '.claude', 'agents', 'gardener.md'), 'utf8');
 
     // P15: property-related markers are present
@@ -209,7 +208,6 @@ describe('Template content integrity', () => {
   });
 
   it('CLAUDE.md Growth Rules reference properties as stage definition mechanism', () => {
-    const { tmp } = runCLI();
     const content = readFileSync(join(tmp, 'CLAUDE.md'), 'utf8');
 
     // P17: Growth Rules mention properties as the planning mechanism
@@ -232,7 +230,6 @@ describe('Template content integrity', () => {
   });
 
   it('all commands have a description in frontmatter', () => {
-    const { tmp } = runCLI();
     const commands = ['seed', 'grow', 'next', 'replan', 'review', 'worktree'];
 
     for (const cmd of commands) {
@@ -530,9 +527,10 @@ describe('README worktree section', () => {
 });
 
 describe('Gardener and CLAUDE.md worktree awareness', () => {
+  const { tmp } = runCLI();
+
   it('gardener template mentions worktrees in context of stage reporting or context hygiene', () => {
     // P17: worktree guidance in GROW mode reporting
-    const { tmp } = runCLI();
     const content = readFileSync(join(tmp, '.claude', 'agents', 'gardener.md'), 'utf8');
 
     // Extract GROW mode section (from "Mode: GROW" to the next "Mode:" or "# Critical")
@@ -554,7 +552,6 @@ describe('Gardener and CLAUDE.md worktree awareness', () => {
 
   it('gardener PLAN mode mentions worktrees in context of existing growth plans', () => {
     // P18: PLAN mode checks for in-progress plans and suggests worktrees
-    const { tmp } = runCLI();
     const content = readFileSync(join(tmp, '.claude', 'agents', 'gardener.md'), 'utf8');
 
     // Extract PLAN mode section
@@ -576,7 +573,6 @@ describe('Gardener and CLAUDE.md worktree awareness', () => {
 
   it('gardener template does not require worktrees — guidance is optional', () => {
     // P19: no "must" or "always" adjacent to "worktree" — keeps P12
-    const { tmp } = runCLI();
     const content = readFileSync(join(tmp, '.claude', 'agents', 'gardener.md'), 'utf8');
 
     // Check that no line contains "must" or "always" on the same line as "worktree"
@@ -593,7 +589,6 @@ describe('Gardener and CLAUDE.md worktree awareness', () => {
 
   it('CLAUDE.md template mentions worktrees in context hygiene section', () => {
     // P20: context hygiene rule includes worktree mention
-    const { tmp } = runCLI();
     const content = readFileSync(join(tmp, 'CLAUDE.md'), 'utf8');
 
     // Extract context hygiene section (numbered rule to next numbered rule)
@@ -609,9 +604,10 @@ describe('Gardener and CLAUDE.md worktree awareness', () => {
 });
 
 describe('Worktree command content', () => {
+  const { tmp } = runCLI();
+
   it('mentions git worktree as the underlying mechanism', () => {
     // P27: command contains actual worktree instruction, not generic branching
-    const { tmp } = runCLI();
     const content = readFileSync(join(tmp, '.claude', 'commands', 'worktree.md'), 'utf8');
 
     assert.ok(
@@ -622,7 +618,6 @@ describe('Worktree command content', () => {
 
   it('mentions /grow as the next step after creating a worktree', () => {
     // P28: user knows to run /grow in the new worktree
-    const { tmp } = runCLI();
     const content = readFileSync(join(tmp, '.claude', 'commands', 'worktree.md'), 'utf8');
 
     assert.ok(
@@ -633,7 +628,6 @@ describe('Worktree command content', () => {
 
   it('references $ARGUMENTS for feature name input', () => {
     // P29: command accepts feature name via $ARGUMENTS, not hardcoded
-    const { tmp } = runCLI();
     const content = readFileSync(join(tmp, '.claude', 'commands', 'worktree.md'), 'utf8');
 
     assert.ok(

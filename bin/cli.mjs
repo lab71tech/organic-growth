@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { existsSync, mkdirSync, copyFileSync, readFileSync, readdirSync, statSync } from 'fs';
-import { join, dirname, relative } from 'path';
+import { join, dirname, relative, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { createInterface } from 'readline';
 
@@ -105,6 +105,10 @@ async function install() {
     }
 
     if (existsSync(dest) && !force) {
+      if (!process.stdin.isTTY) {
+        skipped.push(file);
+        continue;
+      }
       const answer = await ask(`${YELLOW}!${RESET} ${file} already exists. Overwrite? [y/N] `);
       if (answer !== 'y' && answer !== 'yes') {
         skipped.push(file);
@@ -125,7 +129,7 @@ async function install() {
 
   // Handle DNA document
   if (dna) {
-    const dnaSource = join(TARGET_DIR, dna);
+    const dnaSource = resolve(TARGET_DIR, dna);
     if (existsSync(dnaSource)) {
       const dnaDest = join(TARGET_DIR, 'docs', 'product-dna.md');
       copyFileSync(dnaSource, dnaDest);

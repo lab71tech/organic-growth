@@ -17,6 +17,9 @@
     "incremental-development",
     "elephant-carpaccio"
   ],
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "test": "node --test"
   },
