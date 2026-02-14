@@ -31,7 +31,7 @@ describe('CLI smoke test', () => {
 });
 
 describe('CLI template completeness', () => {
-  it('installs all 8 template files', () => {
+  it('installs all 10 template files', () => {
     const { tmp } = runCLI();
 
     const expectedFiles = [
@@ -43,6 +43,8 @@ describe('CLI template completeness', () => {
       '.claude/commands/replan.md',
       '.claude/commands/review.md',
       '.claude/commands/worktree.md',
+      '.claude/hooks/post-stage-review.sh',
+      '.claude/settings.json',
     ];
 
     for (const file of expectedFiles) {
@@ -652,6 +654,55 @@ describe('Product DNA documentation', () => {
     assert.ok(
       /\/worktree/.test(section),
       'Key Commands section should include /worktree'
+    );
+  });
+});
+
+describe('Post-stage review hook (template)', () => {
+  const { tmp } = runCLI();
+
+  it('hook template exists and contains stage-commit detection logic (P8, P11)', () => {
+    const hookPath = join(tmp, '.claude', 'hooks', 'post-stage-review.sh');
+    assert.ok(existsSync(hookPath), 'template should install .claude/hooks/post-stage-review.sh');
+
+    const content = readFileSync(hookPath, 'utf8');
+    assert.ok(
+      /git commit/.test(content),
+      'hook template should check for "git commit" in the command'
+    );
+    assert.ok(
+      /stage.*[0-9]|stage.*\\d/i.test(content),
+      'hook template should check for stage number pattern'
+    );
+  });
+
+  it('settings template exists with PostToolUse hook referencing the hook script (P9, P12)', () => {
+    const settingsPath = join(tmp, '.claude', 'settings.json');
+    assert.ok(existsSync(settingsPath), 'template should install .claude/settings.json');
+
+    const settings = JSON.parse(readFileSync(settingsPath, 'utf8'));
+    assert.ok(settings.hooks, 'settings template should have a hooks key');
+    assert.ok(settings.hooks.PostToolUse, 'settings template should have PostToolUse event');
+
+    const bashHook = settings.hooks.PostToolUse.find(h => h.matcher === 'Bash');
+    assert.ok(bashHook, 'settings template should have a Bash matcher');
+    assert.ok(
+      bashHook.hooks[0].command.includes('post-stage-review'),
+      'settings template should reference the hook script'
+    );
+  });
+
+  it('hook template outputs JSON with additionalContext (P13)', () => {
+    const hookPath = join(tmp, '.claude', 'hooks', 'post-stage-review.sh');
+    const content = readFileSync(hookPath, 'utf8');
+
+    assert.ok(
+      /additionalContext/.test(content),
+      'hook template should output additionalContext in JSON'
+    );
+    assert.ok(
+      /hookSpecificOutput/.test(content),
+      'hook template should output hookSpecificOutput wrapper'
     );
   });
 });

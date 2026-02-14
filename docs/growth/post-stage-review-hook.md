@@ -31,7 +31,7 @@ The organic growth workflow emphasizes quality gates after every stage, but code
   - Touches: `.claude/hooks/post-stage-review.sh`, `.claude/settings.json`, `test/cli.test.mjs`
   - Implementation hint: Hook reads JSON from stdin, extracts `tool_input.command`, checks for `git commit`, then runs `git log -1 --pretty=%B` to verify stage pattern. Uses `jq` for JSON I/O. Settings uses `bash "$CLAUDE_PROJECT_DIR"/.claude/hooks/post-stage-review.sh` as command.
 
-- ⬜ Stage 2: Template hook + CLI installation + tests
+- ✅ Stage 2: Template hook + CLI installation + tests
   - Intent: Ship the hook as a template that gets installed by the CLI, with tests validating template content and installation
   - Properties:
     - P8: Template file exists at `templates/.claude/hooks/post-stage-review.sh` with the same stage-detection and diff-output logic as the project's own hook [invariant]
@@ -75,3 +75,4 @@ The organic growth workflow emphasizes quality gates after every stage, but code
 ## Growth Log
 <!-- Auto-updated after each stage -->
 - 2026-02-14: Stage 1 complete. Created `.claude/hooks/post-stage-review.sh` (bash + jq, detects stage commits via commit message pattern, outputs diff as `additionalContext` JSON) and `.claude/settings.json` (PostToolUse hook wired to Bash matcher). Uses `bash` invocation to avoid executable-bit issues. Added 6 tests (P1-P6) in "Post-stage review hook (project)" describe block. All 85 tests pass.
+- 2026-02-14: Stage 2 complete. Added `templates/.claude/hooks/post-stage-review.sh` and `templates/.claude/settings.json` (identical to project versions). CLI auto-discovers new files via `getAllFiles` — no CLI code changes needed. Updated template completeness test from 8 to 10 files. Added 3 tests (P8/P11, P9/P12, P13) in "Post-stage review hook (template)" describe block. All 88 tests pass.
