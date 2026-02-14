@@ -1093,6 +1093,147 @@ describe('Visual growth plan documentation (Stage 4)', () => {
   });
 });
 
+describe('Hook visual feedback — test hook stderr messages (Stage 1)', () => {
+  const PROJECT_HOOK = join(import.meta.dirname, '..', '.claude', 'hooks', 'post-stage-test.sh');
+  const TEMPLATE_HOOK = join(import.meta.dirname, '..', 'templates', '.claude', 'hooks', 'post-stage-test.sh');
+
+  it('P1: both hooks contain at least one >&2 echo with an emoji character', () => {
+    const projectContent = readFileSync(PROJECT_HOOK, 'utf8');
+    const templateContent = readFileSync(TEMPLATE_HOOK, 'utf8');
+
+    // Match a line that contains both >&2 and a Unicode emoji (in either order)
+    // Covers: U+1F300-1F9FF (misc symbols & pictographs), U+2705 (check), U+274C (cross)
+    const stderrEmojiPattern = />&2.*[\u{1F300}-\u{1F9FF}\u{2705}\u{274C}]|[\u{1F300}-\u{1F9FF}\u{2705}\u{274C}].*>&2/u;
+
+    assert.ok(
+      stderrEmojiPattern.test(projectContent),
+      'project test hook should have at least one stderr echo with an emoji'
+    );
+    assert.ok(
+      stderrEmojiPattern.test(templateContent),
+      'template test hook should have at least one stderr echo with an emoji'
+    );
+  });
+
+  it('P2: hooks emit a stderr message BEFORE running the test suite', () => {
+    const projectContent = readFileSync(PROJECT_HOOK, 'utf8');
+    const templateContent = readFileSync(TEMPLATE_HOOK, 'utf8');
+
+    // The "before tests" message must appear before the actual test execution line.
+    // Pattern: a line containing both an emoji and >&2 (in either order, e.g. echo "emoji" >&2)
+    // Project hook uses: node --test
+    // Template hook uses: eval "$TEST_CMD"
+    const emojiStderrLine = /^.*[\u{1F300}-\u{1F9FF}\u{2600}-\u{27BF}\u{2702}-\u{27B0}\u{2705}\u{274C}].*>&2|^.*>&2.*[\u{1F300}-\u{1F9FF}\u{2600}-\u{27BF}\u{2702}-\u{27B0}\u{2705}\u{274C}]/um;
+
+    for (const [label, content, testLine] of [
+      ['project', projectContent, 'node --test'],
+      ['template', templateContent, 'eval "$TEST_CMD"'],
+    ]) {
+      const match = content.match(emojiStderrLine);
+      const beforeIdx = match ? content.indexOf(match[0]) : -1;
+      const testIdx = content.indexOf(testLine);
+      assert.ok(
+        beforeIdx >= 0 && testIdx >= 0 && beforeIdx < testIdx,
+        `${label} hook should emit a stderr emoji message before running tests (beforeIdx=${beforeIdx}, testIdx=${testIdx})`
+      );
+    }
+  });
+
+  it('P3: hooks emit different emoji for pass vs fail after tests complete', () => {
+    const projectContent = readFileSync(PROJECT_HOOK, 'utf8');
+    const templateContent = readFileSync(TEMPLATE_HOOK, 'utf8');
+
+    for (const [label, content] of [
+      ['project', projectContent],
+      ['template', templateContent],
+    ]) {
+      // Check that the hook has a pass-emoji line and a fail-emoji line on stderr
+      const hasPassEmoji = content.includes('>&2') && content.includes('\u2705');
+      const hasFailEmoji = content.includes('>&2') && content.includes('\u274C');
+
+      assert.ok(
+        hasPassEmoji,
+        `${label} hook should emit a pass emoji (e.g. checkmark) to stderr after tests pass`
+      );
+      assert.ok(
+        hasFailEmoji,
+        `${label} hook should emit a fail emoji (e.g. cross mark) to stderr after tests fail`
+      );
+    }
+  });
+
+  it('P4: stderr messages do not interfere with JSON stdout — hook still produces valid JSON', () => {
+    // Set up a temp dir with a git repo and stage commit
+    const { tmp } = runCLI();
+    writeFileSync(join(tmp, 'CLAUDE.md'), '- **Test:** `echo test-passed`\n');
+    execFileSync('git', ['init'], { cwd: tmp, encoding: 'utf8' });
+    execFileSync('git', ['config', 'user.email', 'test@test.com'], { cwd: tmp });
+    execFileSync('git', ['config', 'user.name', 'Test'], { cwd: tmp });
+    writeFileSync(join(tmp, 'dummy.txt'), 'hello');
+    execFileSync('git', ['add', '.'], { cwd: tmp, encoding: 'utf8' });
+    execFileSync('git', ['commit', '-m', 'feat(test): stage 1 — initial'], {
+      cwd: tmp,
+      encoding: 'utf8',
+    });
+
+    const stdinJSON = JSON.stringify({ tool_input: { command: 'git commit -m "feat(test): stage 1"' } });
+    const hookPath = join(tmp, '.claude', 'hooks', 'post-stage-test.sh');
+
+    // Run hook capturing stdout and stderr separately
+    const result = execFileSync('bash', [hookPath], {
+      cwd: tmp,
+      encoding: 'utf8',
+      input: stdinJSON,
+      timeout: 10000,
+    });
+
+    // stdout must be valid JSON
+    const parsed = JSON.parse(result);
+    assert.ok(
+      parsed.hookSpecificOutput,
+      'stdout should still contain valid hookSpecificOutput JSON'
+    );
+    assert.ok(
+      parsed.hookSpecificOutput.additionalContext,
+      'stdout JSON should have additionalContext'
+    );
+  });
+
+  it('P5: project and template hooks have functionally equivalent stderr messages', () => {
+    const projectContent = readFileSync(PROJECT_HOOK, 'utf8');
+    const templateContent = readFileSync(TEMPLATE_HOOK, 'utf8');
+
+    // Extract all stderr echo lines from both files
+    const stderrLinePattern = /echo.*>&2|>&2.*echo/g;
+
+    const projectStderrLines = projectContent.match(stderrLinePattern) || [];
+    const templateStderrLines = templateContent.match(stderrLinePattern) || [];
+
+    assert.ok(
+      projectStderrLines.length > 0,
+      'project hook should have stderr echo lines'
+    );
+    assert.equal(
+      projectStderrLines.length,
+      templateStderrLines.length,
+      `project and template should have the same number of stderr echo lines (project: ${projectStderrLines.length}, template: ${templateStderrLines.length})`
+    );
+
+    // Extract just the message content (the part inside quotes) from each stderr line
+    // and verify they contain the same emoji characters
+    const emojiPattern = /[\u{1F300}-\u{1F9FF}\u{2600}-\u{27BF}\u{2700}-\u{27BF}\u{2702}-\u{27B0}\u{FE00}-\u{FE0F}\u{200D}\u{2705}\u{274C}]/gu;
+
+    const projectEmoji = (projectContent.match(emojiPattern) || []).sort().join('');
+    const templateEmoji = (templateContent.match(emojiPattern) || []).sort().join('');
+
+    assert.equal(
+      projectEmoji,
+      templateEmoji,
+      `project and template should use the same emoji characters (project: ${projectEmoji}, template: ${templateEmoji})`
+    );
+  });
+});
+
 describe('Visual progress map in GROW mode report (Stage 1)', () => {
   const { tmp } = runCLI();
 

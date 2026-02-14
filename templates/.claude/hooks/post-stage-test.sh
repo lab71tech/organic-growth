@@ -49,6 +49,9 @@ fi
 
 # This was a stage commit — run tests
 SUBJECT=$(git log -1 --pretty=%s 2>/dev/null)
+
+echo "🧪 Running quality gate tests..." >&2
+
 # Safety: eval is acceptable here because CLAUDE.md is local project config
 # authored by the team, not untrusted external input.
 TEST_OUTPUT=$(eval "$TEST_CMD" 2>&1 || true)
@@ -57,6 +60,7 @@ TEST_OUTPUT=$(eval "$TEST_CMD" 2>&1 || true)
 TEST_OUTPUT=$(echo "$TEST_OUTPUT" | tail -100)
 
 if echo "$TEST_OUTPUT" | grep -qE '# fail [1-9]|failing|not ok|FAIL|FAILED'; then
+  echo "❌ Tests failed after: ${SUBJECT}" >&2
   TEST_CONTEXT="TESTS FAILED after stage commit: ${SUBJECT}
 
 Some tests are failing. You MUST fix these failures before continuing to the next stage.
@@ -65,6 +69,7 @@ The quality gate requires ALL tests to pass after every stage.
 Test output (last 100 lines):
 ${TEST_OUTPUT}"
 else
+  echo "✅ All tests passed after: ${SUBJECT}" >&2
   TEST_CONTEXT="All tests passed after stage commit: ${SUBJECT}"
 fi
 
