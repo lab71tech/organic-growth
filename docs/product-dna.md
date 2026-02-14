@@ -13,7 +13,7 @@ Claude Code without structure produces inconsistent results — sprawling change
 - **One agent (gardener)** with three modes: PLAN, GROW, REPLAN
 - **Rolling plans** stored in `docs/growth/<feature>.md` — 3-5 concrete stages + horizon
 - **One stage = one intent = one commit**
-- **Two-layer quality:** deterministic tools (build/lint/typecheck/test) after every stage, LLM deep review on demand, plus automatic post-stage review hook that injects the commit diff as review context
+- **Two-layer quality:** deterministic tools (build/lint/typecheck/test) after every stage, LLM deep review on demand. Post-stage hooks enforce this automatically: a test hook runs the test suite after every stage commit (deterministic gate), then a review hook injects the diff as review context
 - **Context hygiene:** fresh session every 3 stages, plan file provides continuity
 
 ## Key Commands

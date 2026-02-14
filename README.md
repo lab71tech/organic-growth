@@ -45,11 +45,17 @@ CLAUDE.md                           # Project context template + growth philosop
 │   ├── review.md                   # /review   — deep quality review
 │   └── worktree.md                 # /worktree — parallel feature in a worktree
 ├── hooks/
+│   ├── post-stage-test.sh          # Automatic test run after stage commits
 │   └── post-stage-review.sh        # Automatic diff review after stage commits
 └── settings.json                   # Claude Code hook configuration
 ```
 
-A **post-stage review hook** runs automatically after every stage commit. When you commit with a message matching the stage pattern (e.g. `feat(auth): stage 2 — ...`), the hook captures the diff and injects it back into the conversation as review context. This gives the gardener agent an immediate second look at what just changed — no manual `/review` needed for quick feedback.
+A **post-stage test** hook and a **post-stage review** hook run automatically after every stage commit, in order:
+
+1. **Test hook** — runs your test suite (discovered from the `**Test:**` field in CLAUDE.md) and injects pass/fail results into the conversation. On failure, tells Claude to fix before continuing.
+2. **Review hook** — captures the commit diff and injects it as review context, giving the gardener agent an immediate second look at what changed.
+
+Tests run first so failures are caught before the review. This makes the quality gate deterministic — tests always run after stage commits, regardless of whether the agent remembers to.
 
 ## Workflow
 

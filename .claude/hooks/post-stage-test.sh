@@ -30,7 +30,6 @@ fi
 # This was a stage commit — run tests
 SUBJECT=$(git log -1 --pretty=%s 2>/dev/null)
 TEST_OUTPUT=$(node --test 2>&1 || true)
-TEST_EXIT=$?
 
 # Cap output to 100 lines to avoid overwhelming context
 TEST_OUTPUT=$(echo "$TEST_OUTPUT" | tail -100)

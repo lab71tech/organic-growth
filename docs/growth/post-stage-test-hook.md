@@ -47,6 +47,7 @@ Done: 2026-02-14
 - P14: All existing tests pass unchanged
 
 Depends on: P1-P7
+Done: 2026-02-14
 
 ### Stage 3: Documentation
 
@@ -60,3 +61,4 @@ Depends on: P1-P7
 - P19: All existing tests pass unchanged
 
 Depends on: P8-P14
+Done: 2026-02-14
