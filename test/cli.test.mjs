@@ -31,7 +31,7 @@ describe('CLI smoke test', () => {
 });
 
 describe('CLI template completeness', () => {
-  it('installs all 11 template files', () => {
+  it('installs all 10 template files', () => {
     const { tmp } = runCLI();
 
     const expectedFiles = [
@@ -42,7 +42,6 @@ describe('CLI template completeness', () => {
       '.claude/commands/next.md',
       '.claude/commands/replan.md',
       '.claude/commands/review.md',
-      '.claude/commands/worktree.md',
       '.claude/hooks/post-stage-review.sh',
       '.claude/hooks/post-stage-test.sh',
       '.claude/settings.json',
@@ -233,7 +232,7 @@ describe('Template content integrity', () => {
   });
 
   it('all commands have a description in frontmatter', () => {
-    const commands = ['seed', 'grow', 'next', 'replan', 'review', 'worktree'];
+    const commands = ['seed', 'grow', 'next', 'replan', 'review'];
 
     for (const cmd of commands) {
       const content = readFileSync(join(tmp, '.claude', 'commands', `${cmd}.md`), 'utf8');
@@ -602,40 +601,6 @@ describe('Gardener and CLAUDE.md worktree awareness', () => {
     assert.ok(
       /worktree/i.test(hygieneSection),
       'Context hygiene section should mention worktrees'
-    );
-  });
-});
-
-describe('Worktree command content', () => {
-  const { tmp } = runCLI();
-
-  it('mentions git worktree as the underlying mechanism', () => {
-    // P27: command contains actual worktree instruction, not generic branching
-    const content = readFileSync(join(tmp, '.claude', 'commands', 'worktree.md'), 'utf8');
-
-    assert.ok(
-      /git worktree/.test(content),
-      'worktree command should mention "git worktree"'
-    );
-  });
-
-  it('mentions /grow as the next step after creating a worktree', () => {
-    // P28: user knows to run /grow in the new worktree
-    const content = readFileSync(join(tmp, '.claude', 'commands', 'worktree.md'), 'utf8');
-
-    assert.ok(
-      /\/grow/.test(content),
-      'worktree command should mention /grow as the next step'
-    );
-  });
-
-  it('references $ARGUMENTS for feature name input', () => {
-    // P29: command accepts feature name via $ARGUMENTS, not hardcoded
-    const content = readFileSync(join(tmp, '.claude', 'commands', 'worktree.md'), 'utf8');
-
-    assert.ok(
-      /\$ARGUMENTS/.test(content),
-      'worktree command should reference $ARGUMENTS for feature name'
     );
   });
 });
