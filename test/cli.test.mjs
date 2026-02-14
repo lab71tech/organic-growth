@@ -729,10 +729,10 @@ describe('Post-stage review hook (project)', () => {
     assert.ok(bashHook, 'should have a PostToolUse hook with matcher "Bash"');
     assert.ok(bashHook.hooks && bashHook.hooks.length > 0, 'Bash hook should have at least one hook entry');
 
-    const command = bashHook.hooks[0].command;
+    const reviewHook = bashHook.hooks.find(h => h.command.includes('post-stage-review'));
     assert.ok(
-      command.includes('post-stage-review'),
-      `hook command should reference post-stage-review script, got: ${command}`
+      reviewHook,
+      `should have a hook referencing post-stage-review script`
     );
   });
 
@@ -778,15 +778,16 @@ describe('Post-stage review hook (project)', () => {
     );
   });
 
-  it('settings.json uses bash to invoke the script — no executable bit needed (P6)', () => {
+  it('settings.json uses bash to invoke all hook scripts — no executable bit needed (P6)', () => {
     const settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf8'));
     const bashHook = settings.hooks.PostToolUse.find(h => h.matcher === 'Bash');
-    const command = bashHook.hooks[0].command;
 
-    assert.ok(
-      command.startsWith('bash '),
-      `hook command should start with "bash " to avoid needing executable bit, got: ${command}`
-    );
+    for (const hook of bashHook.hooks) {
+      assert.ok(
+        hook.command.startsWith('bash '),
+        `hook command should start with "bash " to avoid needing executable bit, got: ${hook.command}`
+      );
+    }
   });
 });
 
