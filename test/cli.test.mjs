@@ -419,10 +419,20 @@ describe('README property-based planning section', () => {
     // P9: concrete example showing the difference between scenario and property style
     const content = readFileSync(README_PATH, 'utf8');
 
-    // Check for a bad example marker and a good example marker
+    // Check for a bad example marker and a good example marker (❌/✅ are unambiguous)
     assert.ok(
-      /bad|❌|wrong/i.test(content) && /good|✅|right/i.test(content),
-      'README should show a bad vs good property example'
+      /❌/.test(content) && /✅/.test(content),
+      'README should show a bad vs good property example (❌/✅ markers)'
+    );
+  });
+
+  it('Philosophy section links to the property-based planning section', () => {
+    // P11: reading path from overview to detail
+    const content = readFileSync(README_PATH, 'utf8');
+
+    assert.ok(
+      content.includes('#property-based-planning'),
+      'Philosophy section should link to #property-based-planning'
     );
   });
 
@@ -431,7 +441,7 @@ describe('README property-based planning section', () => {
     const content = readFileSync(README_PATH, 'utf8');
 
     assert.ok(
-      /accumulate/i.test(content),
+      /properties.*accumulate|accumulate.*stages/is.test(content),
       'README should mention that properties accumulate across stages'
     );
   });

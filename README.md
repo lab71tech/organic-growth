@@ -89,7 +89,7 @@ Properties are not test cases or user stories. A test says "when I do X, Y happe
 
 Properties **accumulate** across stages. Stage 3 must still satisfy the properties from stages 1 and 2. They are permanent commitments, not checkboxes to discard. This is what prevents regressions as the feature grows.
 
-The gardener agent handles the full property format (categories, "Captures" clauses, dependency tracking). See the [example growth plan](docs/example-growth-plan.md) for what this looks like in practice.
+The gardener agent handles the full property format — categories, failure analysis, dependency tracking. See the [example growth plan](docs/example-growth-plan.md) for what this looks like in practice.
 
 ## After Install
 
