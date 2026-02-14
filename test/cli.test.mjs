@@ -512,6 +512,21 @@ describe('README worktree section', () => {
       'Worktree section should mention a naming convention linking branches to growth plan files'
     );
   });
+
+  it('mentions /worktree as a command', () => {
+    // P30: users discover the convenience command
+    const content = readFileSync(README_PATH, 'utf8');
+
+    // Extract the worktree section
+    const worktreeMatch = content.match(/## .*[Ww]orktree[\s\S]*?(?=\n## )/);
+    assert.ok(worktreeMatch, 'should find worktree section');
+    const section = worktreeMatch[0];
+
+    assert.ok(
+      /\/worktree/.test(section),
+      'Worktree section should mention /worktree command'
+    );
+  });
 });
 
 describe('Gardener and CLAUDE.md worktree awareness', () => {
@@ -624,6 +639,25 @@ describe('Worktree command content', () => {
     assert.ok(
       /\$ARGUMENTS/.test(content),
       'worktree command should reference $ARGUMENTS for feature name'
+    );
+  });
+});
+
+describe('Product DNA documentation', () => {
+  const DNA_PATH = join(import.meta.dirname, '..', 'docs', 'product-dna.md');
+
+  it('key commands list includes /worktree', () => {
+    // P31: gardener agent knows about /worktree during planning
+    const content = readFileSync(DNA_PATH, 'utf8');
+
+    // Extract Key Commands section
+    const commandsMatch = content.match(/## Key Commands[\s\S]*?(?=\n## )/);
+    assert.ok(commandsMatch, 'should find Key Commands section');
+    const section = commandsMatch[0];
+
+    assert.ok(
+      /\/worktree/.test(section),
+      'Key Commands section should include /worktree'
     );
   });
 });

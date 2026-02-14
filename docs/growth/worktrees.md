@@ -1,6 +1,6 @@
 # Feature: Git Worktree Guidance for Parallel Feature Growth
 Created: 2026-02-14
-Status: 🌱 Growing
+Status: 🌳 Complete
 
 ## Seed (what & why)
 
@@ -111,7 +111,7 @@ This is a documentation/guidance feature, not a code feature. The value is telli
   - Touches: `test/cli.test.mjs`
   - Done: Added 3 tests in "Worktree command content" describe block validating git worktree mention, /grow next step, and $ARGUMENTS reference.
 
-- Stage 7: Documentation — update README and product DNA
+- ✅ Stage 7: Documentation — update README and product DNA
   - Intent: Document the `/worktree` command in user-facing documentation so users discover it
   - Properties:
     - P30: README worktree section mentions `/worktree` as a command [invariant]
@@ -121,6 +121,7 @@ This is a documentation/guidance feature, not a code feature. The value is telli
     - P1-P5 from Stage 1 still hold (README structure intact)
   - Depends on: P21 (command exists), P1 (README worktree section exists)
   - Touches: `README.md`, `docs/product-dna.md`
+  - Done: Added `/worktree` to README worktree section (with usage example) and "What You Get" tree. Added `/worktree` to product DNA Key Commands. Updated "five commands" to "six commands". 2 new tests (P30, P31), 78 total passing.
 
 ### Horizon (rough outline of what comes after)
 - Guidance in the gardener on handling growth plan merges when two worktree features complete in sequence
@@ -135,3 +136,4 @@ This is a documentation/guidance feature, not a code feature. The value is telli
 - 2026-02-14: REPLAN — Reopened feature to add `/worktree` convenience command (from Horizon). Three new stages: Stage 5 (command template + test adjustments), Stage 6 (command content tests), Stage 7 (README + product DNA docs). Note: adds a 6th command, expanding beyond the original "five commands" constraint in product DNA — DNA will be updated in Stage 7.
 - 2026-02-14: Stage 5 complete. Created `templates/.claude/commands/worktree.md` with YAML frontmatter description, `$ARGUMENTS` for feature name input, `git worktree add` with `feature/<name>` branch naming convention matching `docs/growth/<name>.md`, `/grow` as next step, and missing-argument handling. Updated template completeness test from 7 to 8 files and added `worktree` to frontmatter description test. All 73 tests pass.
 - 2026-02-14: Stage 6 complete. Added 3 tests in "Worktree command content" describe block. P27: validates `git worktree` is mentioned. P28: validates `/grow` is referenced as the next step. P29: validates `$ARGUMENTS` is used for feature name input. All 76 tests pass.
+- 2026-02-14: Stage 7 complete. Updated README worktree section to mention `/worktree` command with usage example. Added `/worktree` to "What You Get" file tree. Added `/worktree` to product DNA Key Commands and updated "five commands" to "six commands". Added 2 tests: P30 (README mentions `/worktree`) and P31 (product DNA includes `/worktree`). All 78 tests pass. Feature complete.

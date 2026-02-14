@@ -38,11 +38,12 @@ This copies the `.claude/` configuration into your project. No runtime dependenc
 ├── agents/
 │   └── gardener.md        # Plans, implements, and validates growth stages
 └── commands/
-    ├── seed.md            # /seed  — bootstrap new project
-    ├── grow.md            # /grow  — plan a new feature
-    ├── next.md            # /next  — implement next stage
-    ├── replan.md          # /replan — adjust when things change
-    └── review.md          # /review — deep quality review
+    ├── seed.md            # /seed     — bootstrap new project
+    ├── grow.md            # /grow     — plan a new feature
+    ├── next.md            # /next     — implement next stage
+    ├── replan.md          # /replan   — adjust when things change
+    ├── review.md          # /review   — deep quality review
+    └── worktree.md        # /worktree — parallel feature in a worktree
 ```
 
 ## Workflow
@@ -103,10 +104,15 @@ See the [example growth plan](docs/example-growth-plan.md) to see properties, st
 
 Organic growth uses `/clear` every 3 stages for temporal context hygiene — a fresh session prevents accumulated confusion. Git worktrees add a **spatial** dimension: each feature gets its own working directory. This lets you grow features in parallel, `/review` one while `/next`-ing another, or pause a feature without stashing.
 
+Use `/worktree <feature-name>` to create a worktree with the right naming convention automatically.
+
 **Naming convention:** match branch names to growth plan files. If the plan is `docs/growth/auth.md`, the branch is `auth`:
 
 ```bash
-# Create a worktree for a new feature
+# Quick setup with the /worktree command
+> /worktree auth
+
+# Or manually:
 git worktree add ../myproject-auth -b auth
 
 # Work in it — separate directory, separate Claude Code session

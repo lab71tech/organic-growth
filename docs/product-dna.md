@@ -22,6 +22,7 @@ Claude Code without structure produces inconsistent results — sprawling change
 - `/next` — implement next stage
 - `/replan` — adjust when reality changes
 - `/review` — deep quality check with fresh context
+- `/worktree` — create a git worktree for parallel feature growth
 
 ## Tech Stack
 - Node.js CLI (bin/cli.mjs) — zero dependencies, pure Node.js
@@ -47,4 +48,4 @@ v1.0.1 — Post-MVP, infrastructure mature. CLI installs templates with all comm
 ## Priorities
 1. Correctness of templates (gardener instructions, command definitions)
 2. Developer experience (clear README, easy install, helpful CLI output)
-3. Simplicity (resist adding features — one agent, five commands, that's it)
+3. Simplicity (resist adding features — one agent, six commands, that's it)
