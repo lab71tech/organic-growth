@@ -49,6 +49,8 @@ fi
 
 # This was a stage commit — run tests
 SUBJECT=$(git log -1 --pretty=%s 2>/dev/null)
+# Safety: eval is acceptable here because CLAUDE.md is local project config
+# authored by the team, not untrusted external input.
 TEST_OUTPUT=$(eval "$TEST_CMD" 2>&1 || true)
 
 # Cap output to 100 lines to avoid overwhelming context

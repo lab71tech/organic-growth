@@ -779,6 +779,56 @@ describe('Post-stage test hook (template)', () => {
       'test hook should output hookSpecificOutput wrapper'
     );
   });
+
+  it('template hook has eval safety comment', () => {
+    const hookPath = join(tmp, '.claude', 'hooks', 'post-stage-test.sh');
+    const content = readFileSync(hookPath, 'utf8');
+
+    assert.ok(
+      /eval.*acceptable|Safety:.*eval/i.test(content),
+      'test hook should have a safety comment near eval'
+    );
+  });
+
+  it('runs end-to-end: parses CLAUDE.md, runs test command, outputs JSON (P21)', () => {
+    // Set up a fresh temp dir with installed templates
+    const { tmp: hookTmp } = runCLI();
+
+    // Write a CLAUDE.md with a real test command
+    writeFileSync(join(hookTmp, 'CLAUDE.md'), '- **Test:** `echo test-passed`\n');
+
+    // Create a git repo with a stage commit so the guards pass
+    execFileSync('git', ['init'], { cwd: hookTmp, encoding: 'utf8' });
+    execFileSync('git', ['config', 'user.email', 'test@test.com'], { cwd: hookTmp });
+    execFileSync('git', ['config', 'user.name', 'Test'], { cwd: hookTmp });
+    writeFileSync(join(hookTmp, 'dummy.txt'), 'hello');
+    execFileSync('git', ['add', '.'], { cwd: hookTmp, encoding: 'utf8' });
+    execFileSync('git', ['commit', '-m', 'feat(test): stage 1 — initial'], {
+      cwd: hookTmp,
+      encoding: 'utf8',
+    });
+
+    // Run the hook with mock stdin simulating a git commit tool event
+    const stdinJSON = JSON.stringify({ tool_input: { command: 'git commit -m "feat(test): stage 1"' } });
+    const hookPath = join(hookTmp, '.claude', 'hooks', 'post-stage-test.sh');
+    const hookOutput = execFileSync('bash', [hookPath], {
+      cwd: hookTmp,
+      encoding: 'utf8',
+      input: stdinJSON,
+      timeout: 10000,
+    });
+
+    // Parse the JSON output and verify additionalContext
+    const parsed = JSON.parse(hookOutput);
+    assert.ok(
+      parsed.hookSpecificOutput,
+      'output should have hookSpecificOutput'
+    );
+    assert.ok(
+      parsed.hookSpecificOutput.additionalContext.includes('All tests passed'),
+      `additionalContext should include "All tests passed", got: ${parsed.hookSpecificOutput.additionalContext}`
+    );
+  });
 });
 
 describe('Post-stage test hook (project)', () => {

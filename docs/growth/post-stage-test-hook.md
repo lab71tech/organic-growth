@@ -62,3 +62,15 @@ Done: 2026-02-14
 
 Depends on: P8-P14
 Done: 2026-02-14
+
+### Stage 4: Review fixes — eval comment + integration test
+
+**Intent:** Add safety comment to template hook's `eval` usage, and add integration test that verifies runtime test-command discovery from CLAUDE.md.
+
+**Properties:**
+- P20: Template hook has a comment before `eval` explaining trust boundary
+- P21: Integration test runs the template hook end-to-end in a temp dir with a real CLAUDE.md
+- P22: All existing tests still pass
+
+Depends on: P15-P19
+Done: 2026-02-14
