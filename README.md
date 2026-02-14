@@ -99,6 +99,26 @@ The gardener agent handles the full property format — categories, failure anal
 
 See the [example growth plan](docs/example-growth-plan.md) to see properties, stages, and accumulation in action.
 
+## Parallel Growth with Worktrees
+
+Organic growth uses `/clear` every 3 stages for temporal context hygiene — a fresh session prevents accumulated confusion. Git worktrees add a **spatial** dimension: each feature gets its own working directory. This lets you grow features in parallel, `/review` one while `/next`-ing another, or pause a feature without stashing.
+
+**Naming convention:** match branch names to growth plan files. If the plan is `docs/growth/auth.md`, the branch is `auth`:
+
+```bash
+# Create a worktree for a new feature
+git worktree add ../myproject-auth -b auth
+
+# Work in it — separate directory, separate Claude Code session
+cd ../myproject-auth && claude
+> /grow Add user authentication
+
+# When done, merge and clean up
+git worktree remove ../myproject-auth
+```
+
+Each worktree has its own working tree, so `docs/growth/auth.md` lives on the `auth` branch and doesn't collide with growth plans on other branches.
+
 ## Releases
 
 Releases are triggered manually via the [Release](.github/workflows/release.yml) workflow. When triggered, it:
