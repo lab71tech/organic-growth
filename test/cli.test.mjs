@@ -1234,6 +1234,128 @@ describe('Hook visual feedback — test hook stderr messages (Stage 1)', () => {
   });
 });
 
+describe('Hook visual feedback — review hook stderr messages (Stage 2)', () => {
+  const PROJECT_HOOK = join(import.meta.dirname, '..', '.claude', 'hooks', 'post-stage-review.sh');
+  const TEMPLATE_HOOK = join(import.meta.dirname, '..', 'templates', '.claude', 'hooks', 'post-stage-review.sh');
+
+  it('P6: both hooks contain at least one >&2 echo with an emoji character', () => {
+    const projectContent = readFileSync(PROJECT_HOOK, 'utf8');
+    const templateContent = readFileSync(TEMPLATE_HOOK, 'utf8');
+
+    // Match a line that contains both >&2 and a Unicode emoji
+    const stderrEmojiPattern = />&2.*[\u{1F300}-\u{1F9FF}\u{2705}\u{274C}]|[\u{1F300}-\u{1F9FF}\u{2705}\u{274C}].*>&2/u;
+
+    assert.ok(
+      stderrEmojiPattern.test(projectContent),
+      'project review hook should have at least one stderr echo with an emoji'
+    );
+    assert.ok(
+      stderrEmojiPattern.test(templateContent),
+      'template review hook should have at least one stderr echo with an emoji'
+    );
+  });
+
+  it('P7: hooks emit a stderr message indicating gathering review context', () => {
+    const projectContent = readFileSync(PROJECT_HOOK, 'utf8');
+    const templateContent = readFileSync(TEMPLATE_HOOK, 'utf8');
+
+    for (const [label, content] of [
+      ['project', projectContent],
+      ['template', templateContent],
+    ]) {
+      // Must have a stderr line mentioning gathering/collecting review context
+      assert.ok(
+        />&2/.test(content) && /[Gg]athering.*review|[Cc]ollecting.*review/i.test(content),
+        `${label} review hook should emit a stderr message about gathering review context`
+      );
+    }
+  });
+
+  it('P8: hooks emit a stderr message when review context is ready', () => {
+    const projectContent = readFileSync(PROJECT_HOOK, 'utf8');
+    const templateContent = readFileSync(TEMPLATE_HOOK, 'utf8');
+
+    for (const [label, content] of [
+      ['project', projectContent],
+      ['template', templateContent],
+    ]) {
+      // Must have a stderr line mentioning ready/prepared/complete
+      assert.ok(
+        />&2/.test(content) && /[Rr]eview context ready|[Rr]eady for review/i.test(content),
+        `${label} review hook should emit a stderr message when review context is ready`
+      );
+    }
+  });
+
+  it('P9: stderr messages do not interfere with JSON stdout — hook still produces valid JSON', () => {
+    // Set up a temp dir with a git repo and stage commit
+    const { tmp } = runCLI();
+    execFileSync('git', ['init'], { cwd: tmp, encoding: 'utf8' });
+    execFileSync('git', ['config', 'user.email', 'test@test.com'], { cwd: tmp });
+    execFileSync('git', ['config', 'user.name', 'Test'], { cwd: tmp });
+    writeFileSync(join(tmp, 'dummy.txt'), 'hello');
+    execFileSync('git', ['add', '.'], { cwd: tmp, encoding: 'utf8' });
+    execFileSync('git', ['commit', '-m', 'feat(review): stage 1 — initial'], {
+      cwd: tmp,
+      encoding: 'utf8',
+    });
+
+    const stdinJSON = JSON.stringify({ tool_input: { command: 'git commit -m "feat(review): stage 1"' } });
+    const hookPath = join(tmp, '.claude', 'hooks', 'post-stage-review.sh');
+
+    // Run hook — stdout must be valid JSON despite stderr emoji messages
+    const result = execFileSync('bash', [hookPath], {
+      cwd: tmp,
+      encoding: 'utf8',
+      input: stdinJSON,
+      timeout: 10000,
+    });
+
+    const parsed = JSON.parse(result);
+    assert.ok(
+      parsed.hookSpecificOutput,
+      'stdout should still contain valid hookSpecificOutput JSON'
+    );
+    assert.ok(
+      parsed.hookSpecificOutput.additionalContext,
+      'stdout JSON should have additionalContext'
+    );
+  });
+
+  it('P10: project and template hooks have functionally equivalent stderr messages', () => {
+    const projectContent = readFileSync(PROJECT_HOOK, 'utf8');
+    const templateContent = readFileSync(TEMPLATE_HOOK, 'utf8');
+
+    // Extract all stderr echo lines from both files
+    const stderrLinePattern = /echo.*>&2|>&2.*echo/g;
+
+    const projectStderrLines = projectContent.match(stderrLinePattern) || [];
+    const templateStderrLines = templateContent.match(stderrLinePattern) || [];
+
+    assert.ok(
+      projectStderrLines.length > 0,
+      'project review hook should have stderr echo lines'
+    );
+    assert.equal(
+      projectStderrLines.length,
+      templateStderrLines.length,
+      `project and template should have the same number of stderr echo lines (project: ${projectStderrLines.length}, template: ${templateStderrLines.length})`
+    );
+
+    // Verify they use the same emoji characters
+    const emojiPattern = /[\u{1F300}-\u{1F9FF}\u{2600}-\u{27BF}\u{2700}-\u{27BF}\u{2702}-\u{27B0}\u{FE00}-\u{FE0F}\u{200D}\u{2705}\u{274C}]/gu;
+
+    const projectEmoji = (projectContent.match(emojiPattern) || []).sort().join('');
+    const templateEmoji = (templateContent.match(emojiPattern) || []).sort().join('');
+
+    assert.equal(
+      projectEmoji,
+      templateEmoji,
+      `project and template should use the same emoji characters (project: ${projectEmoji}, template: ${templateEmoji})`
+    );
+  });
+});
+
 describe('Visual progress map in GROW mode report (Stage 1)', () => {
   const { tmp } = runCLI();
 

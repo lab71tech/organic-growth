@@ -28,6 +28,8 @@ fi
 
 # This was a stage commit — gather review context
 SUBJECT=$(git log -1 --pretty=%s 2>/dev/null)
+
+echo "🔍 Gathering review context..." >&2
 DIFF_STAT=$(git diff HEAD~1 --stat 2>/dev/null || true)
 DIFF=$(git diff HEAD~1 2>/dev/null | head -300 || true)
 
@@ -44,6 +46,8 @@ Please review this stage:
 
 Diff (first 300 lines):
 ${DIFF}"
+
+echo "📋 Review context ready for: ${SUBJECT}" >&2
 
 # Output structured JSON so Claude receives the review context
 jq -n --arg ctx "$REVIEW_CONTEXT" '{

@@ -29,7 +29,7 @@ The post-stage hooks (test and review) run silently — they produce JSON on std
   - Touches: `.claude/hooks/post-stage-test.sh`, `templates/.claude/hooks/post-stage-test.sh`, `test/cli.test.mjs`
   - Done: Added three stderr messages to both hooks (test tube before tests, check mark on pass, cross on fail). 5 property tests added. All 72 tests pass.
 
-🌱 Stage 2: Visual feedback for the review hook
+🌳 Stage 2: Visual feedback for the review hook
   - Intent: Add emoji-prefixed stderr messages to the post-stage review hook so the user sees when review context is being gathered and when it's ready
   - Properties:
     - P6: Both project and template review hook scripts contain at least one `>&2` (stderr) echo statement that includes an emoji character [invariant]
@@ -45,6 +45,7 @@ The post-stage hooks (test and review) run silently — they produce JSON on std
     - P1-P5 from Stage 1 still hold [regression]
   - Depends on: none (independent of Stage 1 but naturally follows)
   - Touches: `.claude/hooks/post-stage-review.sh`, `templates/.claude/hooks/post-stage-review.sh`, `test/cli.test.mjs`
+  - Done: Added two stderr messages to both review hooks (magnifying glass for gathering, clipboard for ready). 5 property tests added (P6-P10). All 77 tests pass.
 
 🌱 Stage 3: End-to-end stderr verification
   - Intent: Add end-to-end tests that actually execute the hooks and verify stderr contains the expected emoji, complementing the existing stdout JSON tests
@@ -75,3 +76,10 @@ Added emoji-prefixed stderr messages to both project and template test hooks:
 - `echo "❌ Tests failed after: ..." >&2` on failure
 All output goes to stderr; stdout JSON remains untouched.
 5 property tests (P1-P5) added and passing. Total: 72/72 tests pass.
+
+### 2026-02-15 — Stage 2 complete
+Added emoji-prefixed stderr messages to both project and template review hooks:
+- `echo "🔍 Gathering review context..." >&2` after stage-commit guard passes, before diff gathering
+- `echo "📋 Review context ready for: ${SUBJECT}" >&2` after context assembly, before JSON output
+All output goes to stderr; stdout JSON remains untouched.
+5 property tests (P6-P10) added and passing. Total: 77/77 tests pass.
