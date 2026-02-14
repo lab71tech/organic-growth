@@ -42,7 +42,7 @@ Growth plan files and stage reports are functional but visually flat. Every file
   - Touches: `templates/.claude/agents/gardener.md` (PLAN mode template), `.claude/agents/gardener.md`
   - Implementation hint: Use 🌱 for pending stages (seed waiting to grow), 🌳 for completed stages (fully grown), 🌿 for Horizon items (rough growth). Add a vine or leaf divider between major sections (e.g., `---` replaced with a plant-themed line). Add a small plant ornament to the feature header line. Keep it tasteful — 3-4 decorative elements total, not every line.
 
-- ⬜ Stage 3: Tests for visual markers in gardener template
+- ✅ Stage 3: Tests for visual markers in gardener template (added P10-P12 regression tests for progress map format, plant markers, and file identity)
   - Intent: Add test assertions validating that the gardener template contains the new visual elements — progress map format and plant-themed decorations — preventing future edits from stripping them
   - Properties:
     - P10: Test validates the gardener template GROW mode step 8 contains a multi-line progress display specification (not just a single-line "Progress:" format) [invariant]
@@ -78,3 +78,4 @@ Growth plan files and stage reports are functional but visually flat. Every file
 <!-- Auto-updated after each stage -->
 - 2026-02-14: Stage 1 complete. Replaced single-line progress format in GROW mode step 8 with multi-line stage map. Three states: completed, current, upcoming. Four property tests added (P1-P4). All 70 tests pass.
 - 2026-02-14: Stage 2 complete. Added plant-themed decorations to PLAN mode template: header ornament (🌱 Feature:), seed markers (🌱) for pending stages, herb markers (🌿) for Horizon items, vine divider between Growth Stages and Growth Log. Updated GROW mode step 2 (find next 🌱 stage) and step 6 (mark as 🌳). Five property tests added (P5-P9). All 113 tests pass.
+- 2026-02-14: Stage 3 complete. Added regression guard tests (P10-P12) validating visual markers in the source template: multi-line progress display in GROW step 8, plant-themed stage markers in PLAN template, and byte-identity between template and project gardener files. Re-evaluated plan at stage 3 checkpoint — remaining Stage 4 (docs update) still valid. All 116 tests pass.

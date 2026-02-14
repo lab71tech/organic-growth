@@ -1197,6 +1197,73 @@ describe('Plant-themed decorations in growth plan template (Stage 2)', () => {
   });
 });
 
+describe('Visual markers regression guard (Stage 3)', () => {
+  const TEMPLATE_PATH = join(import.meta.dirname, '..', 'templates', '.claude', 'agents', 'gardener.md');
+  const PROJECT_PATH = join(import.meta.dirname, '..', '.claude', 'agents', 'gardener.md');
+
+  it('P10: GROW mode step 8 contains a multi-line progress display — not a single-line format', () => {
+    const content = readFileSync(TEMPLATE_PATH, 'utf8');
+
+    // Extract step 8
+    const step8Match = content.match(/8\. Report:[\s\S]*?(?=\n## Mode: REPLAN|\n# Critical)/);
+    assert.ok(step8Match, 'should find step 8 (Report) in GROW mode');
+    const step8 = step8Match[0];
+
+    // Must contain a multi-line stage listing — multiple "Stage N:" lines
+    const stageLines = step8.match(/Stage \d+:/g);
+    assert.ok(
+      stageLines && stageLines.length >= 3,
+      `step 8 should contain at least 3 "Stage N:" lines for a multi-line display, found ${stageLines ? stageLines.length : 0}`
+    );
+
+    // Must NOT contain the old single-line emoji progress format
+    assert.ok(
+      !/Stage \d+\/~\d+ — /.test(step8),
+      'step 8 should not contain the old single-line "Stage N/~M — " progress format'
+    );
+  });
+
+  it('P11: PLAN mode template uses plant-themed stage markers distinct from generic markers', () => {
+    const content = readFileSync(TEMPLATE_PATH, 'utf8');
+
+    // Extract the plan template code block from PLAN mode step 5
+    const templateMatch = content.match(/5\. Create a growth plan[\s\S]*?```markdown\n([\s\S]*?)```/);
+    assert.ok(templateMatch, 'should find plan template code block in PLAN mode step 5');
+    const planTemplate = templateMatch[1];
+
+    // Pending stages must use plant-themed marker (not generic checkbox)
+    assert.ok(
+      /- 🌱 Stage \d+:/.test(planTemplate),
+      'pending stages in plan template should use plant-themed marker (🌱), not generic checkbox'
+    );
+    assert.ok(
+      !/- ⬜ Stage \d+:/.test(planTemplate),
+      'plan template should not use generic ⬜ for pending stage markers'
+    );
+    assert.ok(
+      !/- ✅ Stage \d+:/.test(planTemplate),
+      'plan template should not use generic ✅ for stage markers (use 🌳 for completed)'
+    );
+
+    // Horizon items must use a plant-themed marker
+    assert.ok(
+      /- 🌿/.test(planTemplate),
+      'Horizon items in plan template should use plant-themed marker (🌿)'
+    );
+  });
+
+  it('P12: templates/.claude/agents/gardener.md and .claude/agents/gardener.md are identical', () => {
+    const templateContent = readFileSync(TEMPLATE_PATH, 'utf8');
+    const projectContent = readFileSync(PROJECT_PATH, 'utf8');
+
+    assert.equal(
+      templateContent,
+      projectContent,
+      'template gardener.md and project gardener.md must be identical — they have drifted apart'
+    );
+  });
+});
+
 describe('Visual progress map in GROW mode report (Stage 1)', () => {
   const { tmp } = runCLI();
 
