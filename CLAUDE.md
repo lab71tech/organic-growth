@@ -11,7 +11,7 @@
 **For whom:** Developers using Claude Code who want structured, controlled workflow instead of autonomous coding.
 **Core problem:** Claude Code without structure produces sprawling changes, lost context, and no checkpoints. Developers need methodology that works with LLM limitations.
 **Key domain concepts:** Growth stage, gardener agent, rolling plan, DNA document, quality gate, context hygiene, vertical slice
-**Current state:** v1.0.1 — Post-MVP, infrastructure mature (CLI, full CI/CD, automated releases, dependabot, 61 tests)
+**Current state:** v1.0.1 — Post-MVP, infrastructure mature (CLI, full CI/CD, automated releases, dependabot, 78 tests)
 **Full DNA:** docs/product-dna.md
 
 ## Tech Stack (THE SOIL — auto-discovered, but document the non-obvious)
@@ -19,7 +19,7 @@
 <!-- Claude Code reads your build files. Only add what it CAN'T discover. -->
 
 - Node.js CLI (`bin/cli.mjs`) — zero runtime dependencies, pure Node.js
-- Templates in `templates/.claude/` — plain markdown, no templating engine
+- Templates in `templates/` — `CLAUDE.md` at root, agents and commands under `templates/.claude/`
 - Published to npm, invoked via `bunx organic-growth` or `npx organic-growth`
 - Hard constraints: zero deps, single executable, bun + npm compat, package <50KB
 
@@ -39,7 +39,7 @@
 
 - Correctness of templates (gardener instructions, command definitions)
 - Developer experience (clear README, easy install, helpful CLI output)
-- Simplicity (resist adding features — one agent, five commands, that's it)
+- Simplicity (resist adding features — one agent, six commands, that's it)
 
 ---
 

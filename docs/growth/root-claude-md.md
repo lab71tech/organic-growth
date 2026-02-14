@@ -1,6 +1,6 @@
 # Feature: Move CLAUDE.md to Project Root
 Created: 2026-02-14
-Status: 🌱 Growing
+Status: 🌳 Complete
 
 ## Seed (what & why)
 
@@ -12,7 +12,7 @@ This is a structural/refactoring feature. The template content stays the same; o
 
 ### Concrete (next 3-5 stages, detailed)
 
-- Stage 1: Move template file and update CLI + tests
+- ✅ Stage 1: Move template file and update CLI + tests
   - Intent: Move the template CLAUDE.md from `templates/.claude/CLAUDE.md` to `templates/CLAUDE.md`, update the CLI post-install message, and update all tests to expect the new path. After this stage, `npx organic-growth` installs CLAUDE.md at the project root.
   - Properties:
     - P1: Running the CLI installs CLAUDE.md at the project root (`<target>/CLAUDE.md`), not at `<target>/.claude/CLAUDE.md` [transition]
@@ -32,7 +32,7 @@ This is a structural/refactoring feature. The template content stays the same; o
   - Depends on: none (first stage)
   - Touches: `templates/.claude/CLAUDE.md` (delete), `templates/CLAUDE.md` (create), `bin/cli.mjs`, `test/cli.test.mjs`
 
-- Stage 2: Update README and user-facing documentation
+- ✅ Stage 2: Update README and user-facing documentation
   - Intent: Update the README "What You Get" tree, "After Install" instructions, install description, and product DNA to reflect the new CLAUDE.md location.
   - Properties:
     - P8: README "What You Get" shows `CLAUDE.md` at the project root level, separate from the `.claude/` directory tree [invariant]
@@ -47,7 +47,7 @@ This is a structural/refactoring feature. The template content stays the same; o
   - Depends on: P1 (file is actually at root before documenting it)
   - Touches: `README.md`, `docs/product-dna.md`
 
-- Stage 3: Move project's own CLAUDE.md to root
+- ✅ Stage 3: Move project's own CLAUDE.md to root
   - Intent: Move the project's own `.claude/CLAUDE.md` to root `CLAUDE.md` for consistency with what the package ships. Update tech stack description.
   - Properties:
     - P12: Project's own CLAUDE.md exists at the repository root (`CLAUDE.md`), not at `.claude/CLAUDE.md` [transition]
@@ -66,3 +66,6 @@ This is a structural/refactoring feature. The template content stays the same; o
 
 ## Growth Log
 <!-- Auto-updated after each stage -->
+- 2026-02-14: Stage 1 complete. Moved `templates/.claude/CLAUDE.md` to `templates/CLAUDE.md`. Updated CLI post-install message from `.claude/CLAUDE.md` to `CLAUDE.md`. Updated all 6 test path references to read from project root. All 78 tests pass.
+- 2026-02-14: Stage 2 complete. Updated README "What You Get" tree to show CLAUDE.md at project root. Updated install description and "After Install" instructions. Updated product DNA tech stack. All 78 tests pass.
+- 2026-02-14: Stage 3 complete. Moved project's own `.claude/CLAUDE.md` to root `CLAUDE.md`. Updated tech stack description, stale test count (61→78), and command count (five→six). All 78 tests pass. Feature complete.
