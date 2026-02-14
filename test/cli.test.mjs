@@ -31,7 +31,7 @@ describe('CLI smoke test', () => {
 });
 
 describe('CLI template completeness', () => {
-  it('installs all 10 template files', () => {
+  it('installs all 11 template files', () => {
     const { tmp } = runCLI();
 
     const expectedFiles = [
@@ -44,6 +44,7 @@ describe('CLI template completeness', () => {
       '.claude/commands/review.md',
       '.claude/commands/worktree.md',
       '.claude/hooks/post-stage-review.sh',
+      '.claude/hooks/post-stage-test.sh',
       '.claude/settings.json',
     ];
 
@@ -686,9 +687,10 @@ describe('Post-stage review hook (template)', () => {
 
     const bashHook = settings.hooks.PostToolUse.find(h => h.matcher === 'Bash');
     assert.ok(bashHook, 'settings template should have a Bash matcher');
+    const reviewHook = bashHook.hooks.find(h => h.command.includes('post-stage-review'));
     assert.ok(
-      bashHook.hooks[0].command.includes('post-stage-review'),
-      'settings template should reference the hook script'
+      reviewHook,
+      'settings template should reference the review hook script'
     );
   });
 
@@ -703,6 +705,135 @@ describe('Post-stage review hook (template)', () => {
     assert.ok(
       /hookSpecificOutput/.test(content),
       'hook template should output hookSpecificOutput wrapper'
+    );
+  });
+});
+
+describe('Post-stage test hook (template)', () => {
+  const { tmp } = runCLI();
+
+  it('hook template exists and contains stage-commit detection logic', () => {
+    const hookPath = join(tmp, '.claude', 'hooks', 'post-stage-test.sh');
+    assert.ok(existsSync(hookPath), 'template should install .claude/hooks/post-stage-test.sh');
+
+    const content = readFileSync(hookPath, 'utf8');
+    assert.ok(
+      /git commit/.test(content),
+      'test hook template should check for "git commit" in the command'
+    );
+    assert.ok(
+      /stage.*[0-9]|stage.*\\d/i.test(content),
+      'test hook template should check for stage number pattern'
+    );
+  });
+
+  it('template settings has test hook before review hook in hooks array', () => {
+    const settingsPath = join(tmp, '.claude', 'settings.json');
+    const settings = JSON.parse(readFileSync(settingsPath, 'utf8'));
+    const bashHook = settings.hooks.PostToolUse.find(h => h.matcher === 'Bash');
+
+    const testIdx = bashHook.hooks.findIndex(h => h.command.includes('post-stage-test'));
+    const reviewIdx = bashHook.hooks.findIndex(h => h.command.includes('post-stage-review'));
+    assert.ok(testIdx >= 0, 'settings should have a test hook');
+    assert.ok(reviewIdx >= 0, 'settings should have a review hook');
+    assert.ok(
+      testIdx < reviewIdx,
+      `test hook (index ${testIdx}) should come before review hook (index ${reviewIdx})`
+    );
+  });
+
+  it('template hook discovers test command from CLAUDE.md **Test:** field', () => {
+    const hookPath = join(tmp, '.claude', 'hooks', 'post-stage-test.sh');
+    const content = readFileSync(hookPath, 'utf8');
+
+    assert.ok(
+      /\*\*Test:\*\*/.test(content) || /Test:/.test(content),
+      'test hook should parse the **Test:** field from CLAUDE.md'
+    );
+    assert.ok(
+      /CLAUDE\.md/.test(content),
+      'test hook should reference CLAUDE.md for test command discovery'
+    );
+  });
+
+  it('template hook exits silently when no test command found (placeholder)', () => {
+    const hookPath = join(tmp, '.claude', 'hooks', 'post-stage-test.sh');
+    const content = readFileSync(hookPath, 'utf8');
+
+    assert.ok(
+      /\[e\.g/.test(content) || /placeholder/.test(content) || /\\\[/.test(content),
+      'test hook should handle placeholder values like [e.g.: ...]'
+    );
+  });
+
+  it('template hook outputs JSON with additionalContext', () => {
+    const hookPath = join(tmp, '.claude', 'hooks', 'post-stage-test.sh');
+    const content = readFileSync(hookPath, 'utf8');
+
+    assert.ok(
+      /additionalContext/.test(content),
+      'test hook should output additionalContext in JSON'
+    );
+    assert.ok(
+      /hookSpecificOutput/.test(content),
+      'test hook should output hookSpecificOutput wrapper'
+    );
+  });
+});
+
+describe('Post-stage test hook (project)', () => {
+  const HOOK_PATH = join(import.meta.dirname, '..', '.claude', 'hooks', 'post-stage-test.sh');
+  const SETTINGS_PATH = join(import.meta.dirname, '..', '.claude', 'settings.json');
+
+  it('hook script exists at .claude/hooks/post-stage-test.sh', () => {
+    assert.ok(existsSync(HOOK_PATH), '.claude/hooks/post-stage-test.sh should exist');
+    const stat = statSync(HOOK_PATH);
+    assert.ok(stat.size > 0, 'hook script should not be empty');
+  });
+
+  it('settings.json has test hook before review hook', () => {
+    const settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf8'));
+    const bashHook = settings.hooks.PostToolUse.find(h => h.matcher === 'Bash');
+
+    const testIdx = bashHook.hooks.findIndex(h => h.command.includes('post-stage-test'));
+    const reviewIdx = bashHook.hooks.findIndex(h => h.command.includes('post-stage-review'));
+    assert.ok(testIdx >= 0, 'settings should have a test hook');
+    assert.ok(reviewIdx >= 0, 'settings should have a review hook');
+    assert.ok(
+      testIdx < reviewIdx,
+      `test hook (index ${testIdx}) should come before review hook (index ${reviewIdx})`
+    );
+  });
+
+  it('hook runs node --test for this project', () => {
+    const content = readFileSync(HOOK_PATH, 'utf8');
+
+    assert.ok(
+      /node --test/.test(content),
+      'project test hook should run node --test'
+    );
+  });
+
+  it('hook outputs JSON with hookSpecificOutput.additionalContext', () => {
+    const content = readFileSync(HOOK_PATH, 'utf8');
+
+    assert.ok(
+      /additionalContext/.test(content),
+      'hook should output additionalContext in JSON'
+    );
+    assert.ok(
+      /hookSpecificOutput/.test(content),
+      'hook should output hookSpecificOutput wrapper'
+    );
+  });
+
+  it('hook exits cleanly for non-commit commands', () => {
+    const content = readFileSync(HOOK_PATH, 'utf8');
+
+    const exitCount = (content.match(/exit 0/g) || []).length;
+    assert.ok(
+      exitCount >= 2,
+      `hook should have at least 2 exit points (guard clause + final), found ${exitCount}`
     );
   });
 });

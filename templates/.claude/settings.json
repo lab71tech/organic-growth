@@ -6,6 +6,10 @@
         "hooks": [
           {
             "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/post-stage-test.sh"
+          },
+          {
+            "type": "command",
             "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/post-stage-review.sh"
           }
         ]
