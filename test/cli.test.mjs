@@ -656,6 +656,89 @@ describe('Product DNA documentation', () => {
   });
 });
 
+describe('Post-stage review hook (project)', () => {
+  const HOOK_PATH = join(import.meta.dirname, '..', '.claude', 'hooks', 'post-stage-review.sh');
+  const SETTINGS_PATH = join(import.meta.dirname, '..', '.claude', 'settings.json');
+
+  it('hook script exists at .claude/hooks/post-stage-review.sh (P1)', () => {
+    assert.ok(existsSync(HOOK_PATH), '.claude/hooks/post-stage-review.sh should exist');
+    const stat = statSync(HOOK_PATH);
+    assert.ok(stat.size > 0, 'hook script should not be empty');
+  });
+
+  it('settings.json has PostToolUse hook for Bash referencing the hook script (P2)', () => {
+    assert.ok(existsSync(SETTINGS_PATH), '.claude/settings.json should exist');
+    const settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf8'));
+
+    assert.ok(settings.hooks, 'settings should have a hooks key');
+    assert.ok(settings.hooks.PostToolUse, 'hooks should have PostToolUse event');
+    assert.ok(Array.isArray(settings.hooks.PostToolUse), 'PostToolUse should be an array');
+
+    const bashHook = settings.hooks.PostToolUse.find(h => h.matcher === 'Bash');
+    assert.ok(bashHook, 'should have a PostToolUse hook with matcher "Bash"');
+    assert.ok(bashHook.hooks && bashHook.hooks.length > 0, 'Bash hook should have at least one hook entry');
+
+    const command = bashHook.hooks[0].command;
+    assert.ok(
+      command.includes('post-stage-review'),
+      `hook command should reference post-stage-review script, got: ${command}`
+    );
+  });
+
+  it('hook script detects git commit commands and checks for stage pattern (P3)', () => {
+    const content = readFileSync(HOOK_PATH, 'utf8');
+
+    assert.ok(
+      /git commit/.test(content),
+      'hook should check for "git commit" in the command'
+    );
+    assert.ok(
+      /stage.*[0-9]|stage.*\\d/i.test(content),
+      'hook should check for stage number pattern in commit message'
+    );
+  });
+
+  it('hook outputs JSON with hookSpecificOutput.additionalContext when triggered (P4)', () => {
+    const content = readFileSync(HOOK_PATH, 'utf8');
+
+    assert.ok(
+      /additionalContext/.test(content),
+      'hook should output additionalContext in JSON'
+    );
+    assert.ok(
+      /hookSpecificOutput/.test(content),
+      'hook should output hookSpecificOutput wrapper'
+    );
+  });
+
+  it('hook exits cleanly for non-commit commands with no stdout (P5)', () => {
+    const content = readFileSync(HOOK_PATH, 'utf8');
+
+    // Script should exit 0 early when command is not a git commit
+    assert.ok(
+      /exit 0/.test(content),
+      'hook should have early exit 0 for non-matching commands'
+    );
+    // The git commit check should be a guard clause (exit before output)
+    const exitCount = (content.match(/exit 0/g) || []).length;
+    assert.ok(
+      exitCount >= 2,
+      `hook should have at least 2 exit points (guard clause + final), found ${exitCount}`
+    );
+  });
+
+  it('settings.json uses bash to invoke the script — no executable bit needed (P6)', () => {
+    const settings = JSON.parse(readFileSync(SETTINGS_PATH, 'utf8'));
+    const bashHook = settings.hooks.PostToolUse.find(h => h.matcher === 'Bash');
+    const command = bashHook.hooks[0].command;
+
+    assert.ok(
+      command.startsWith('bash '),
+      `hook command should start with "bash " to avoid needing executable bit, got: ${command}`
+    );
+  });
+});
+
 describe('CLI DNA document handling', () => {
   it('copies a DNA file to docs/product-dna.md', () => {
     const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
