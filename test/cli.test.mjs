@@ -26,7 +26,7 @@ describe('CLI smoke test', () => {
 
     assert.ok(output.includes('Organic Growth'), 'should print banner');
     assert.ok(output.includes('Done!'), 'should print completion message');
-    assert.ok(existsSync(join(tmp, '.claude', 'CLAUDE.md')), 'should create CLAUDE.md');
+    assert.ok(existsSync(join(tmp, 'CLAUDE.md')), 'should create CLAUDE.md at project root');
   });
 });
 
@@ -35,7 +35,7 @@ describe('CLI template completeness', () => {
     const { tmp } = runCLI();
 
     const expectedFiles = [
-      '.claude/CLAUDE.md',
+      'CLAUDE.md',
       '.claude/agents/gardener.md',
       '.claude/commands/seed.md',
       '.claude/commands/grow.md',
@@ -139,7 +139,7 @@ describe('CLI --version flag', () => {
 describe('Template content integrity', () => {
   it('CLAUDE.md contains key section markers', () => {
     const { tmp } = runCLI();
-    const content = readFileSync(join(tmp, '.claude', 'CLAUDE.md'), 'utf8');
+    const content = readFileSync(join(tmp, 'CLAUDE.md'), 'utf8');
 
     const markers = [
       'THE SEED',
@@ -210,7 +210,7 @@ describe('Template content integrity', () => {
 
   it('CLAUDE.md Growth Rules reference properties as stage definition mechanism', () => {
     const { tmp } = runCLI();
-    const content = readFileSync(join(tmp, '.claude', 'CLAUDE.md'), 'utf8');
+    const content = readFileSync(join(tmp, 'CLAUDE.md'), 'utf8');
 
     // P17: Growth Rules mention properties as the planning mechanism
     assert.ok(
@@ -260,7 +260,7 @@ describe('Package publish readiness', () => {
     const required = [
       'bin/cli.mjs',
       'package.json',
-      'templates/.claude/CLAUDE.md',
+      'templates/CLAUDE.md',
       'templates/.claude/agents/gardener.md',
     ];
     for (const file of required) {
@@ -594,7 +594,7 @@ describe('Gardener and CLAUDE.md worktree awareness', () => {
   it('CLAUDE.md template mentions worktrees in context hygiene section', () => {
     // P20: context hygiene rule includes worktree mention
     const { tmp } = runCLI();
-    const content = readFileSync(join(tmp, '.claude', 'CLAUDE.md'), 'utf8');
+    const content = readFileSync(join(tmp, 'CLAUDE.md'), 'utf8');
 
     // Extract context hygiene section (numbered rule to next numbered rule)
     const hygieneMatch = content.match(/Context hygiene[\s\S]*?(?=\n\d+\.\s\*\*)/);

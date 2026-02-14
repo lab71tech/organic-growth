@@ -158,7 +158,7 @@ async function install() {
     info(`Run ${CYAN}/seed${RESET} to bootstrap a new project (interview mode)`);
     info(`Or: ${CYAN}/seed path/to/product-doc.md${RESET} if you have a product document`);
   }
-  info(`Edit ${CYAN}.claude/CLAUDE.md${RESET} to fill in your tech stack and quality tools`);
+  info(`Edit ${CYAN}CLAUDE.md${RESET} to fill in your tech stack and quality tools`);
   log('');
   log(`${DIM}Commands available after setup:${RESET}`);
   log(`  ${CYAN}/seed${RESET}    — bootstrap project (interview or DNA document)`);
