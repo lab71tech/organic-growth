@@ -31,7 +31,7 @@ New users reading the README encounter "property-based planning" in passing (Phi
   - Touches: `README.md`
   - Done: Added ~17 lines of markdown with bad/good property example, LLM-specific rationale, accumulation explanation, and link to example growth plan. Defers full taxonomy to gardener agent. All 61 tests pass.
 
-- ⬜ Stage 2: Test that README property section exists and contains key concepts
+- ✅ Stage 2: Test that README property section exists and contains key concepts
   - Intent: Add test assertions validating that the README contains the property-based planning section with its essential elements, preventing future edits from accidentally removing it
   - Properties:
     - P8: Test validates README contains a property-related heading [invariant]
@@ -44,7 +44,7 @@ New users reading the README encounter "property-based planning" in passing (Phi
     - P7 (from Stage 1): Existing content intact [still holds]
   - Depends on: P1, P4, P6, P7
   - Touches: `test/cli.test.mjs`
-  - Implementation hint: Add assertions in the existing README or template test suite. Check for key phrases rather than exact wording to allow natural editing of prose.
+  - Done: Added 3 tests in "README property-based planning section" describe block. Tests use regex/key phrases, not exact wording. Validates heading position, good/bad example pair, and accumulation concept. All 64 tests pass.
 
 - ⬜ Stage 3: Connect Philosophy bullets to the new section
   - Intent: Update the existing Philosophy section to reference the new property-based planning section, creating a coherent reading path from overview to detail
@@ -67,3 +67,4 @@ New users reading the README encounter "property-based planning" in passing (Phi
 ## Growth Log
 <!-- Auto-updated after each stage -->
 - 2026-02-14: Stage 1 complete. Added "Property-Based Planning" section to README between Philosophy and After Install. Explains what/why/example, mentions accumulation, defers taxonomy to gardener. All 61 tests pass.
+- 2026-02-14: Stage 2 complete. Added 3 tests validating heading position, example pair, and accumulation concept. Key-phrase matching allows prose to evolve. All 64 tests pass.

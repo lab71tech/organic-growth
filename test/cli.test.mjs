@@ -394,6 +394,49 @@ describe('Example growth plan documentation', () => {
   });
 });
 
+describe('README property-based planning section', () => {
+  const README_PATH = join(import.meta.dirname, '..', 'README.md');
+
+  it('contains a property-related heading between Philosophy and After Install', () => {
+    // P8: section exists with correct heading
+    const content = readFileSync(README_PATH, 'utf8');
+
+    assert.ok(
+      /## .*Propert/i.test(content),
+      'README should have a heading containing "Propert" (Property/Properties)'
+    );
+
+    // Verify ordering: Philosophy -> Property section -> After Install
+    const philosophyIdx = content.indexOf('## Philosophy');
+    const propertyIdx = content.search(/## .*Propert/i);
+    const afterInstallIdx = content.indexOf('## After Install');
+
+    assert.ok(philosophyIdx < propertyIdx, 'Property section should come after Philosophy');
+    assert.ok(propertyIdx < afterInstallIdx, 'Property section should come before After Install');
+  });
+
+  it('includes at least one good/bad property example pair', () => {
+    // P9: concrete example showing the difference between scenario and property style
+    const content = readFileSync(README_PATH, 'utf8');
+
+    // Check for a bad example marker and a good example marker
+    assert.ok(
+      /bad|❌|wrong/i.test(content) && /good|✅|right/i.test(content),
+      'README should show a bad vs good property example'
+    );
+  });
+
+  it('explains property accumulation across stages', () => {
+    // P10: the hardest concept for new users — properties are permanent
+    const content = readFileSync(README_PATH, 'utf8');
+
+    assert.ok(
+      /accumulate/i.test(content),
+      'README should mention that properties accumulate across stages'
+    );
+  });
+});
+
 describe('CLI DNA document handling', () => {
   it('copies a DNA file to docs/product-dna.md', () => {
     const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
