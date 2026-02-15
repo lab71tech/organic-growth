@@ -31,7 +31,7 @@ describe('CLI smoke test', () => {
 });
 
 describe('CLI template completeness', () => {
-  it('installs all 10 template files', () => {
+  it('installs all 13 template files', () => {
     const { tmp } = runCLI();
 
     const expectedFiles = [
@@ -45,6 +45,9 @@ describe('CLI template completeness', () => {
       '.claude/hooks/post-stage-review.sh',
       '.claude/hooks/post-stage-test.sh',
       '.claude/settings.json',
+      '.claude/skills/property-planning.md',
+      '.claude/skills/stage-writing.md',
+      '.claude/skills/quality-gates.md',
     ];
 
     for (const file of expectedFiles) {
@@ -1429,6 +1432,75 @@ describe('Visual progress map in GROW mode report (Stage 1)', () => {
       progressMapIdx > whatsNextIdx,
       `progress/stage map (at ${progressMapIdx}) should come after "What's next" (at ${whatsNextIdx})`
     );
+  });
+});
+
+describe('Skills templates', () => {
+  const { tmp } = runCLI();
+
+  it('installs three skill files into .claude/skills/', () => {
+    const skills = [
+      '.claude/skills/property-planning.md',
+      '.claude/skills/stage-writing.md',
+      '.claude/skills/quality-gates.md',
+    ];
+    for (const skill of skills) {
+      const fullPath = join(tmp, skill);
+      assert.ok(existsSync(fullPath), `expected skill file to exist: ${skill}`);
+      const stat = statSync(fullPath);
+      assert.ok(stat.size > 0, `expected skill file to be non-empty: ${skill}`);
+    }
+  });
+
+  it('property-planning skill contains property category guidance', () => {
+    const content = readFileSync(join(tmp, '.claude', 'skills', 'property-planning.md'), 'utf8');
+    const categories = ['invariant', 'state transition', 'roundtrip', 'boundary'];
+    for (const cat of categories) {
+      assert.ok(
+        content.toLowerCase().includes(cat),
+        `property-planning.md should mention "${cat}"`
+      );
+    }
+  });
+
+  it('stage-writing skill contains vertical slicing guidance', () => {
+    const content = readFileSync(join(tmp, '.claude', 'skills', 'stage-writing.md'), 'utf8');
+    assert.ok(
+      /vertical/i.test(content),
+      'stage-writing.md should mention vertical slicing'
+    );
+    assert.ok(
+      /one intent/i.test(content) || /single purpose/i.test(content),
+      'stage-writing.md should mention one intent or single purpose'
+    );
+  });
+
+  it('quality-gates skill contains fix-it-now guidance', () => {
+    const content = readFileSync(join(tmp, '.claude', 'skills', 'quality-gates.md'), 'utf8');
+    assert.ok(
+      /CLAUDE\.md/i.test(content),
+      'quality-gates.md should reference CLAUDE.md configuration'
+    );
+    assert.ok(
+      /debt/i.test(content) || /carry forward/i.test(content),
+      'quality-gates.md should mention not carrying debt forward'
+    );
+  });
+
+  it('all skills have description in frontmatter', () => {
+    const skills = ['property-planning', 'stage-writing', 'quality-gates'];
+    for (const skill of skills) {
+      const content = readFileSync(join(tmp, '.claude', 'skills', `${skill}.md`), 'utf8');
+      assert.match(
+        content,
+        /^---\s*\n/m,
+        `${skill}.md should have YAML frontmatter`
+      );
+      assert.ok(
+        /description:/m.test(content),
+        `${skill}.md should contain a description field in frontmatter`
+      );
+    }
   });
 });
 
