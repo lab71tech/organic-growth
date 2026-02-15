@@ -170,6 +170,24 @@ async function install() {
   log(`  ${CYAN}/next${RESET}    — implement the next growth stage`);
   log(`  ${CYAN}/replan${RESET}  — re-evaluate when things change`);
   log(`  ${CYAN}/review${RESET}  — deep quality review of recent stages`);
+
+  // Detect superpowers plugin
+  const homedir = process.env.HOME || process.env.USERPROFILE || '';
+  const pluginsDir = join(homedir, '.claude', 'plugins');
+  let hasSuperpowers = false;
+  if (existsSync(pluginsDir)) {
+    try {
+      const entries = readdirSync(pluginsDir, { recursive: true });
+      hasSuperpowers = entries.some(e => String(e).includes('superpowers'));
+    } catch { /* ignore */ }
+  }
+
+  if (hasSuperpowers) {
+    success(`Superpowers plugin detected — great companion for organic-growth!`);
+  } else {
+    info(`Tip: Install the superpowers plugin for TDD, debugging, and brainstorming skills`);
+  }
+
   log('');
 }
 

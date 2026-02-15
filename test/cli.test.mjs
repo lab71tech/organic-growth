@@ -1745,6 +1745,17 @@ describe('Commit format check hook (template)', () => {
   });
 });
 
+describe('Superpowers plugin detection', () => {
+  it('CLI output includes a superpowers-related message', () => {
+    const { output } = runCLI();
+    // Should mention superpowers regardless of whether plugin is installed
+    assert.ok(
+      /superpowers/i.test(output),
+      'CLI output should mention superpowers plugin'
+    );
+  });
+});
+
 describe('Commit format check hook (end-to-end)', () => {
   it('exits silently for non-commit commands', () => {
     const { tmp } = runCLI();
