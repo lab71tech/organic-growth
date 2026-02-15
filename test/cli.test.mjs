@@ -31,7 +31,7 @@ describe('CLI smoke test', () => {
 });
 
 describe('CLI template completeness', () => {
-  it('installs all 14 template files', () => {
+  it('installs all 15 template files', () => {
     const { tmp } = runCLI();
 
     const expectedFiles = [
@@ -42,6 +42,7 @@ describe('CLI template completeness', () => {
       '.claude/commands/next.md',
       '.claude/commands/replan.md',
       '.claude/commands/review.md',
+      '.claude/hooks/commit-format-check.sh',
       '.claude/hooks/post-stage-review.sh',
       '.claude/hooks/post-stage-test.sh',
       '.claude/settings.json',
@@ -1675,5 +1676,142 @@ describe('Hook visual feedback — end-to-end stderr verification (Stage 3)', ()
       !result.stdout.includes('\u{1F9EA}'),
       'stdout should not contain emoji — emoji belongs in stderr only'
     );
+  });
+});
+
+describe('Commit format check hook (template)', () => {
+  const { tmp } = runCLI();
+
+  it('hook template exists at .claude/hooks/commit-format-check.sh', () => {
+    const hookPath = join(tmp, '.claude', 'hooks', 'commit-format-check.sh');
+    assert.ok(existsSync(hookPath), 'expected commit-format-check.sh to exist');
+    const stat = statSync(hookPath);
+    assert.ok(stat.size > 0, 'expected hook to be non-empty');
+  });
+
+  it('hook checks for feat(scope): stage N format', () => {
+    const content = readFileSync(
+      join(tmp, '.claude', 'hooks', 'commit-format-check.sh'), 'utf8'
+    );
+    assert.ok(
+      /feat\(/.test(content) || /stage.*[0-9]|stage.*\\d/i.test(content),
+      'hook should check for feat(scope): stage N pattern'
+    );
+  });
+
+  it('hook outputs warning to stderr (advisory, not blocking)', () => {
+    const content = readFileSync(
+      join(tmp, '.claude', 'hooks', 'commit-format-check.sh'), 'utf8'
+    );
+    assert.ok(
+      />&2/.test(content),
+      'hook should output to stderr'
+    );
+  });
+
+  it('hook outputs JSON with additionalContext', () => {
+    const content = readFileSync(
+      join(tmp, '.claude', 'hooks', 'commit-format-check.sh'), 'utf8'
+    );
+    assert.ok(
+      /additionalContext/.test(content),
+      'hook should output additionalContext in JSON'
+    );
+  });
+
+  it('settings.json registers commit-format-check hook', () => {
+    const settings = JSON.parse(
+      readFileSync(join(tmp, '.claude', 'settings.json'), 'utf8')
+    );
+    const bashHook = settings.hooks.PostToolUse.find(h => h.matcher === 'Bash');
+    const formatHook = bashHook.hooks.find(h =>
+      h.command.includes('commit-format-check')
+    );
+    assert.ok(formatHook, 'settings should register commit-format-check hook');
+  });
+
+  it('commit-format-check runs after test and review hooks', () => {
+    const settings = JSON.parse(
+      readFileSync(join(tmp, '.claude', 'settings.json'), 'utf8')
+    );
+    const bashHook = settings.hooks.PostToolUse.find(h => h.matcher === 'Bash');
+    const testIdx = bashHook.hooks.findIndex(h => h.command.includes('post-stage-test'));
+    const reviewIdx = bashHook.hooks.findIndex(h => h.command.includes('post-stage-review'));
+    const formatIdx = bashHook.hooks.findIndex(h => h.command.includes('commit-format-check'));
+    assert.ok(
+      formatIdx > reviewIdx && reviewIdx > testIdx,
+      `hook order should be: test(${testIdx}) < review(${reviewIdx}) < format(${formatIdx})`
+    );
+  });
+});
+
+describe('Commit format check hook (end-to-end)', () => {
+  it('exits silently for non-commit commands', () => {
+    const { tmp } = runCLI();
+    const stdinJSON = JSON.stringify({ tool_input: { command: 'ls -la' } });
+    const hookPath = join(tmp, '.claude', 'hooks', 'commit-format-check.sh');
+    const result = spawnSync('bash', [hookPath], {
+      cwd: tmp,
+      encoding: 'utf8',
+      input: stdinJSON,
+      timeout: 5000,
+    });
+    assert.equal(result.status, 0, 'should exit 0 for non-commit commands');
+    assert.equal(result.stdout.trim(), '', 'should produce no stdout for non-commit commands');
+  });
+
+  it('outputs warning JSON for incorrectly formatted stage commit', () => {
+    const { tmp } = runCLI();
+    execFileSync('git', ['init'], { cwd: tmp, encoding: 'utf8' });
+    execFileSync('git', ['config', 'user.email', 'test@test.com'], { cwd: tmp });
+    execFileSync('git', ['config', 'user.name', 'Test'], { cwd: tmp });
+    writeFileSync(join(tmp, 'dummy.txt'), 'hello');
+    execFileSync('git', ['add', '.'], { cwd: tmp, encoding: 'utf8' });
+    // Bad format: missing feat(scope): prefix
+    execFileSync('git', ['commit', '-m', 'stage 1 — did something'], {
+      cwd: tmp,
+      encoding: 'utf8',
+    });
+
+    const stdinJSON = JSON.stringify({ tool_input: { command: 'git commit -m "stage 1"' } });
+    const hookPath = join(tmp, '.claude', 'hooks', 'commit-format-check.sh');
+    const result = spawnSync('bash', [hookPath], {
+      cwd: tmp,
+      encoding: 'utf8',
+      input: stdinJSON,
+      timeout: 5000,
+    });
+
+    assert.equal(result.status, 0, 'should exit 0 (advisory, not blocking)');
+    const parsed = JSON.parse(result.stdout);
+    assert.ok(
+      parsed.hookSpecificOutput.additionalContext.toLowerCase().includes('format'),
+      'should warn about commit format'
+    );
+  });
+
+  it('produces no warning for correctly formatted stage commit', () => {
+    const { tmp } = runCLI();
+    execFileSync('git', ['init'], { cwd: tmp, encoding: 'utf8' });
+    execFileSync('git', ['config', 'user.email', 'test@test.com'], { cwd: tmp });
+    execFileSync('git', ['config', 'user.name', 'Test'], { cwd: tmp });
+    writeFileSync(join(tmp, 'dummy.txt'), 'hello');
+    execFileSync('git', ['add', '.'], { cwd: tmp, encoding: 'utf8' });
+    execFileSync('git', ['commit', '-m', 'feat(auth): stage 1 — add login'], {
+      cwd: tmp,
+      encoding: 'utf8',
+    });
+
+    const stdinJSON = JSON.stringify({ tool_input: { command: 'git commit -m "feat(auth): stage 1"' } });
+    const hookPath = join(tmp, '.claude', 'hooks', 'commit-format-check.sh');
+    const result = spawnSync('bash', [hookPath], {
+      cwd: tmp,
+      encoding: 'utf8',
+      input: stdinJSON,
+      timeout: 5000,
+    });
+
+    assert.equal(result.status, 0);
+    assert.equal(result.stdout.trim(), '', 'should produce no output for correct format');
   });
 });
