@@ -31,7 +31,7 @@ describe('CLI smoke test', () => {
 });
 
 describe('CLI template completeness', () => {
-  it('installs all 13 template files', () => {
+  it('installs all 14 template files', () => {
     const { tmp } = runCLI();
 
     const expectedFiles = [
@@ -48,6 +48,7 @@ describe('CLI template completeness', () => {
       '.claude/skills/property-planning.md',
       '.claude/skills/stage-writing.md',
       '.claude/skills/quality-gates.md',
+      '.mcp.json',
     ];
 
     for (const file of expectedFiles) {
@@ -1501,6 +1502,45 @@ describe('Skills templates', () => {
         `${skill}.md should contain a description field in frontmatter`
       );
     }
+  });
+});
+
+describe('MCP configuration template', () => {
+  const { tmp } = runCLI();
+
+  it('installs .mcp.json at project root', () => {
+    const mcpPath = join(tmp, '.mcp.json');
+    assert.ok(existsSync(mcpPath), 'expected .mcp.json to exist at project root');
+    const stat = statSync(mcpPath);
+    assert.ok(stat.size > 0, 'expected .mcp.json to be non-empty');
+  });
+
+  it('.mcp.json is valid JSON with mcpServers key', () => {
+    const content = readFileSync(join(tmp, '.mcp.json'), 'utf8');
+    const parsed = JSON.parse(content);
+    assert.ok(parsed.mcpServers, '.mcp.json should have mcpServers key');
+  });
+
+  it('.mcp.json includes Context7 MCP server', () => {
+    const content = readFileSync(join(tmp, '.mcp.json'), 'utf8');
+    const parsed = JSON.parse(content);
+    const serverNames = Object.keys(parsed.mcpServers);
+    assert.ok(
+      serverNames.some(name => /context7/i.test(name)),
+      `.mcp.json should include a Context7 server, found: ${serverNames.join(', ')}`
+    );
+  });
+
+  it('Context7 server uses npx command (no auth required)', () => {
+    const content = readFileSync(join(tmp, '.mcp.json'), 'utf8');
+    const parsed = JSON.parse(content);
+    const c7Key = Object.keys(parsed.mcpServers).find(k => /context7/i.test(k));
+    const c7 = parsed.mcpServers[c7Key];
+    assert.equal(c7.type, 'stdio', 'Context7 should use stdio type');
+    assert.ok(
+      c7.command.includes('npx') || c7.command === 'npx',
+      'Context7 should use npx command'
+    );
   });
 });
 
