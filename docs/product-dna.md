@@ -14,6 +14,10 @@ Claude Code without structure produces inconsistent results — sprawling change
 - **Rolling plans** stored in `docs/growth/<feature>.md` — 3-5 concrete stages + horizon, with plant-themed visual markers for stage status
 - **One stage = one intent = one commit**
 - **Two-layer quality:** deterministic tools (build/lint/typecheck/test) after every stage, LLM deep review on demand. Post-stage hooks enforce this automatically: a test hook runs the test suite after every stage commit (deterministic gate), then a review hook injects the diff as review context
+- **Commit discipline:** a commit-format-check hook validates the `type(scope): stage N — description` convention before every commit
+- **Curated skills:** three skill files ship with the package — `property-planning`, `stage-writing`, `quality-gates` — giving the gardener agent domain knowledge out of the box
+- **MCP configuration:** a `.mcp.json` template pre-configures Context7 for library documentation lookup during planning
+- **Superpowers detection:** CLI detects available MCP plugins (Playwright, Figma, Context7) at install time and reports them
 - **Context hygiene:** fresh session every 3 stages, plan file provides continuity
 
 ## Key Commands
@@ -42,7 +46,7 @@ v1.0.1 — Post-MVP, infrastructure mature. CLI installs templates with all comm
 - Manual release workflow (configurable bump, dry-run mode, loop prevention)
 - Release notes with changelog categories
 - Dependabot for GitHub Actions (grouped minor/patch updates)
-- 105 tests, 24 suites, zero failures
+- 137 tests, zero failures
 
 ## Priorities
 1. Correctness of templates (gardener instructions, command definitions)
