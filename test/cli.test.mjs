@@ -1994,3 +1994,183 @@ describe('Superpowers integration — seed.md brainstorming (Stage 1)', () => {
     );
   });
 });
+
+describe('Superpowers integration — next.md debugging fallback (Stage 2)', () => {
+  const TEMPLATE_NEXT = join(import.meta.dirname, '..', 'templates', '.claude', 'commands', 'next.md');
+  const PROJECT_NEXT = join(import.meta.dirname, '..', '.claude', 'commands', 'next.md');
+
+  it('P9: next.md contains a reference to systematic-debugging skill as a fallback when stuck', () => {
+    const content = readFileSync(TEMPLATE_NEXT, 'utf8');
+
+    assert.ok(
+      /systematic.debugging/i.test(content),
+      'next.md should contain a reference to systematic-debugging skill'
+    );
+  });
+
+  it('P12: next.md debugging reference appears as a general tip visible when stuck', () => {
+    const content = readFileSync(TEMPLATE_NEXT, 'utf8');
+
+    // The debugging reference should appear AFTER the main numbered steps
+    // (i.e., after step 4 — the "all done" case), as a general tip the user
+    // sees when they look at the command for help while stuck
+    const step4Idx = content.search(/4\.\s/);
+    const debugIdx = content.search(/systematic.debugging/i);
+
+    assert.ok(step4Idx >= 0, 'next.md should contain step 4');
+    assert.ok(debugIdx >= 0, 'next.md should contain systematic-debugging reference');
+    assert.ok(
+      debugIdx > step4Idx,
+      `debugging reference (at ${debugIdx}) should appear after step 4 (at ${step4Idx}) as a general tip`
+    );
+  });
+
+  it('P13: templates/.claude/commands/next.md and .claude/commands/next.md are identical', () => {
+    const templateContent = readFileSync(TEMPLATE_NEXT, 'utf8');
+    const projectContent = readFileSync(PROJECT_NEXT, 'utf8');
+
+    assert.equal(
+      templateContent,
+      projectContent,
+      'template next.md and project next.md must be identical'
+    );
+  });
+
+  it('P15: next.md still contains all existing steps', () => {
+    const content = readFileSync(TEMPLATE_NEXT, 'utf8');
+
+    // Must preserve all four steps
+    assert.ok(
+      /Find the active plan/i.test(content),
+      'next.md should still contain "Find the active plan" step'
+    );
+    assert.ok(
+      /gardener.*GROW mode|GROW mode/i.test(content),
+      'next.md should still contain gardener GROW mode instruction'
+    );
+    assert.ok(
+      /no plan exists/i.test(content),
+      'next.md should still contain no-plan fallback'
+    );
+    assert.ok(
+      /all stages are done/i.test(content),
+      'next.md should still contain all-done case'
+    );
+    assert.ok(
+      /\$ARGUMENTS/i.test(content),
+      'next.md should still reference $ARGUMENTS'
+    );
+  });
+});
+
+describe('Superpowers integration — review.md code review skills (Stage 2)', () => {
+  const TEMPLATE_REVIEW = join(import.meta.dirname, '..', 'templates', '.claude', 'commands', 'review.md');
+  const PROJECT_REVIEW = join(import.meta.dirname, '..', '.claude', 'commands', 'review.md');
+
+  it('P10: review.md contains a reference to requesting-code-review skill', () => {
+    const content = readFileSync(TEMPLATE_REVIEW, 'utf8');
+
+    assert.ok(
+      /requesting.code.review/i.test(content),
+      'review.md should contain a reference to requesting-code-review skill'
+    );
+  });
+
+  it('P11: review.md contains a reference to receiving-code-review skill', () => {
+    const content = readFileSync(TEMPLATE_REVIEW, 'utf8');
+
+    assert.ok(
+      /receiving.code.review/i.test(content),
+      'review.md should contain a reference to receiving-code-review skill'
+    );
+  });
+
+  it('P14: templates/.claude/commands/review.md and .claude/commands/review.md are identical', () => {
+    const templateContent = readFileSync(TEMPLATE_REVIEW, 'utf8');
+    const projectContent = readFileSync(PROJECT_REVIEW, 'utf8');
+
+    assert.equal(
+      templateContent,
+      projectContent,
+      'template review.md and project review.md must be identical'
+    );
+  });
+
+  it('P16: review.md still contains all existing review dimensions and report format', () => {
+    const content = readFileSync(TEMPLATE_REVIEW, 'utf8');
+
+    // Must preserve all five review dimensions
+    const dimensions = [
+      'Correctness',
+      'Consistency',
+      'Simplicity',
+      'Security',
+      'Test quality',
+    ];
+    for (const dim of dimensions) {
+      assert.ok(
+        content.includes(`**${dim}`),
+        `review.md should still contain review dimension "**${dim}"`
+      );
+    }
+
+    // Must preserve report format
+    assert.ok(
+      content.includes('### 🟢 Good'),
+      'review.md should still contain Good section in report format'
+    );
+    assert.ok(
+      content.includes('### 🟡 Suggestions'),
+      'review.md should still contain Suggestions section in report format'
+    );
+    assert.ok(
+      content.includes('### 🔴 Issues'),
+      'review.md should still contain Issues section in report format'
+    );
+    assert.ok(
+      content.includes('### Verdict:'),
+      'review.md should still contain Verdict section in report format'
+    );
+
+    // Must preserve scope and arguments
+    assert.ok(
+      /\$ARGUMENTS/i.test(content),
+      'review.md should still reference $ARGUMENTS'
+    );
+  });
+});
+
+describe('Superpowers integration — replan.md unchanged (Stage 2)', () => {
+  const TEMPLATE_REPLAN = join(import.meta.dirname, '..', 'templates', '.claude', 'commands', 'replan.md');
+  const PROJECT_REPLAN = join(import.meta.dirname, '..', '.claude', 'commands', 'replan.md');
+
+  it('P17: replan.md is unchanged — no superpowers integration added', () => {
+    const templateContent = readFileSync(TEMPLATE_REPLAN, 'utf8');
+    const projectContent = readFileSync(PROJECT_REPLAN, 'utf8');
+
+    // replan.md should NOT contain any superpowers skill references
+    assert.ok(
+      !/brainstorm/i.test(templateContent),
+      'replan.md should not contain brainstorming reference'
+    );
+    assert.ok(
+      !/systematic.debugging/i.test(templateContent),
+      'replan.md should not contain systematic-debugging reference'
+    );
+    assert.ok(
+      !/requesting.code.review/i.test(templateContent),
+      'replan.md should not contain requesting-code-review reference'
+    );
+    assert.ok(
+      !/receiving.code.review/i.test(templateContent),
+      'replan.md should not contain receiving-code-review reference'
+    );
+
+    // Template and project copies must remain identical
+    assert.equal(
+      templateContent,
+      projectContent,
+      'template replan.md and project replan.md must be identical'
+    );
+  });
+});

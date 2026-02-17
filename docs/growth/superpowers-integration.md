@@ -36,7 +36,8 @@ organic-growth commands and the gardener agent currently operate in isolation fr
   - Touches: `templates/.claude/commands/grow.md`, `.claude/commands/grow.md`, `templates/.claude/commands/seed.md`, `.claude/commands/seed.md`, `test/cli.test.mjs`
   - Implementation hint: Add a step 0 to grow.md that invokes brainstorming skill. In seed.md, add a brainstorming step inside Path B's bullet list, before the interview. Use wording like "Use the brainstorming skill to..." which Claude Code interprets as a Skill tool invocation.
 
-- 🌱 Stage 2: Command integration — next.md and review.md
+- 🌳 Stage 2: Command integration — next.md and review.md
+  - Done: Added systematic-debugging skill tip after step 4 in next.md. Added requesting-code-review reference in review.md step 4 and receiving-code-review in step 5. replan.md untouched. Mirror invariant maintained. 9 property tests added (P9-P17).
   - Intent: Complete command-level integration. next.md gets a debugging fallback note. review.md references code review skills for structured output.
   - Properties:
     - P9: next.md contains a reference to systematic-debugging skill as a fallback when stuck [invariant]
@@ -113,3 +114,4 @@ organic-growth commands and the gardener agent currently operate in isolation fr
 ## Growth Log
 <!-- Auto-updated after each stage -->
 - 2026-02-17: Stage 1 complete. grow.md and seed.md now invoke brainstorming skill at the right moments. 8 property tests (P1-P8) all passing. Total: 107 tests.
+- 2026-02-17: Stage 2 complete. next.md has systematic-debugging tip, review.md references requesting-code-review and receiving-code-review skills. replan.md unchanged. 9 property tests (P9-P17) all passing. Total: 116 tests.
