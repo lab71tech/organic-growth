@@ -62,7 +62,8 @@ organic-growth commands and the gardener agent currently operate in isolation fr
   - Touches: `templates/.claude/commands/next.md`, `.claude/commands/next.md`, `templates/.claude/commands/review.md`, `.claude/commands/review.md`, `test/cli.test.mjs`
   - Implementation hint: In next.md, add a tip after the existing steps. In review.md, add skill references in step 4 (output) and step 5 (fix). Keep additions brief — one line each.
 
-- 🌱 Stage 3: Gardener agent — superpowers integration section
+- 🌳 Stage 3: Gardener agent — superpowers integration section
+  - Done: Added four inline one-sentence reminders at GROW mode decision points: red/green/refactor at step 4b, verification-before-completion at step 4d, systematic-debugging at step 4e, finishing-a-development-branch at step 6. Mirror invariant maintained. 8 property tests added (P18-P25). Re-evaluation checkpoint: stages 3-4 remain valid, no adjustments needed.
   - Intent: Add precisely placed one-sentence reminders at the four GROW mode decision points: writing tests (TDD), quality gate (verification), test failure (debugging), and feature complete (finishing branch).
   - Properties:
     - P18: Gardener contains a TDD reminder within or immediately adjacent to GROW step 4b (write tests) [invariant]
@@ -115,3 +116,4 @@ organic-growth commands and the gardener agent currently operate in isolation fr
 <!-- Auto-updated after each stage -->
 - 2026-02-17: Stage 1 complete. grow.md and seed.md now invoke brainstorming skill at the right moments. 8 property tests (P1-P8) all passing. Total: 107 tests.
 - 2026-02-17: Stage 2 complete. next.md has systematic-debugging tip, review.md references requesting-code-review and receiving-code-review skills. replan.md unchanged. 9 property tests (P9-P17) all passing. Total: 116 tests.
+- 2026-02-17: Stage 3 complete. Gardener GROW mode now has four inline reminders: TDD (step 4b), verification-before-completion (step 4d), systematic-debugging (step 4e), finishing-a-development-branch (step 6). Each is one sentence. All modes and steps preserved. 8 property tests (P18-P25) all passing. Total: 124 tests. Re-evaluation checkpoint: plan confirmed valid.

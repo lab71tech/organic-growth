@@ -148,11 +148,13 @@ This is the primary review gate.
 4. Implement ONLY this stage:
    a. Read the stage's properties — these are your acceptance criteria
    b. Write tests that encode the properties FIRST:
+      - Follow red/green/refactor — write a failing test first, then the minimum code to pass it.
       - Each property (P1, P2, ...) becomes one or more tests
       - Tests express the RULE, not a specific scenario
       - Tests for properties from "Depends on" must still pass
    c. Write the code to make the property tests pass
    d. Quality gate — run ALL checks, fix before proceeding:
+      - Apply verification-before-completion: confirm every check passes before moving on.
       - Build: verify it compiles (`./gradlew build`, `npm run build`, etc.)
       - Lint: run the project linter (`./gradlew ktlintCheck`, `npm run lint`, etc.)
       - Type check: if applicable (`tsc --noEmit`, strict mode, etc.)
@@ -160,6 +162,7 @@ This is the primary review gate.
       - Smoke: app starts, health endpoint responds (or equivalent)
    e. If any check fails — fix it within this stage, don't leave it
       for the next one. Quality debt doesn't carry forward.
+      - Use systematic-debugging to isolate the root cause rather than guessing.
 5. Self-review:
    - Do ALL property tests for this stage pass?
    - Do ALL property tests from previous stages still pass?
@@ -175,7 +178,7 @@ This is the primary review gate.
    - If this was a re-evaluation point, update upcoming stages
      (including their properties)
    - If all stages (Concrete + Horizon) are done, set
-     `Status: 🌳 Complete` at the top of the plan
+     `Status: 🌳 Complete` at the top of the plan and follow the finishing-a-development-branch checklist for PR preparation.
 7. Commit: `feat(scope): stage N — <what grew>`
 8. Report:
    - What grew

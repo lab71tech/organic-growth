@@ -2174,3 +2174,222 @@ describe('Superpowers integration — replan.md unchanged (Stage 2)', () => {
     );
   });
 });
+
+describe('Superpowers integration — gardener agent reminders (Stage 3)', () => {
+  const TEMPLATE_PATH = join(import.meta.dirname, '..', 'templates', '.claude', 'agents', 'gardener.md');
+  const PROJECT_PATH = join(import.meta.dirname, '..', '.claude', 'agents', 'gardener.md');
+
+  /**
+   * Helper: extract GROW mode section from gardener template.
+   * Starts at "## Mode: GROW" and ends at "## Mode: REPLAN".
+   */
+  function getGrowMode(content) {
+    const match = content.match(/## Mode: GROW[\s\S]*?(?=\n## Mode: REPLAN)/);
+    assert.ok(match, 'should find GROW mode section');
+    return match[0];
+  }
+
+  /**
+   * Helper: extract a specific step region from GROW mode.
+   * Returns text from "N. " to the next numbered step or section end.
+   */
+  function getStep(growMode, stepNum) {
+    const nextStep = stepNum + 1;
+    const pattern = new RegExp(
+      `${stepNum}\\. [\\s\\S]*?(?=\\n${nextStep}\\. |$)`
+    );
+    const match = growMode.match(pattern);
+    assert.ok(match, `should find step ${stepNum} in GROW mode`);
+    return match[0];
+  }
+
+  /**
+   * Helper: extract a sub-step region (e.g., "b." or "d.") from a step.
+   * Returns text from the sub-step letter to the next sub-step letter.
+   */
+  function getSubStep(stepContent, letter) {
+    const nextLetter = String.fromCharCode(letter.charCodeAt(0) + 1);
+    const pattern = new RegExp(
+      `${letter}\\. [\\s\\S]*?(?=\\n\\s+${nextLetter}\\. |$)`
+    );
+    const match = stepContent.match(pattern);
+    assert.ok(match, `should find sub-step ${letter} in step content`);
+    return match[0];
+  }
+
+  it('P18: gardener contains a TDD reminder within or immediately adjacent to GROW step 4b', () => {
+    const content = readFileSync(TEMPLATE_PATH, 'utf8');
+    const growMode = getGrowMode(content);
+    const step4 = getStep(growMode, 4);
+    const subStepB = getSubStep(step4, 'b');
+
+    // Must mention TDD or red/green/refactor or "failing test first"
+    assert.ok(
+      /TDD|red.green.refactor|failing test first/i.test(subStepB),
+      `step 4b should contain a TDD reminder (red/green/refactor or failing test first), got:\n${subStepB}`
+    );
+  });
+
+  it('P19: gardener contains a verification reminder within or immediately adjacent to GROW step 4d', () => {
+    const content = readFileSync(TEMPLATE_PATH, 'utf8');
+    const growMode = getGrowMode(content);
+    const step4 = getStep(growMode, 4);
+    const subStepD = getSubStep(step4, 'd');
+
+    // Must mention verification or "verify before continuing" or "verification-before-completion"
+    assert.ok(
+      /verification.before.completion|verify.*before.*continu/i.test(subStepD),
+      `step 4d should contain a verification reminder, got:\n${subStepD}`
+    );
+  });
+
+  it('P20: gardener contains a debugging reminder within or immediately adjacent to GROW step 4e', () => {
+    const content = readFileSync(TEMPLATE_PATH, 'utf8');
+    const growMode = getGrowMode(content);
+    const step4 = getStep(growMode, 4);
+    const subStepE = getSubStep(step4, 'e');
+
+    // Must mention systematic-debugging or "systematic debugging"
+    assert.ok(
+      /systematic.debugging/i.test(subStepE),
+      `step 4e should contain a systematic-debugging reminder, got:\n${subStepE}`
+    );
+  });
+
+  it('P21: gardener contains a finishing-branch reference within or adjacent to GROW step 6 or step 8', () => {
+    const content = readFileSync(TEMPLATE_PATH, 'utf8');
+    const growMode = getGrowMode(content);
+
+    // Extract step 6 and step 8 regions
+    const step6 = getStep(growMode, 6);
+    const step8Match = growMode.match(/8\. [\s\S]*/);
+    assert.ok(step8Match, 'should find step 8 in GROW mode');
+    const step8 = step8Match[0];
+
+    // Must mention finishing-a-development-branch or "finishing branch" in step 6 or step 8
+    const inStep6 = /finishing.a.development.branch|finishing.branch/i.test(step6);
+    const inStep8 = /finishing.a.development.branch|finishing.branch/i.test(step8);
+
+    assert.ok(
+      inStep6 || inStep8,
+      `step 6 or step 8 should contain a finishing-branch reference.\nStep 6: ${step6}\nStep 8: ${step8}`
+    );
+  });
+
+  it('P22: each superpowers reminder is one sentence or less — no multi-paragraph additions', () => {
+    const content = readFileSync(TEMPLATE_PATH, 'utf8');
+    const growMode = getGrowMode(content);
+
+    // Find all lines that mention superpowers skill names
+    const skillPatterns = [
+      /TDD|red.green.refactor/i,
+      /verification.before.completion/i,
+      /systematic.debugging/i,
+      /finishing.a.development.branch|finishing.branch/i,
+    ];
+
+    for (const pattern of skillPatterns) {
+      // Find all lines matching this pattern
+      const lines = growMode.split('\n').filter(line => pattern.test(line));
+      assert.ok(
+        lines.length >= 1,
+        `should find at least one line matching ${pattern}`
+      );
+
+      for (const line of lines) {
+        // Count sentences: split on ". " (period + space) or "." at end of line
+        // A single sentence has at most one terminal period
+        const trimmed = line.trim();
+        // Count periods that end sentences (followed by space+capital or end of string)
+        // Simple heuristic: count ". " occurrences (sentence boundaries within the line)
+        const sentenceBoundaries = (trimmed.match(/\.\s+[A-Z]/g) || []).length;
+        assert.ok(
+          sentenceBoundaries <= 1,
+          `reminder line should be one sentence or less (found ${sentenceBoundaries + 1} sentences): "${trimmed}"`
+        );
+      }
+    }
+  });
+
+  it('P23: gardener still contains all three modes with all existing steps intact', () => {
+    const content = readFileSync(TEMPLATE_PATH, 'utf8');
+
+    // All three modes must be present
+    assert.ok(/## Mode: PLAN/.test(content), 'should contain PLAN mode');
+    assert.ok(/## Mode: GROW/.test(content), 'should contain GROW mode');
+    assert.ok(/## Mode: REPLAN/.test(content), 'should contain REPLAN mode');
+
+    // PLAN mode steps 0-5
+    for (let i = 0; i <= 5; i++) {
+      assert.ok(
+        new RegExp(`^${i}\\. `, 'm').test(content),
+        `PLAN mode should still contain step ${i}`
+      );
+    }
+
+    // GROW mode steps 1-8
+    const growMode = getGrowMode(content);
+    for (let i = 1; i <= 8; i++) {
+      assert.ok(
+        new RegExp(`^${i}\\. `, 'm').test(growMode),
+        `GROW mode should still contain step ${i}`
+      );
+    }
+
+    // GROW mode sub-steps a-e in step 4
+    const step4 = getStep(growMode, 4);
+    for (const letter of ['a', 'b', 'c', 'd', 'e']) {
+      assert.ok(
+        new RegExp(`^\\s+${letter}\\. `, 'm').test(step4),
+        `GROW step 4 should still contain sub-step ${letter}`
+      );
+    }
+
+    // REPLAN mode steps 1-9
+    const replanMatch = content.match(/## Mode: REPLAN[\s\S]*?(?=\n# Critical)/);
+    assert.ok(replanMatch, 'should find REPLAN mode section');
+    const replanMode = replanMatch[0];
+    for (let i = 1; i <= 9; i++) {
+      assert.ok(
+        new RegExp(`^${i}\\. `, 'm').test(replanMode),
+        `REPLAN mode should still contain step ${i}`
+      );
+    }
+  });
+
+  it('P24: gardener still contains all property-based planning content', () => {
+    const content = readFileSync(TEMPLATE_PATH, 'utf8');
+
+    // Property-Based Planning section markers
+    const markers = [
+      'Property-Based Planning',
+      'INVARIANTS',
+      'STATE TRANSITIONS',
+      'ROUNDTRIPS',
+      'BOUNDARIES',
+      'Plan Self-Check',
+      'COMPLETENESS',
+      'INDEPENDENCE',
+      'ACCUMULATION',
+      'BOUNDARY COVERAGE',
+    ];
+
+    for (const marker of markers) {
+      assert.ok(
+        content.includes(marker),
+        `gardener should still contain property-based planning marker "${marker}"`
+      );
+    }
+  });
+
+  it('P25: templates/.claude/agents/gardener.md and .claude/agents/gardener.md are identical', () => {
+    const templateContent = readFileSync(TEMPLATE_PATH, 'utf8');
+    const projectContent = readFileSync(PROJECT_PATH, 'utf8');
+
+    assert.equal(
+      templateContent,
+      projectContent,
+      'template gardener.md and project gardener.md must be identical after stage 3 changes'
+    );
+  });
+});
