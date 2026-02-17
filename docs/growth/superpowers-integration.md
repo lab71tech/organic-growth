@@ -1,6 +1,6 @@
-# 🌱 Feature: Superpowers Plugin Integration
+# 🌳 Feature: Superpowers Plugin Integration
 Created: 2026-02-17
-Status: 🌱 Growing
+Status: 🌳 Complete
 
 ## Seed (what & why)
 
@@ -86,7 +86,8 @@ organic-growth commands and the gardener agent currently operate in isolation fr
   - Touches: `templates/.claude/agents/gardener.md`, `.claude/agents/gardener.md`, `test/cli.test.mjs`
   - Implementation hint: Add inline comments at each decision point rather than a separate section. Example at step 4b: "Follow red/green/refactor — write a failing test first, then the minimum code to pass it." Keep each under one sentence.
 
-- 🌱 Stage 4: CLAUDE.md template + CLI summary + product DNA
+- 🌳 Stage 4: CLAUDE.md template + CLI summary + product DNA
+  - Done: Added one bullet to Growth Rule 5 (Quality gate) in templates/CLAUDE.md mentioning superpowers process skills integration. Updated CLI superpowers detection messages to describe what the integration enables (TDD, debugging, brainstorming). Updated product DNA to reflect superpowers integration as a capability. 6 property tests added (P26-P31). All 130 tests passing.
   - Intent: Complete the integration by noting superpowers in the template CLAUDE.md's Development Philosophy, updating the CLI install summary, and updating product DNA.
   - Properties:
     - P26: templates/CLAUDE.md Development Philosophy section mentions superpowers as a companion for process skills [invariant]
@@ -117,3 +118,4 @@ organic-growth commands and the gardener agent currently operate in isolation fr
 - 2026-02-17: Stage 1 complete. grow.md and seed.md now invoke brainstorming skill at the right moments. 8 property tests (P1-P8) all passing. Total: 107 tests.
 - 2026-02-17: Stage 2 complete. next.md has systematic-debugging tip, review.md references requesting-code-review and receiving-code-review skills. replan.md unchanged. 9 property tests (P9-P17) all passing. Total: 116 tests.
 - 2026-02-17: Stage 3 complete. Gardener GROW mode now has four inline reminders: TDD (step 4b), verification-before-completion (step 4d), systematic-debugging (step 4e), finishing-a-development-branch (step 6). Each is one sentence. All modes and steps preserved. 8 property tests (P18-P25) all passing. Total: 124 tests. Re-evaluation checkpoint: plan confirmed valid.
+- 2026-02-17: Stage 4 complete. CLAUDE.md template has one superpowers bullet in Growth Rule 5. CLI messages now describe integration value (TDD, debugging, brainstorming). Product DNA updated. 6 property tests (P26-P31) all passing. Total: 130 tests. Feature complete.

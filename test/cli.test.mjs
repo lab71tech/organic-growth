@@ -2393,3 +2393,116 @@ describe('Superpowers integration — gardener agent reminders (Stage 3)', () =>
     );
   });
 });
+
+describe('Superpowers integration — CLAUDE.md template + CLI + DNA (Stage 4)', () => {
+  const TEMPLATE_CLAUDE = join(import.meta.dirname, '..', 'templates', 'CLAUDE.md');
+  const DNA_PATH = join(import.meta.dirname, '..', 'docs', 'product-dna.md');
+
+  it('P26: templates/CLAUDE.md Development Philosophy section mentions superpowers as companion for process skills', () => {
+    const content = readFileSync(TEMPLATE_CLAUDE, 'utf8');
+
+    // The superpowers mention must be within the Development Philosophy section
+    // (between "# Development Philosophy" and the end of file or next top-level heading)
+    const philStart = content.indexOf('# Development Philosophy');
+    assert.ok(philStart >= 0, 'CLAUDE.md should contain Development Philosophy section');
+
+    const philSection = content.substring(philStart);
+    assert.ok(
+      /superpowers/i.test(philSection),
+      'Development Philosophy section should mention superpowers'
+    );
+    assert.ok(
+      /process skills|TDD|debugging|brainstorming/i.test(philSection),
+      'superpowers mention should reference process skills it provides'
+    );
+  });
+
+  it('P27: templates/CLAUDE.md superpowers mention is one sentence within an existing section — not a new top-level section', () => {
+    const content = readFileSync(TEMPLATE_CLAUDE, 'utf8');
+
+    // Count top-level headings (# or ##) — should NOT have a new "## Superpowers" section
+    assert.ok(
+      !/^##?\s+[Ss]uperpowers/m.test(content),
+      'CLAUDE.md should NOT have a top-level Superpowers section'
+    );
+
+    // Find all lines mentioning superpowers — should be just one or two lines, not a paragraph
+    const superpowerLines = content.split('\n').filter(line => /superpowers/i.test(line));
+    assert.ok(
+      superpowerLines.length >= 1 && superpowerLines.length <= 2,
+      `superpowers should be mentioned in 1-2 lines, found ${superpowerLines.length}`
+    );
+  });
+
+  it('P28: templates/CLAUDE.md still contains all existing sections', () => {
+    const content = readFileSync(TEMPLATE_CLAUDE, 'utf8');
+
+    const requiredSections = [
+      'THE SEED',
+      'THE SOIL',
+      'LIGHT & WATER',
+      'Growth Rules',
+      'Growth Stage Patterns',
+      'Commit Convention',
+      'Growth Plan Location',
+    ];
+
+    for (const section of requiredSections) {
+      assert.ok(
+        content.includes(section),
+        `CLAUDE.md should still contain "${section}"`
+      );
+    }
+
+    // All 6 growth rules must still be present
+    for (let i = 1; i <= 6; i++) {
+      assert.ok(
+        new RegExp(`^${i}\\. \\*\\*`, 'm').test(content),
+        `CLAUDE.md should still contain Growth Rule ${i}`
+      );
+    }
+  });
+
+  it('P29: CLI install summary mentions superpowers integration status', () => {
+    const { output } = runCLI();
+
+    // The CLI should mention what superpowers integration enables
+    // — not just "detected" but what it does (e.g., TDD, debugging, brainstorming)
+    assert.ok(
+      /superpowers/i.test(output),
+      'CLI output should mention superpowers'
+    );
+    assert.ok(
+      /TDD|debugging|brainstorming|process skills|integrated/i.test(output),
+      'CLI superpowers message should mention what the integration enables (TDD, debugging, brainstorming, etc.)'
+    );
+  });
+
+  it('P30: docs/product-dna.md reflects superpowers integration as a capability', () => {
+    const content = readFileSync(DNA_PATH, 'utf8');
+
+    assert.ok(
+      /superpowers.*integrat|integrat.*superpowers/i.test(content),
+      'product DNA should mention superpowers integration as a capability'
+    );
+  });
+
+  it('P31: CLAUDE.md key section markers still pass existing tests', () => {
+    const content = readFileSync(TEMPLATE_CLAUDE, 'utf8');
+
+    // These are the same markers checked by the existing Template content integrity test
+    const markers = [
+      'THE SEED',
+      'THE SOIL',
+      'LIGHT & WATER',
+      'Organic Growth',
+      'Growth Rules',
+    ];
+    for (const marker of markers) {
+      assert.ok(
+        content.includes(marker),
+        `CLAUDE.md should still contain key marker "${marker}"`
+      );
+    }
+  });
+});

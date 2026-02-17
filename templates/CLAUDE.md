@@ -81,6 +81,7 @@ A seedling is a whole plant, not 10% of a tree.
    - ALL tests must pass (not just new ones)
    - App must start (health check / smoke test)
    - Fix all failures within the stage — don't carry debt forward
+   - If the superpowers plugin is installed, its process skills (TDD, debugging, brainstorming) are integrated into commands and the gardener agent automatically
 
 6. **Deep review on demand**
    - Run `/review` after every 3-5 stages or before merging

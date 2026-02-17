@@ -183,9 +183,9 @@ async function install() {
   }
 
   if (hasSuperpowers) {
-    success(`Superpowers plugin detected — great companion for organic-growth!`);
+    success(`Superpowers plugin detected — TDD, debugging, and brainstorming skills are integrated into commands and gardener`);
   } else {
-    info(`Tip: Install the superpowers plugin for TDD, debugging, and brainstorming skills`);
+    info(`Tip: Install the superpowers plugin for integrated TDD, debugging, and brainstorming process skills`);
   }
 
   log('');

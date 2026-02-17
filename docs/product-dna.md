@@ -17,7 +17,7 @@ Claude Code without structure produces inconsistent results — sprawling change
 - **Commit discipline:** a commit-format-check hook validates the `type(scope): stage N — description` convention before every commit
 - **Curated skills:** three skill files ship with the package — `property-planning`, `stage-writing`, `quality-gates` — giving the gardener agent domain knowledge out of the box
 - **MCP configuration:** a `.mcp.json` template pre-configures Context7 for library documentation lookup during planning
-- **Superpowers detection:** CLI detects available MCP plugins (Playwright, Figma, Context7) at install time and reports them
+- **Superpowers integration:** commands and gardener agent invoke superpowers process skills (brainstorming, TDD, systematic-debugging, code review) at decision points; CLI detects the plugin at install time and reports integration status
 - **Context hygiene:** fresh session every 3 stages, plan file provides continuity
 
 ## Key Commands
