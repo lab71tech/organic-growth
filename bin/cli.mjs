@@ -8,6 +8,7 @@ import { createInterface } from 'readline';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const TEMPLATES_DIR = join(__dirname, '..', 'templates');
+const TEMPLATES_OPENCODE_DIR = join(__dirname, '..', 'templates-opencode');
 const TARGET_DIR = process.cwd();
 
 const RESET = '\x1b[0m';
@@ -85,18 +86,20 @@ async function install() {
   }
 
   const force = args.includes('--force') || args.includes('-f');
+  const isOpencode = args.includes('--opencode');
   const dna = args.find(a => !a.startsWith('-') && a.endsWith('.md'));
 
   log('');
   log(`${GREEN}🌱 Organic Growth${RESET} — Claude Code setup for incremental development`);
   log('');
 
-  const files = getAllFiles(TEMPLATES_DIR);
+  const templatesDir = isOpencode ? TEMPLATES_OPENCODE_DIR : TEMPLATES_DIR;
+  const files = getAllFiles(templatesDir);
   const created = [];
   const skipped = [];
 
   for (const file of files) {
-    const src = join(TEMPLATES_DIR, file);
+    const src = join(templatesDir, file);
     const dest = join(TARGET_DIR, file);
     const destDir = dirname(dest);
 

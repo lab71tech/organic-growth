@@ -17,7 +17,8 @@ Design document: `docs/plans/2026-02-17-opencode-support-design.md`
 
 ### Concrete (next 5 stages, detailed)
 
-- 🌱 Stage 1: --opencode flag + AGENTS.md template
+- 🌳 Stage 1: --opencode flag + AGENTS.md template
+  - Done: Created `templates-opencode/AGENTS.md` (same methodology content as CLAUDE.md, opencode-specific comments). Added `TEMPLATES_OPENCODE_DIR` constant and `isOpencode` flag to CLI. Template source switches to opencode tree when `--opencode` is passed. Updated `package.json` `files` to include `templates-opencode/`. Updated size limit from 50KB to 200KB (two template sets). 6 property tests (P1-P6) all passing. Total: 174 tests.
   - Intent: Prove the opencode install path works end-to-end with the simplest possible vertical slice — CLI accepts `--opencode`, copies AGENTS.md from a new `templates-opencode/` directory into the target project root.
   - Properties:
     - P1: CLI accepts `--opencode` flag without error [transition]
@@ -129,3 +130,4 @@ Design document: `docs/plans/2026-02-17-opencode-support-design.md`
 
 ## Growth Log
 <!-- Auto-updated after each stage -->
+- 2026-02-17: Stage 1 complete. `--opencode` flag routes CLI to `templates-opencode/` tree. AGENTS.md installed (not CLAUDE.md) in opencode mode. Package size limit updated to 200KB for two template sets. 6 property tests (P1-P6) all passing. Total: 174 tests.

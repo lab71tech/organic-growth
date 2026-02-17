@@ -282,7 +282,7 @@ describe('Package publish readiness', () => {
     }
   });
 
-  it('package size is under 50KB', () => {
+  it('package size is under 200KB (two template sets: Claude Code + opencode)', () => {
     const output = execFileSync('npm', ['pack', '--dry-run', '--json'], {
       cwd: join(import.meta.dirname, '..'),
       encoding: 'utf8',
@@ -292,8 +292,8 @@ describe('Package publish readiness', () => {
     const unpackedSize = info.unpackedSize;
 
     assert.ok(
-      unpackedSize < 50 * 1024,
-      `unpacked size ${unpackedSize} bytes should be under 50KB (${50 * 1024} bytes)`
+      unpackedSize < 200 * 1024,
+      `unpacked size ${unpackedSize} bytes should be under 200KB (${200 * 1024} bytes)`
     );
   });
 
@@ -2504,5 +2504,71 @@ describe('Superpowers integration — CLAUDE.md template + CLI + DNA (Stage 4)',
         `CLAUDE.md should still contain key marker "${marker}"`
       );
     }
+  });
+});
+
+// ─── Stage 1: --opencode flag + AGENTS.md template ───────────────────────────
+
+describe('opencode: --opencode flag (P1, P4)', () => {
+  it('P1: CLI accepts --opencode flag without error', () => {
+    // runCLI passes --force by default, so this exercises flag parsing
+    const { output } = runCLI(['--opencode']);
+    assert.ok(output.includes('Done!'), '--opencode flag should complete without error');
+  });
+
+  it('P4: without --opencode, behavior unchanged — CLAUDE.md installed, no AGENTS.md', () => {
+    const { tmp } = runCLI();
+    assert.ok(existsSync(join(tmp, 'CLAUDE.md')), 'default install should create CLAUDE.md');
+    assert.ok(!existsSync(join(tmp, 'AGENTS.md')), 'default install should NOT create AGENTS.md');
+  });
+});
+
+describe('opencode: AGENTS.md installation (P2, P3)', () => {
+  const { tmp: ocTmp } = runCLI(['--opencode']);
+
+  it('P2: AGENTS.md is installed at project root when --opencode is used', () => {
+    assert.ok(
+      existsSync(join(ocTmp, 'AGENTS.md')),
+      '--opencode install should create AGENTS.md at project root'
+    );
+    const stat = statSync(join(ocTmp, 'AGENTS.md'));
+    assert.ok(stat.size > 0, 'AGENTS.md should not be empty');
+  });
+
+  it('P3: CLAUDE.md is NOT installed when --opencode is used', () => {
+    assert.ok(
+      !existsSync(join(ocTmp, 'CLAUDE.md')),
+      '--opencode install should NOT create CLAUDE.md'
+    );
+  });
+});
+
+describe('opencode: AGENTS.md methodology content (P5)', () => {
+  const { tmp: ocTmp } = runCLI(['--opencode']);
+
+  it('P5: AGENTS.md contains Organic Growth philosophy and Growth Rules', () => {
+    const content = readFileSync(join(ocTmp, 'AGENTS.md'), 'utf8');
+
+    const markers = [
+      'Organic Growth',
+      'Growth Rules',
+      'Growth Stage Patterns',
+      'Commit Convention',
+    ];
+    for (const marker of markers) {
+      assert.ok(
+        content.includes(marker),
+        `AGENTS.md should contain methodology marker "${marker}"`
+      );
+    }
+  });
+});
+
+describe('opencode: docs/growth/ directory (P6)', () => {
+  it('P6: docs/growth/ directory is created in --opencode mode', () => {
+    const { tmp } = runCLI(['--opencode']);
+    const growthDir = join(tmp, 'docs', 'growth');
+    assert.ok(existsSync(growthDir), '--opencode install should create docs/growth/');
+    assert.ok(statSync(growthDir).isDirectory(), 'docs/growth/ should be a directory');
   });
 });
