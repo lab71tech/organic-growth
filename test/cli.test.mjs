@@ -1826,3 +1826,171 @@ describe('Commit format check hook (end-to-end)', () => {
     assert.equal(result.stdout.trim(), '', 'should produce no output for correct format');
   });
 });
+
+describe('Superpowers integration — grow.md brainstorming (Stage 1)', () => {
+  const TEMPLATE_GROW = join(import.meta.dirname, '..', 'templates', '.claude', 'commands', 'grow.md');
+  const PROJECT_GROW = join(import.meta.dirname, '..', '.claude', 'commands', 'grow.md');
+
+  it('P1: grow.md contains a brainstorming invocation BEFORE the gardener PLAN mode instruction', () => {
+    const content = readFileSync(TEMPLATE_GROW, 'utf8');
+
+    // Brainstorming must appear before the PLAN mode instruction
+    const brainstormIdx = content.search(/brainstorm/i);
+    const planModeIdx = content.search(/gardener.*PLAN mode|PLAN mode/i);
+
+    assert.ok(brainstormIdx >= 0, 'grow.md should contain a brainstorming reference');
+    assert.ok(planModeIdx >= 0, 'grow.md should contain gardener PLAN mode instruction');
+    assert.ok(
+      brainstormIdx < planModeIdx,
+      `brainstorming (at ${brainstormIdx}) should appear BEFORE PLAN mode instruction (at ${planModeIdx})`
+    );
+  });
+
+  it('P3: grow.md brainstorming invocation uses the Skill tool explicitly', () => {
+    const content = readFileSync(TEMPLATE_GROW, 'utf8');
+
+    // Must use explicit Skill tool invocation wording, not vague "consider brainstorming"
+    assert.ok(
+      /[Ii]nvoke the brainstorming skill|[Uu]se the brainstorming skill/i.test(content),
+      'grow.md should use explicit Skill tool invocation (e.g. "Invoke the brainstorming skill")'
+    );
+
+    // Must NOT be a vague reference
+    assert.ok(
+      !/consider brainstorming(?! skill)/i.test(content),
+      'grow.md should not use vague "consider brainstorming" — must invoke the skill explicitly'
+    );
+  });
+
+  it('P5: templates/.claude/commands/grow.md and .claude/commands/grow.md are identical', () => {
+    const templateContent = readFileSync(TEMPLATE_GROW, 'utf8');
+    const projectContent = readFileSync(PROJECT_GROW, 'utf8');
+
+    assert.equal(
+      templateContent,
+      projectContent,
+      'template grow.md and project grow.md must be identical'
+    );
+  });
+
+  it('P7: grow.md still contains all existing instruction steps', () => {
+    const content = readFileSync(TEMPLATE_GROW, 'utf8');
+
+    // Must preserve: gardener PLAN mode, property review gate, "Plan ready" prompt
+    assert.ok(
+      /gardener.*PLAN mode|Use the gardener agent in PLAN mode/i.test(content),
+      'grow.md should still contain gardener PLAN mode instruction'
+    );
+    assert.ok(
+      /PROPERTIES/i.test(content),
+      'grow.md should still contain property review gate'
+    );
+    assert.ok(
+      /Plan ready/i.test(content),
+      'grow.md should still contain "Plan ready" prompt'
+    );
+    assert.ok(
+      /GROW mode/i.test(content),
+      'grow.md should still contain GROW mode instruction for stage 1'
+    );
+    assert.ok(
+      /\$ARGUMENTS/i.test(content),
+      'grow.md should still reference $ARGUMENTS'
+    );
+  });
+});
+
+describe('Superpowers integration — seed.md brainstorming (Stage 1)', () => {
+  const TEMPLATE_SEED = join(import.meta.dirname, '..', 'templates', '.claude', 'commands', 'seed.md');
+  const PROJECT_SEED = join(import.meta.dirname, '..', '.claude', 'commands', 'seed.md');
+
+  it('P2: seed.md contains a brainstorming invocation inside Path B only — not in Path A', () => {
+    const content = readFileSync(TEMPLATE_SEED, 'utf8');
+
+    // Split content at Path B marker to check location
+    const pathAStart = content.indexOf('**Path A');
+    const pathBStart = content.indexOf('**Path B');
+    assert.ok(pathAStart >= 0, 'seed.md should contain Path A');
+    assert.ok(pathBStart >= 0, 'seed.md should contain Path B');
+
+    const pathASection = content.substring(pathAStart, pathBStart);
+    const pathBSection = content.substring(pathBStart);
+
+    // Brainstorming should be in Path B
+    assert.ok(
+      /brainstorm/i.test(pathBSection),
+      'seed.md Path B should contain a brainstorming reference'
+    );
+
+    // Brainstorming should NOT be in Path A
+    assert.ok(
+      !/brainstorm/i.test(pathASection),
+      'seed.md Path A should NOT contain a brainstorming reference'
+    );
+  });
+
+  it('P4: seed.md brainstorming invocation uses the Skill tool explicitly', () => {
+    const content = readFileSync(TEMPLATE_SEED, 'utf8');
+
+    // Must use explicit Skill tool invocation wording
+    assert.ok(
+      /[Ii]nvoke the brainstorming skill|[Uu]se the brainstorming skill/i.test(content),
+      'seed.md should use explicit Skill tool invocation (e.g. "Invoke the brainstorming skill")'
+    );
+  });
+
+  it('P6: templates/.claude/commands/seed.md and .claude/commands/seed.md are identical', () => {
+    const templateContent = readFileSync(TEMPLATE_SEED, 'utf8');
+    const projectContent = readFileSync(PROJECT_SEED, 'utf8');
+
+    assert.equal(
+      templateContent,
+      projectContent,
+      'template seed.md and project seed.md must be identical'
+    );
+  });
+
+  it('P8: seed.md still contains all existing paths and interview questions', () => {
+    const content = readFileSync(TEMPLATE_SEED, 'utf8');
+
+    // Must preserve both paths
+    assert.ok(
+      /Path A.*DNA exists/i.test(content),
+      'seed.md should still contain Path A'
+    );
+    assert.ok(
+      /Path B.*No DNA/i.test(content),
+      'seed.md should still contain Path B'
+    );
+
+    // Must preserve all interview questions
+    const interviewQuestions = [
+      'What are you building',
+      'Who is it for',
+      'What core problem',
+      'What tech stack',
+      'Any hard constraints',
+      'priority',
+    ];
+    for (const q of interviewQuestions) {
+      assert.ok(
+        content.includes(q),
+        `seed.md should still contain interview question: "${q}"`
+      );
+    }
+
+    // Must preserve other key elements
+    assert.ok(
+      /CLAUDE\.md Product section/i.test(content),
+      'seed.md should still reference CLAUDE.md Product section'
+    );
+    assert.ok(
+      /docs\/growth\/project-bootstrap\.md/i.test(content),
+      'seed.md should still reference docs/growth/project-bootstrap.md'
+    );
+    assert.ok(
+      /Seed planted/i.test(content),
+      'seed.md should still contain "Seed planted" prompt'
+    );
+  });
+});
