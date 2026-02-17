@@ -2572,3 +2572,114 @@ describe('opencode: docs/growth/ directory (P6)', () => {
     assert.ok(statSync(growthDir).isDirectory(), 'docs/growth/ should be a directory');
   });
 });
+
+// ─── Stage 2: .opencode/ agents, commands, and skills ────────────────────────
+
+describe('opencode: agent installation (P7)', () => {
+  const { tmp: ocTmp } = runCLI(['--opencode']);
+
+  it('P7: .opencode/agents/gardener.md is installed in --opencode mode', () => {
+    const f = join(ocTmp, '.opencode', 'agents', 'gardener.md');
+    assert.ok(existsSync(f), '.opencode/agents/gardener.md should exist');
+    assert.ok(statSync(f).size > 0, 'gardener.md should not be empty');
+  });
+});
+
+describe('opencode: command installation (P8)', () => {
+  const { tmp: ocTmp } = runCLI(['--opencode']);
+
+  it('P8: all 5 commands are installed under .opencode/commands/', () => {
+    const commands = ['seed', 'grow', 'next', 'replan', 'review'];
+    for (const cmd of commands) {
+      const f = join(ocTmp, '.opencode', 'commands', `${cmd}.md`);
+      assert.ok(existsSync(f), `.opencode/commands/${cmd}.md should exist`);
+      assert.ok(statSync(f).size > 0, `${cmd}.md should not be empty`);
+    }
+  });
+});
+
+describe('opencode: skill installation (P9)', () => {
+  const { tmp: ocTmp } = runCLI(['--opencode']);
+
+  it('P9: all 3 skills are installed under .opencode/skills/', () => {
+    const skills = ['property-planning', 'stage-writing', 'quality-gates'];
+    for (const skill of skills) {
+      const f = join(ocTmp, '.opencode', 'skills', `${skill}.md`);
+      assert.ok(existsSync(f), `.opencode/skills/${skill}.md should exist`);
+      assert.ok(statSync(f).size > 0, `${skill}.md should not be empty`);
+    }
+  });
+});
+
+describe('opencode: no .claude/ directory in --opencode mode (P10)', () => {
+  it('P10: .claude/ directory is NOT created in --opencode mode', () => {
+    const { tmp } = runCLI(['--opencode']);
+    assert.ok(
+      !existsSync(join(tmp, '.claude')),
+      '--opencode install should NOT create .claude/ directory'
+    );
+  });
+});
+
+describe('opencode: gardener references AGENTS.md (P11, P13)', () => {
+  const { tmp: ocTmp } = runCLI(['--opencode']);
+
+  it('P11: gardener agent references AGENTS.md (not CLAUDE.md) for product context', () => {
+    const content = readFileSync(join(ocTmp, '.opencode', 'agents', 'gardener.md'), 'utf8');
+    assert.ok(
+      content.includes('AGENTS.md'),
+      'opencode gardener should reference AGENTS.md'
+    );
+    assert.ok(
+      !content.includes('CLAUDE.md'),
+      'opencode gardener should NOT reference CLAUDE.md'
+    );
+  });
+
+  it('P13: gardener contains all three modes and quality gate', () => {
+    const content = readFileSync(join(ocTmp, '.opencode', 'agents', 'gardener.md'), 'utf8');
+    const markers = ['Mode: PLAN', 'Mode: GROW', 'Mode: REPLAN', 'Quality gate'];
+    for (const marker of markers) {
+      assert.ok(content.includes(marker), `opencode gardener should contain "${marker}"`);
+    }
+  });
+});
+
+describe('opencode: commands use $ARGUMENTS placeholder (P12)', () => {
+  const { tmp: ocTmp } = runCLI(['--opencode']);
+
+  it('P12: each command file that accepts arguments uses the $ARGUMENTS placeholder', () => {
+    // grow, next, replan, review all accept arguments; seed uses it for DNA path
+    const commands = ['seed', 'grow', 'next', 'replan', 'review'];
+    for (const cmd of commands) {
+      const content = readFileSync(join(ocTmp, '.opencode', 'commands', `${cmd}.md`), 'utf8');
+      assert.ok(
+        content.includes('$ARGUMENTS'),
+        `.opencode/commands/${cmd}.md should use $ARGUMENTS placeholder`
+      );
+    }
+  });
+});
+
+describe('opencode: all files non-empty (P14)', () => {
+  const { tmp: ocTmp } = runCLI(['--opencode']);
+
+  it('P14: all installed .opencode/ files are non-empty', () => {
+    const expectedFiles = [
+      '.opencode/agents/gardener.md',
+      '.opencode/commands/seed.md',
+      '.opencode/commands/grow.md',
+      '.opencode/commands/next.md',
+      '.opencode/commands/replan.md',
+      '.opencode/commands/review.md',
+      '.opencode/skills/property-planning.md',
+      '.opencode/skills/stage-writing.md',
+      '.opencode/skills/quality-gates.md',
+    ];
+    for (const f of expectedFiles) {
+      const fullPath = join(ocTmp, f);
+      assert.ok(existsSync(fullPath), `${f} should exist`);
+      assert.ok(statSync(fullPath).size > 0, `${f} should not be empty`);
+    }
+  });
+});

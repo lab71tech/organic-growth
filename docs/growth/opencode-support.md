@@ -37,7 +37,8 @@ Design document: `docs/plans/2026-02-17-opencode-support-design.md`
   - Touches: `bin/cli.mjs`, `templates-opencode/AGENTS.md`, `package.json` (files array), `test/cli.test.mjs`
   - Implementation hint: Create `templates-opencode/AGENTS.md` with same content as `templates/CLAUDE.md` but with opencode-specific naming in comments (e.g., "opencode reads your build files" instead of "Claude Code reads your build files"). Add `--opencode` flag parsing in CLI. New constant `TEMPLATES_OPENCODE_DIR`. Add `"templates-opencode/"` to package.json `files` array.
 
-- 🌱 Stage 2: .opencode/ agents, commands, and skills
+- 🌳 Stage 2: .opencode/ agents, commands, and skills
+  - Done: Created `.opencode/agents/gardener.md` (opencode frontmatter: mode=subagent, tools as object; AGENTS.md refs throughout). Created all 5 commands with `$ARGUMENTS`; removed Claude Code-specific skill refs. Copied property-planning and stage-writing skills verbatim; quality-gates adjusted to reference AGENTS.md. 8 property tests (P7-P14) all passing. Total: 182 tests.
   - Intent: Port the gardener agent, all 5 commands, and all 3 skills into the opencode template tree. After this stage, an opencode user has the full organic growth workflow minus hooks.
   - Properties:
     - P7: `.opencode/agents/gardener.md` is installed in --opencode mode [invariant]
@@ -130,4 +131,5 @@ Design document: `docs/plans/2026-02-17-opencode-support-design.md`
 
 ## Growth Log
 <!-- Auto-updated after each stage -->
+- 2026-02-18: Stage 2 complete. Gardener agent, 5 commands, 3 skills ported to `.opencode/` tree. Gardener uses opencode frontmatter (mode=subagent), references AGENTS.md. Commands drop superpowers refs, use @gardener invocation. Skills: property-planning and stage-writing identical; quality-gates references AGENTS.md. 8 property tests (P7-P14) all passing. Total: 182 tests.
 - 2026-02-17: Stage 1 complete. `--opencode` flag routes CLI to `templates-opencode/` tree. AGENTS.md installed (not CLAUDE.md) in opencode mode. Package size limit updated to 200KB for two template sets. 6 property tests (P1-P6) all passing. Total: 174 tests.
