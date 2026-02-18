@@ -61,7 +61,8 @@ Design document: `docs/plans/2026-02-17-opencode-support-design.md`
   - Touches: `templates-opencode/.opencode/agents/gardener.md`, `templates-opencode/.opencode/commands/{seed,grow,next,replan,review}.md`, `templates-opencode/.opencode/skills/{property-planning,stage-writing,quality-gates}.md`, `test/cli.test.mjs`
   - Implementation hint: Start with gardener.md — mostly identical content, adjust frontmatter to opencode format (tools as object not array), replace CLAUDE.md references with AGENTS.md. Commands are nearly identical — remove superpowers skill references (Claude Code-specific). Skills are identical content, just placed under .opencode/skills/.
 
-- 🌱 Stage 3: Hooks → opencode JS plugin
+- 🌳 Stage 3: Hooks → opencode JS plugin
+  - Done: Created `.opencode/plugins/organic-growth.js`. Single `export default function` receiving `{ $, directory }`. Registers `tool.execute.after` handler with three guards (bash tool, git commit, stage pattern). Three sequential checks: discoverTestCommand reads from AGENTS.md, runTests runs via `sh -c`, gatherReviewContext does `git diff HEAD~1`, checkCommitFormat validates `feat(scope): stage N —` pattern. 7 property tests (P15-P21) all passing. Total: 189 tests.
   - Intent: Translate the 3 Claude Code shell hooks into a single opencode JS plugin. This is the most structurally different piece — shell scripts with jq become a JS module with event handlers.
   - Properties:
     - P15: `.opencode/plugins/organic-growth.js` is installed in --opencode mode [invariant]
@@ -82,7 +83,8 @@ Design document: `docs/plans/2026-02-17-opencode-support-design.md`
   - Touches: `templates-opencode/.opencode/plugins/organic-growth.js`, `test/cli.test.mjs`
   - Implementation hint: Single JS file. Export default function receiving `{ $, directory }`. Return object with `"tool.execute.after"` handler. Guard on bash tool + git commit + "stage N" pattern. Three sequential checks: run tests, gather diff, check format. Use `$` shell API for running commands. Read test command from AGENTS.md using fs.readFileSync + regex (same pattern as shell hooks but in JS).
 
-- 🌱 Stage 4: opencode.json (MCP config) + package.json updates
+- 🌳 Stage 4: opencode.json (MCP config) + package.json updates
+  - Done: Created `templates-opencode/opencode.json` with Context7 MCP config (`mcp.context7` stdio entry). Updated package.json description to mention opencode; added `"opencode"` keyword. P25 (files array) already passed from Stage 1. 6 property tests (P22-P27) all passing. Total: 195 tests.
   - Intent: Complete the template set with opencode.json for MCP config. Update package.json metadata to reflect both-tool support.
   - Properties:
     - P22: `opencode.json` is installed at project root in --opencode mode [invariant]
@@ -131,5 +133,7 @@ Design document: `docs/plans/2026-02-17-opencode-support-design.md`
 
 ## Growth Log
 <!-- Auto-updated after each stage -->
+- 2026-02-18: Stage 4 complete. opencode.json created with Context7 MCP config. package.json description now mentions opencode; "opencode" keyword added. 6 property tests (P22-P27) all passing. Total: 195 tests.
+- 2026-02-18: Stage 3 complete. organic-growth.js plugin created: exports default function, tool.execute.after handler, reads test cmd from AGENTS.md, git diff review, commit format check. 7 property tests (P15-P21) all passing. Total: 189 tests.
 - 2026-02-18: Stage 2 complete. Gardener agent, 5 commands, 3 skills ported to `.opencode/` tree. Gardener uses opencode frontmatter (mode=subagent), references AGENTS.md. Commands drop superpowers refs, use @gardener invocation. Skills: property-planning and stage-writing identical; quality-gates references AGENTS.md. 8 property tests (P7-P14) all passing. Total: 182 tests.
 - 2026-02-17: Stage 1 complete. `--opencode` flag routes CLI to `templates-opencode/` tree. AGENTS.md installed (not CLAUDE.md) in opencode mode. Package size limit updated to 200KB for two template sets. 6 property tests (P1-P6) all passing. Total: 174 tests.

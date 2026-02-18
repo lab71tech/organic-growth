@@ -2683,3 +2683,141 @@ describe('opencode: all files non-empty (P14)', () => {
     }
   });
 });
+
+// ─── Stage 3: Hooks → opencode JS plugin ─────────────────────────────────────
+
+describe('opencode: plugin file installation (P15, P16)', () => {
+  const { tmp: ocTmp } = runCLI(['--opencode']);
+
+  it('P15: .opencode/plugins/organic-growth.js is installed in --opencode mode', () => {
+    const f = join(ocTmp, '.opencode', 'plugins', 'organic-growth.js');
+    assert.ok(existsSync(f), '.opencode/plugins/organic-growth.js should exist');
+    assert.ok(statSync(f).size > 0, 'organic-growth.js should not be empty');
+  });
+
+  it('P16: no .claude/settings.json or .claude/hooks/ in --opencode mode', () => {
+    assert.ok(
+      !existsSync(join(ocTmp, '.claude', 'settings.json')),
+      '.claude/settings.json should NOT exist in --opencode install'
+    );
+    assert.ok(
+      !existsSync(join(ocTmp, '.claude', 'hooks')),
+      '.claude/hooks/ should NOT exist in --opencode install'
+    );
+  });
+});
+
+describe('opencode: plugin structure (P17, P18)', () => {
+  const { tmp: ocTmp } = runCLI(['--opencode']);
+
+  it('P17: plugin exports a default function', () => {
+    const content = readFileSync(
+      join(ocTmp, '.opencode', 'plugins', 'organic-growth.js'), 'utf8'
+    );
+    assert.ok(
+      /export default function/.test(content),
+      'plugin should export a default function'
+    );
+  });
+
+  it('P18: plugin registers a tool.execute.after event handler', () => {
+    const content = readFileSync(
+      join(ocTmp, '.opencode', 'plugins', 'organic-growth.js'), 'utf8'
+    );
+    assert.ok(
+      /tool\.execute\.after/.test(content),
+      'plugin should register tool.execute.after event handler'
+    );
+  });
+});
+
+describe('opencode: plugin hook logic (P19, P20, P21)', () => {
+  const { tmp: ocTmp } = runCLI(['--opencode']);
+
+  it('P19: plugin reads test command from AGENTS.md (not CLAUDE.md)', () => {
+    const content = readFileSync(
+      join(ocTmp, '.opencode', 'plugins', 'organic-growth.js'), 'utf8'
+    );
+    assert.ok(
+      content.includes('AGENTS.md'),
+      'plugin should reference AGENTS.md for test command discovery'
+    );
+    assert.ok(
+      !content.includes('CLAUDE.md'),
+      'plugin should NOT reference CLAUDE.md'
+    );
+  });
+
+  it('P20: plugin contains git diff logic for review context', () => {
+    const content = readFileSync(
+      join(ocTmp, '.opencode', 'plugins', 'organic-growth.js'), 'utf8'
+    );
+    assert.ok(
+      /git.*diff|diff.*HEAD/i.test(content),
+      'plugin should contain git diff logic'
+    );
+  });
+
+  it('P21: plugin contains commit-format checking logic', () => {
+    const content = readFileSync(
+      join(ocTmp, '.opencode', 'plugins', 'organic-growth.js'), 'utf8'
+    );
+    assert.ok(
+      /feat\(/.test(content) || /stage\s*\\d/.test(content) || /commit.*format|format.*commit/i.test(content),
+      'plugin should contain commit format checking logic'
+    );
+  });
+});
+
+// ─── Stage 4: opencode.json (MCP config) + package.json updates ──────────────
+
+describe('opencode: opencode.json MCP config (P22, P23, P24)', () => {
+  const { tmp: ocTmp } = runCLI(['--opencode']);
+
+  it('P22: opencode.json is installed at project root in --opencode mode', () => {
+    const f = join(ocTmp, 'opencode.json');
+    assert.ok(existsSync(f), 'opencode.json should exist at project root');
+    assert.ok(statSync(f).size > 0, 'opencode.json should not be empty');
+  });
+
+  it('P23: opencode.json contains Context7 MCP server configuration', () => {
+    const content = JSON.parse(readFileSync(join(ocTmp, 'opencode.json'), 'utf8'));
+    assert.ok(content.mcp, 'opencode.json should have an "mcp" key');
+    assert.ok(content.mcp.context7, 'opencode.json mcp should have a "context7" entry');
+    assert.equal(content.mcp.context7.type, 'stdio', 'context7 MCP entry should use type "stdio"');
+    assert.ok(content.mcp.context7.command, 'context7 MCP entry should have a command');
+  });
+
+  it('P24: .mcp.json is NOT installed in --opencode mode', () => {
+    assert.ok(
+      !existsSync(join(ocTmp, '.mcp.json')),
+      '.mcp.json should NOT exist in --opencode install'
+    );
+  });
+});
+
+describe('opencode: package.json metadata (P25, P26, P27)', () => {
+  it('P25: package.json files array includes "templates-opencode/"', () => {
+    const pkg = JSON.parse(readFileSync(PKG_PATH, 'utf8'));
+    assert.ok(
+      pkg.files.includes('templates-opencode/'),
+      'package.json files should include "templates-opencode/"'
+    );
+  });
+
+  it('P26: package.json description mentions opencode', () => {
+    const pkg = JSON.parse(readFileSync(PKG_PATH, 'utf8'));
+    assert.ok(
+      /opencode/i.test(pkg.description),
+      `package.json description should mention opencode, got: "${pkg.description}"`
+    );
+  });
+
+  it('P27: package.json keywords includes "opencode"', () => {
+    const pkg = JSON.parse(readFileSync(PKG_PATH, 'utf8'));
+    assert.ok(
+      Array.isArray(pkg.keywords) && pkg.keywords.includes('opencode'),
+      'package.json keywords should include "opencode"'
+    );
+  });
+});
