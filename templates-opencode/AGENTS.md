@@ -16,7 +16,7 @@
 
 ## Tech Stack (THE SOIL — auto-discovered, but document the non-obvious)
 
-<!-- Claude Code reads your build files. Only add what it CAN'T discover. -->
+<!-- opencode reads your build files. Only add what it CAN'T discover. -->
 
 - [Any non-standard commands, e.g.: `./gradlew test --profile staging`]
 - [Unusual conventions, e.g.: "endpoint names in Polish"]
@@ -81,7 +81,6 @@ A seedling is a whole plant, not 10% of a tree.
    - ALL tests must pass (not just new ones)
    - App must start (health check / smoke test)
    - Fix all failures within the stage — don't carry debt forward
-   - If the superpowers plugin is installed, its process skills (TDD, debugging, brainstorming) are integrated into commands and the gardener agent automatically
 
 6. **Deep review on demand**
    - Run `/review` after every 3-5 stages or before merging

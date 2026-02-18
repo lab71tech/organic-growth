@@ -7,39 +7,38 @@
 <!-- This section is the distilled version — what the agent sees always. -->
 <!-- The DNA document is read only during planning (/grow, /replan). -->
 
-**What:** An npm package that installs Claude Code configuration for incremental software development using thin vertical slices.
-**For whom:** Developers using Claude Code who want structured, controlled workflow instead of autonomous coding.
-**Core problem:** Claude Code without structure produces sprawling changes, lost context, and no checkpoints. Developers need methodology that works with LLM limitations.
-**Key domain concepts:** Growth stage, gardener agent, rolling plan, DNA document, quality gate, context hygiene, vertical slice
-**Current state:** v1.0.1 — Post-MVP, infrastructure mature (CLI, full CI/CD, automated releases, dependabot, 78 tests)
-**Full DNA:** docs/product-dna.md
+**What:** [One sentence. What is this product?]
+**For whom:** [Who uses it? What's their context?]
+**Core problem:** [What pain does it solve?]
+**Key domain concepts:** [3-7 terms that someone new needs to understand]
+**Current state:** [Greenfield / MVP exists / Production system]
+**Full DNA:** [docs/product-dna.md if exists, otherwise "N/A"]
 
 ## Tech Stack (THE SOIL — auto-discovered, but document the non-obvious)
 
 <!-- Claude Code reads your build files. Only add what it CAN'T discover. -->
 
-- Node.js CLI (`bin/cli.mjs`) — zero runtime dependencies, pure Node.js
-- Templates in `templates/` — `CLAUDE.md` at root, agents and commands under `templates/.claude/`
-- Published to npm, invoked via `bunx organic-growth` or `npx organic-growth`
-- Hard constraints: zero deps, single executable, bun + npm compat, package <50KB
+- [Any non-standard commands, e.g.: `./gradlew test --profile staging`]
+- [Unusual conventions, e.g.: "endpoint names in Polish"]
+- [Hard constraints, e.g.: "no Lombok", "Flyway not Liquibase"]
 
 ### Quality tools (fill in for your project)
 
 <!-- Gardener runs these after every stage. List the exact commands. -->
 
-- **Build:** N/A (no build step, plain JS)
-- **Lint:** N/A (not configured yet)
-- **Type check:** N/A (plain JavaScript)
-- **Test:** `node --test`
-- **Smoke:** `node bin/cli.mjs --force` in a temp directory
+- **Build:** [e.g.: `./gradlew build` or `npm run build`]
+- **Lint:** [e.g.: `./gradlew ktlintCheck` or `npm run lint`]
+- **Type check:** [e.g.: `tsc --noEmit` or N/A for dynamic languages]
+- **Test:** [e.g.: `./gradlew test` or `npm test`]
+- **Smoke:** [e.g.: `curl http://localhost:8080/health` or `npm run dev` + check]
 
 ## Priorities (LIGHT & WATER — what matters now)
 
 <!-- This changes. Update it when priorities shift. -->
 
-- Correctness of templates (gardener instructions, command definitions)
-- Developer experience (clear README, easy install, helpful CLI output)
-- Simplicity (resist adding features — one agent, six commands, that's it)
+- [e.g.: "MVP speed over production polish"]
+- [e.g.: "Must work offline first"]
+- [e.g.: "Security is non-negotiable, even for MVP"]
 
 ---
 
@@ -74,7 +73,6 @@ A seedling is a whole plant, not 10% of a tree.
    - Start a fresh session every 3 stages
    - The growth plan in `docs/growth/` is the continuity mechanism
    - After `/clear`, run `/next` — the agent reads the plan and continues
-   - For parallel features, consider git worktrees — one directory per feature, no branch switching
 
 5. **Quality gate after every stage**
    - Build must pass

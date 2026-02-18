@@ -9,13 +9,12 @@ Plant the seed for a new project.
 
    **Path A — DNA exists:**
    - Read the document
-   - Distill it into CLAUDE.md Product section (~10 lines: what, for whom,
+   - Distill it into AGENTS.md Product section (~10 lines: what, for whom,
      core problem, key domain concepts, current state)
    - Copy/move the full document to `docs/product-dna.md` if not already there
    - Confirm with the user: "Here's what I extracted. Anything to adjust?"
 
    **Path B — No DNA:**
-   - Invoke the brainstorming skill to explore what this project could be, before narrowing down through the interview.
    - Interview the user. Ask these questions ONE AT A TIME:
      - What are you building? (one sentence)
      - Who is it for? What's their context?
@@ -23,13 +22,13 @@ Plant the seed for a new project.
      - What tech stack do you want? (or: should I suggest one?)
      - Any hard constraints? (hosting, budget, compliance, language)
      - What's the priority: speed to MVP, production quality, or learning?
-   - Fill in CLAUDE.md Product section from answers
+   - Fill in AGENTS.md Product section from answers
 
 2. In both paths, also fill in:
    - Tech Stack (THE SOIL): from DNA or interview + scan of existing project files
    - Priorities (LIGHT & WATER): from DNA or interview
 
-3. Check if CLAUDE.md already has a filled Product section.
+3. Check if AGENTS.md already has a filled Product section.
    If yes, ask: "Product context already exists. Overwrite or update?"
 
 4. Generate `docs/growth/project-bootstrap.md` — the first growth plan:

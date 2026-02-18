@@ -9,4 +9,6 @@ Continue growing: implement the next stage from the active growth plan.
 3. If no plan exists, tell the user to run /grow first
 4. If all stages are done, congratulate and suggest what might grow next
 
+Tip: If you hit a wall during implementation, invoke the systematic-debugging skill to work through the problem methodically instead of guessing.
+
 Feature filter (optional): $ARGUMENTS

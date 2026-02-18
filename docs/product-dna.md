@@ -11,9 +11,13 @@ Claude Code without structure produces inconsistent results — sprawling change
 
 ## How It Works
 - **One agent (gardener)** with three modes: PLAN, GROW, REPLAN
-- **Rolling plans** stored in `docs/growth/<feature>.md` — 3-5 concrete stages + horizon
+- **Rolling plans** stored in `docs/growth/<feature>.md` — 3-5 concrete stages + horizon, with plant-themed visual markers for stage status
 - **One stage = one intent = one commit**
-- **Two-layer quality:** deterministic tools (build/lint/typecheck/test) after every stage, LLM deep review on demand
+- **Two-layer quality:** deterministic tools (build/lint/typecheck/test) after every stage, LLM deep review on demand. Post-stage hooks enforce this automatically: a test hook runs the test suite after every stage commit (deterministic gate), then a review hook injects the diff as review context
+- **Commit discipline:** a commit-format-check hook validates the `type(scope): stage N — description` convention before every commit
+- **Curated skills:** three skill files ship with the package — `property-planning`, `stage-writing`, `quality-gates` — giving the gardener agent domain knowledge out of the box
+- **MCP configuration:** a `.mcp.json` template pre-configures Context7 for library documentation lookup during planning
+- **Superpowers integration:** commands and gardener agent invoke superpowers process skills (brainstorming, TDD, systematic-debugging, code review) at decision points; CLI detects the plugin at install time and reports integration status
 - **Context hygiene:** fresh session every 3 stages, plan file provides continuity
 
 ## Key Commands
@@ -22,7 +26,6 @@ Claude Code without structure produces inconsistent results — sprawling change
 - `/next` — implement next stage
 - `/replan` — adjust when reality changes
 - `/review` — deep quality check with fresh context
-- `/worktree` — create a git worktree for parallel feature growth
 
 ## Tech Stack
 - Node.js CLI (bin/cli.mjs) — zero dependencies, pure Node.js
@@ -43,9 +46,9 @@ v1.0.1 — Post-MVP, infrastructure mature. CLI installs templates with all comm
 - Manual release workflow (configurable bump, dry-run mode, loop prevention)
 - Release notes with changelog categories
 - Dependabot for GitHub Actions (grouped minor/patch updates)
-- 78 tests, 19 suites, zero failures
+- 137 tests, zero failures
 
 ## Priorities
 1. Correctness of templates (gardener instructions, command definitions)
 2. Developer experience (clear README, easy install, helpful CLI output)
-3. Simplicity (resist adding features — one agent, six commands, that's it)
+3. Simplicity (resist adding features — one agent, five commands, that's it)

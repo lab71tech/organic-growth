@@ -8,6 +8,7 @@ import { createInterface } from 'readline';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const TEMPLATES_DIR = join(__dirname, '..', 'templates');
+const TEMPLATES_OPENCODE_DIR = join(__dirname, '..', 'templates-opencode');
 const TARGET_DIR = process.cwd();
 
 const RESET = '\x1b[0m';
@@ -51,7 +52,7 @@ function readVersion() {
 
 function printHelp() {
   log('');
-  log(`${GREEN}🌱 Organic Growth${RESET} — Claude Code setup for incremental development`);
+  log(`${GREEN}🌱 Organic Growth${RESET} — Claude Code + opencode setup for incremental development`);
   log('');
   log(`${CYAN}Usage:${RESET}`);
   log(`  npx organic-growth [options] [dna-file.md]`);
@@ -60,12 +61,14 @@ function printHelp() {
   log(`  -f, --force     Overwrite existing files without prompting`);
   log(`  -h, --help      Show this help message`);
   log(`  -v, --version   Show version number`);
+  log(`      --opencode  Install opencode templates (AGENTS.md + .opencode/)`);
   log('');
   log(`${CYAN}Arguments:${RESET}`);
   log(`  dna-file.md     Path to a product DNA document to copy into docs/`);
   log('');
   log(`${CYAN}Examples:${RESET}`);
-  log(`  npx organic-growth                  Install templates (prompts on conflicts)`);
+  log(`  npx organic-growth                  Install Claude Code templates`);
+  log(`  npx organic-growth --opencode       Install opencode templates`);
   log(`  npx organic-growth --force          Install templates (overwrite existing)`);
   log(`  npx organic-growth spec.md          Install templates + copy DNA document`);
   log('');
@@ -85,18 +88,24 @@ async function install() {
   }
 
   const force = args.includes('--force') || args.includes('-f');
+  const isOpencode = args.includes('--opencode');
   const dna = args.find(a => !a.startsWith('-') && a.endsWith('.md'));
 
   log('');
-  log(`${GREEN}🌱 Organic Growth${RESET} — Claude Code setup for incremental development`);
+  if (isOpencode) {
+    log(`${GREEN}🌱 Organic Growth${RESET} — opencode setup for incremental development`);
+  } else {
+    log(`${GREEN}🌱 Organic Growth${RESET} — Claude Code setup for incremental development`);
+  }
   log('');
 
-  const files = getAllFiles(TEMPLATES_DIR);
+  const templatesDir = isOpencode ? TEMPLATES_OPENCODE_DIR : TEMPLATES_DIR;
+  const files = getAllFiles(templatesDir);
   const created = [];
   const skipped = [];
 
   for (const file of files) {
-    const src = join(TEMPLATES_DIR, file);
+    const src = join(templatesDir, file);
     const dest = join(TARGET_DIR, file);
     const destDir = dirname(dest);
 
@@ -156,13 +165,23 @@ async function install() {
   log('');
   log(`${GREEN}Done!${RESET} Next steps:`);
   log('');
-  if (dna) {
-    info(`Run ${CYAN}/seed docs/product-dna.md${RESET} to bootstrap from your DNA document`);
+  if (isOpencode) {
+    if (dna) {
+      info(`Run ${CYAN}/seed docs/product-dna.md${RESET} to bootstrap from your DNA document`);
+    } else {
+      info(`Run ${CYAN}/seed${RESET} to bootstrap a new project (interview mode)`);
+      info(`Or: ${CYAN}/seed path/to/product-doc.md${RESET} if you have a product document`);
+    }
+    info(`Edit ${CYAN}AGENTS.md${RESET} to fill in your tech stack and quality tools`);
   } else {
-    info(`Run ${CYAN}/seed${RESET} to bootstrap a new project (interview mode)`);
-    info(`Or: ${CYAN}/seed path/to/product-doc.md${RESET} if you have a product document`);
+    if (dna) {
+      info(`Run ${CYAN}/seed docs/product-dna.md${RESET} to bootstrap from your DNA document`);
+    } else {
+      info(`Run ${CYAN}/seed${RESET} to bootstrap a new project (interview mode)`);
+      info(`Or: ${CYAN}/seed path/to/product-doc.md${RESET} if you have a product document`);
+    }
+    info(`Edit ${CYAN}CLAUDE.md${RESET} to fill in your tech stack and quality tools`);
   }
-  info(`Edit ${CYAN}CLAUDE.md${RESET} to fill in your tech stack and quality tools`);
   log('');
   log(`${DIM}Commands available after setup:${RESET}`);
   log(`  ${CYAN}/seed${RESET}    — bootstrap project (interview or DNA document)`);
@@ -170,6 +189,26 @@ async function install() {
   log(`  ${CYAN}/next${RESET}    — implement the next growth stage`);
   log(`  ${CYAN}/replan${RESET}  — re-evaluate when things change`);
   log(`  ${CYAN}/review${RESET}  — deep quality review of recent stages`);
+
+  if (!isOpencode) {
+    // Detect superpowers plugin (Claude Code only — opencode uses a different plugin system)
+    const homedir = process.env.HOME || process.env.USERPROFILE || '';
+    const pluginsDir = join(homedir, '.claude', 'plugins');
+    let hasSuperpowers = false;
+    if (existsSync(pluginsDir)) {
+      try {
+        const entries = readdirSync(pluginsDir, { recursive: true });
+        hasSuperpowers = entries.some(e => String(e).includes('superpowers'));
+      } catch { /* ignore */ }
+    }
+
+    if (hasSuperpowers) {
+      success(`Superpowers plugin detected — TDD, debugging, and brainstorming skills are integrated into commands and gardener`);
+    } else {
+      info(`Tip: Install the superpowers plugin for integrated TDD, debugging, and brainstorming process skills`);
+    }
+  }
+
   log('');
 }
 

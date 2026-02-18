@@ -35,16 +35,12 @@ You have three modes, determined by what you're asked to do:
    invariants. Use it to make informed planning decisions.
    If no, CLAUDE.md Product section is sufficient.
 3. Explore the codebase to understand current state
-3a. Check `docs/growth/` for other in-progress plans (Status: 🌱 Growing).
-    If another feature is actively growing in this working directory,
-    suggest the user consider a git worktree so both features can
-    grow in parallel without branch-switching overhead.
 4. Ask the user 2-3 clarifying questions — no more.
    Focus on: acceptance criteria, constraints, riskiest part.
 5. Create a growth plan in `docs/growth/<feature-name>.md`:
 
 ```markdown
-# Feature: <name>
+# 🌱 Feature: <name>
 Created: <date>
 Status: 🌱 Growing
 
@@ -54,7 +50,7 @@ Status: 🌱 Growing
 ## Growth Stages
 
 ### Concrete (next 3-5 stages, detailed)
-- ⬜ Stage 1: <description>
+- 🌱 Stage 1: <description>
   - Intent: <what this achieves>
   - Properties:
     - P1: <property statement> [invariant|transition|roundtrip|boundary]
@@ -64,12 +60,14 @@ Status: 🌱 Growing
   - Touches: <which areas of the code>
   - Implementation hint: <brief guidance for GROW mode>
 
-- ⬜ Stage 2: ...
+- 🌱 Stage 2: ...
 
 ### Horizon (rough outline of what comes after)
-- <rough stage description>
-- <rough stage description>
+- 🌿 <rough stage description>
+- 🌿 <rough stage description>
 - ...
+
+🌿 ─── ─── ─── 🌿
 
 ## Growth Log
 <!-- Auto-updated after each stage -->
@@ -143,18 +141,20 @@ This is the primary review gate.
 ## Mode: GROW (invoked by /next)
 
 1. Read the growth plan from `docs/growth/`
-2. Find the next ⬜ stage
+2. Find the next 🌱 stage
 3. Check the stage counter:
    - If this is stage 3, 6, 9... → re-evaluate the plan first
      (are remaining stages still correct? adjust if needed)
 4. Implement ONLY this stage:
    a. Read the stage's properties — these are your acceptance criteria
    b. Write tests that encode the properties FIRST:
+      - Follow red/green/refactor — write a failing test first, then the minimum code to pass it.
       - Each property (P1, P2, ...) becomes one or more tests
       - Tests express the RULE, not a specific scenario
       - Tests for properties from "Depends on" must still pass
    c. Write the code to make the property tests pass
    d. Quality gate — run ALL checks, fix before proceeding:
+      - Apply verification-before-completion: confirm every check passes before moving on.
       - Build: verify it compiles (`./gradlew build`, `npm run build`, etc.)
       - Lint: run the project linter (`./gradlew ktlintCheck`, `npm run lint`, etc.)
       - Type check: if applicable (`tsc --noEmit`, strict mode, etc.)
@@ -162,6 +162,7 @@ This is the primary review gate.
       - Smoke: app starts, health endpoint responds (or equivalent)
    e. If any check fails — fix it within this stage, don't leave it
       for the next one. Quality debt doesn't carry forward.
+      - Use systematic-debugging to isolate the root cause rather than guessing.
 5. Self-review:
    - Do ALL property tests for this stage pass?
    - Do ALL property tests from previous stages still pass?
@@ -172,22 +173,35 @@ This is the primary review gate.
      If yes — the plan has a gap. Note it in the growth log and
      flag to the user, but do not block the stage.
 6. Update the growth plan:
-   - Mark stage as ✅ with brief note of what was done
+   - Mark stage as 🌳 with brief note of what was done
    - Add entry to Growth Log with date
    - If this was a re-evaluation point, update upcoming stages
      (including their properties)
    - If all stages (Concrete + Horizon) are done, set
-     `Status: 🌳 Complete` at the top of the plan
+     `Status: 🌳 Complete` at the top of the plan and follow the finishing-a-development-branch checklist for PR preparation.
 7. Commit: `feat(scope): stage N — <what grew>`
 8. Report:
    - What grew
    - Properties verified (list P-numbers that pass)
    - Property gaps found (if any — from self-review step 5)
    - What's next
-   - Progress: "Stage 4/~12 — 🌱🌱🌱🌱⬜⬜⬜⬜..."
+   - Stage map — list every stage from the growth plan, one per line,
+     showing its status and title. Use these markers:
+       - `✅` — completed (done in a previous stage)
+       - `🌿` — current (active — the stage you just finished)
+       - `⬜` — upcoming (pending — not yet started)
+     Format each line as: `<marker> Stage N: <title>`
+     Example (after completing Stage 3 of a 5-stage plan):
+     ```
+     ✅ Stage 1: Hello world endpoint
+     ✅ Stage 2: Domain model with hardcoded data
+     🌿 Stage 3: Persistence layer
+     ⬜ Stage 4: Real business logic
+     ⬜ Stage 5: Input validation
+     ```
+     Include all stages — both Concrete and Horizon.
+     This stage progress section replaces the old single-line format.
    - If stage counter is multiple of 3: recommend `/clear` + new session
-   - If another feature needs attention, mention git worktrees as
-     an option for growing features in parallel directories
 
 ## Mode: REPLAN (invoked by /replan)
 

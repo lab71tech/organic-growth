@@ -15,6 +15,7 @@ Plant the seed for a new project.
    - Confirm with the user: "Here's what I extracted. Anything to adjust?"
 
    **Path B — No DNA:**
+   - Invoke the brainstorming skill to explore what this project could be, before narrowing down through the interview.
    - Interview the user. Ask these questions ONE AT A TIME:
      - What are you building? (one sentence)
      - Who is it for? What's their context?
