@@ -3,7 +3,7 @@
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 Created: 2026-02-17
-Status: 🌱 Growing
+Status: 🌳 Complete
 
 ## Seed (what & why)
 
@@ -103,7 +103,8 @@ Design document: `docs/plans/2026-02-17-opencode-support-design.md`
   - Touches: `templates-opencode/opencode.json`, `package.json`, `test/cli.test.mjs`
   - Implementation hint: opencode.json uses `{ "mcp": { "context7": { "type": "stdio", "command": "npx", "args": ["-y", "@upstash/context7-mcp"] } } }`. Package.json: add `"templates-opencode/"` to files, update description, add keyword.
 
-- 🌱 Stage 5: CLI messaging + help text polish
+- 🌳 Stage 5: CLI messaging + help text polish
+  - Done: Banner says "opencode setup" in --opencode mode. Next-steps references AGENTS.md (not CLAUDE.md) in opencode mode. --help lists --opencode option. Superpowers detection block is gated on !isOpencode. --force and DNA arg already worked (P32, P33 passed from previous stages). 6 property tests (P28-P33) all passing. Total: 163 tests.
   - Intent: Make the CLI output context-aware — banner, next-steps, and help text adjust for the selected tool. Skip superpowers detection in opencode mode.
   - Properties:
     - P28: CLI banner says "opencode setup" (not "Claude Code setup") when --opencode is used [invariant]
@@ -120,7 +121,6 @@ Design document: `docs/plans/2026-02-17-opencode-support-design.md`
       Captures: `npx organic-growth --opencode spec.md` ignores the DNA file
   - Depends on: P22-P27 (template set is complete, package metadata updated)
   - Touches: `bin/cli.mjs`, `test/cli.test.mjs`
-  - Implementation hint: Most changes are in the `install()` function. Use a boolean `isOpencode` derived from flag parsing. Conditionally adjust: banner text, next-steps file reference, superpowers section. Help text: add `--opencode` to the options list.
 
 ### Horizon (rough outline of what comes after)
 
@@ -133,6 +133,7 @@ Design document: `docs/plans/2026-02-17-opencode-support-design.md`
 
 ## Growth Log
 <!-- Auto-updated after each stage -->
+- 2026-02-18: Stage 5 complete (feature complete). Banner, next-steps, and help text adjusted for opencode mode. Superpowers detection gated on !isOpencode. --help now lists --opencode option. 6 property tests (P28-P33) all passing. Total: 163 tests.
 - 2026-02-18: Stage 4 complete. opencode.json created with Context7 MCP config. package.json description now mentions opencode; "opencode" keyword added. 6 property tests (P22-P27) all passing. Total: 195 tests.
 - 2026-02-18: Stage 3 complete. organic-growth.js plugin created: exports default function, tool.execute.after handler, reads test cmd from AGENTS.md, git diff review, commit format check. 7 property tests (P15-P21) all passing. Total: 189 tests.
 - 2026-02-18: Stage 2 complete. Gardener agent, 5 commands, 3 skills ported to `.opencode/` tree. Gardener uses opencode frontmatter (mode=subagent), references AGENTS.md. Commands drop superpowers refs, use @gardener invocation. Skills: property-planning and stage-writing identical; quality-gates references AGENTS.md. 8 property tests (P7-P14) all passing. Total: 182 tests.

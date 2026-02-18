@@ -2821,3 +2821,115 @@ describe('opencode: package.json metadata (P25, P26, P27)', () => {
     );
   });
 });
+
+// ─── Stage 5: CLI messaging + help text polish ────────────────────────────────
+
+describe('opencode: CLI banner in --opencode mode (P28)', () => {
+  it('P28: banner mentions "opencode" setup (not only "Claude Code") when --opencode is used', () => {
+    const { output } = runCLI(['--opencode']);
+    // The banner must contextually indicate opencode mode
+    assert.ok(
+      /opencode/i.test(output),
+      '--opencode install banner should mention "opencode"'
+    );
+  });
+});
+
+describe('opencode: next-steps references AGENTS.md in --opencode mode (P29)', () => {
+  it('P29: next-steps output references AGENTS.md (not CLAUDE.md) in --opencode mode', () => {
+    const { output } = runCLI(['--opencode']);
+    // Must mention AGENTS.md in the next-steps section
+    assert.ok(
+      output.includes('AGENTS.md'),
+      '--opencode install output should reference AGENTS.md in next steps'
+    );
+    // Must NOT tell opencode user to edit CLAUDE.md (it does not exist)
+    assert.ok(
+      !output.includes('CLAUDE.md'),
+      '--opencode install output should NOT reference CLAUDE.md'
+    );
+  });
+});
+
+describe('opencode: --help mentions --opencode option (P30)', () => {
+  it('P30: --help output includes --opencode option', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+    const output = execFileSync('node', [CLI_PATH, '--help'], {
+      cwd: tmp,
+      encoding: 'utf8',
+      timeout: 5000,
+    });
+    assert.ok(
+      output.includes('--opencode'),
+      '--help output should document the --opencode option'
+    );
+  });
+});
+
+describe('opencode: superpowers detection skipped in --opencode mode (P31)', () => {
+  it('P31: superpowers section is absent from --opencode install output', () => {
+    const { output } = runCLI(['--opencode']);
+    // In opencode mode the plugin detection block (which checks ~/.claude/plugins/)
+    // must not run — its output (the superpowers tip/detected line) must not appear.
+    assert.ok(
+      !/superpowers/i.test(output),
+      '--opencode install output should NOT mention superpowers (wrong tool\'s plugin dir)'
+    );
+  });
+});
+
+describe('opencode: --force flag works with --opencode (P32)', () => {
+  it('P32: --force flag causes files to be overwritten in --opencode mode', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+
+    // First install
+    execFileSync('node', [CLI_PATH, '--opencode', '--force'], {
+      cwd: tmp,
+      encoding: 'utf8',
+      timeout: 5000,
+    });
+
+    // Overwrite AGENTS.md with sentinel content
+    const agentsPath = join(tmp, 'AGENTS.md');
+    writeFileSync(agentsPath, 'SENTINEL CONTENT\n');
+
+    // Second install with --force should overwrite
+    execFileSync('node', [CLI_PATH, '--opencode', '--force'], {
+      cwd: tmp,
+      encoding: 'utf8',
+      timeout: 5000,
+    });
+
+    const content = readFileSync(agentsPath, 'utf8');
+    assert.ok(
+      !content.includes('SENTINEL CONTENT'),
+      '--force with --opencode should overwrite existing AGENTS.md'
+    );
+  });
+});
+
+describe('opencode: DNA file argument works with --opencode (P33)', () => {
+  it('P33: DNA file is copied to docs/product-dna.md when --opencode is used with a DNA argument', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+    const dnaContent = '# My Product DNA\n\nThis is test DNA content.\n';
+    writeFileSync(join(tmp, 'spec.md'), dnaContent);
+
+    const output = execFileSync('node', [CLI_PATH, '--opencode', '--force', 'spec.md'], {
+      cwd: tmp,
+      encoding: 'utf8',
+      timeout: 5000,
+    });
+
+    const dnaDest = join(tmp, 'docs', 'product-dna.md');
+    assert.ok(existsSync(dnaDest), '--opencode with DNA arg should copy DNA to docs/product-dna.md');
+    assert.equal(
+      readFileSync(dnaDest, 'utf8'),
+      dnaContent,
+      'DNA content should match source'
+    );
+    assert.ok(
+      output.includes('Product DNA copied'),
+      '--opencode should print DNA copied message'
+    );
+  });
+});
