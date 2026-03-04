@@ -11,13 +11,14 @@ Claude Code without structure produces inconsistent results — sprawling change
 
 ## How It Works
 - **One agent (gardener)** with three modes: PLAN, GROW, REPLAN
-- **Rolling plans** stored in `docs/growth/<feature>.md` — 3-5 concrete stages + horizon, with plant-themed visual markers for stage status
+- **Rolling plans** stored in `.organic-growth/growth/<feature>.md` — 3-5 concrete stages + horizon, with plant-themed visual markers for stage status
 - **One stage = one intent = one commit**
 - **Two-layer quality:** deterministic tools (build/lint/typecheck/test) after every stage, LLM deep review on demand. Post-stage hooks enforce this automatically: a test hook runs the test suite after every stage commit (deterministic gate), then a review hook injects the diff as review context
 - **Commit discipline:** a commit-format-check hook validates the `type(scope): stage N — description` convention before every commit
 - **Curated skills:** three skill files ship with the package — `property-planning`, `stage-writing`, `quality-gates` — giving the gardener agent domain knowledge out of the box
 - **MCP configuration:** a `.mcp.json` template pre-configures Context7 for library documentation lookup during planning
-- **Superpowers integration:** commands and gardener agent invoke superpowers process skills (brainstorming, TDD, systematic-debugging, code review) at decision points; CLI detects the plugin at install time and reports integration status
+- **Growth map support:** optional `.organic-growth/growth-map.md` gives a system-level capability sequence with statuses and links to plans
+- **Capability tags:** each growth plan includes searchable `Capabilities:` tags for related-plan discovery
 - **Context hygiene:** fresh session every 3 stages, plan file provides continuity
 
 ## Key Commands
@@ -51,4 +52,4 @@ v1.0.1 — Post-MVP, infrastructure mature. CLI installs templates with all comm
 ## Priorities
 1. Correctness of templates (gardener instructions, command definitions)
 2. Developer experience (clear README, easy install, helpful CLI output)
-3. Simplicity (resist adding features — one agent, five commands, that's it)
+3. Simplicity (resist unnecessary complexity — one agent, focused command set)

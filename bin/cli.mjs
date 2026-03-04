@@ -1,6 +1,15 @@
 #!/usr/bin/env node
 
-import { existsSync, mkdirSync, copyFileSync, readFileSync, readdirSync, statSync } from 'fs';
+import {
+  existsSync,
+  mkdirSync,
+  copyFileSync,
+  readFileSync,
+  readdirSync,
+  statSync,
+  renameSync,
+  writeFileSync
+} from 'fs';
 import { join, dirname, relative, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { createInterface } from 'readline';
@@ -45,6 +54,67 @@ function getAllFiles(dir, base = dir) {
   return files;
 }
 
+function migrateLegacyState(targetDir) {
+  const actions = [];
+  const ogRoot = join(targetDir, '.organic-growth');
+  const legacyDocsDir = join(targetDir, 'docs');
+  const legacyGrowthDir = join(legacyDocsDir, 'growth');
+  const legacyDna = join(legacyDocsDir, 'product-dna.md');
+  const newGrowthDir = join(ogRoot, 'growth');
+  const newDna = join(ogRoot, 'product-dna.md');
+
+  if (!existsSync(ogRoot)) {
+    mkdirSync(ogRoot, { recursive: true });
+  }
+
+  if (existsSync(legacyGrowthDir)) {
+    if (!existsSync(newGrowthDir)) {
+      renameSync(legacyGrowthDir, newGrowthDir);
+      actions.push('moved docs/growth/ -> .organic-growth/growth/');
+    } else {
+      const legacyFiles = getAllFiles(legacyGrowthDir);
+      let copiedAny = false;
+      for (const rel of legacyFiles) {
+        const src = join(legacyGrowthDir, rel);
+        const dest = join(newGrowthDir, rel);
+        const destDir = dirname(dest);
+        if (!existsSync(destDir)) {
+          mkdirSync(destDir, { recursive: true });
+        }
+        if (!existsSync(dest)) {
+          copyFileSync(src, dest);
+          copiedAny = true;
+        }
+      }
+      if (copiedAny) {
+        actions.push('merged files from docs/growth/ into .organic-growth/growth/');
+      }
+    }
+  }
+
+  if (existsSync(legacyDna) && !existsSync(newDna)) {
+    copyFileSync(legacyDna, newDna);
+    actions.push('copied docs/product-dna.md -> .organic-growth/product-dna.md');
+  }
+
+  const contextFiles = ['CLAUDE.md', 'AGENTS.md'];
+  for (const file of contextFiles) {
+    const fullPath = join(targetDir, file);
+    if (!existsSync(fullPath)) continue;
+    const before = readFileSync(fullPath, 'utf8');
+    const after = before
+      .replaceAll('docs/growth/', '.organic-growth/growth/')
+      .replaceAll('docs/product-dna.md', '.organic-growth/product-dna.md')
+      .replaceAll('docs/growth-map.md', '.organic-growth/growth-map.md');
+    if (after !== before) {
+      writeFileSync(fullPath, after);
+      actions.push(`updated paths in ${file}`);
+    }
+  }
+
+  return actions;
+}
+
 function readVersion() {
   const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf8'));
   return pkg.version;
@@ -59,17 +129,19 @@ function printHelp() {
   log('');
   log(`${CYAN}Options:${RESET}`);
   log(`  -f, --force     Overwrite existing files without prompting`);
+  log(`      --migrate   Move legacy docs/growth and docs/product-dna.md to .organic-growth/`);
   log(`  -h, --help      Show this help message`);
   log(`  -v, --version   Show version number`);
   log(`      --opencode  Install opencode templates (AGENTS.md + .opencode/)`);
   log('');
   log(`${CYAN}Arguments:${RESET}`);
-  log(`  dna-file.md     Path to a product DNA document to copy into docs/`);
+  log(`  dna-file.md     Path to a product DNA document to copy into .organic-growth/`);
   log('');
   log(`${CYAN}Examples:${RESET}`);
   log(`  npx organic-growth                  Install Claude Code templates`);
   log(`  npx organic-growth --opencode       Install opencode templates`);
   log(`  npx organic-growth --force          Install templates (overwrite existing)`);
+  log(`  npx organic-growth --migrate        Migrate legacy docs/ state into .organic-growth/`);
   log(`  npx organic-growth spec.md          Install templates + copy DNA document`);
   log('');
 }
@@ -88,6 +160,7 @@ async function install() {
   }
 
   const force = args.includes('--force') || args.includes('-f');
+  const migrate = args.includes('--migrate');
   const isOpencode = args.includes('--opencode');
   const dna = args.find(a => !a.startsWith('-') && a.endsWith('.md'));
 
@@ -129,22 +202,36 @@ async function install() {
     created.push(file);
   }
 
-  // Create docs/growth/ directory
-  const growthDir = join(TARGET_DIR, 'docs', 'growth');
+  // Create .organic-growth/growth/ directory
+  const growthDir = join(TARGET_DIR, '.organic-growth', 'growth');
   if (!existsSync(growthDir)) {
     mkdirSync(growthDir, { recursive: true });
-    created.push('docs/growth/');
+    created.push('.organic-growth/growth/');
   }
 
   // Handle DNA document
   if (dna) {
     const dnaSource = resolve(TARGET_DIR, dna);
     if (existsSync(dnaSource)) {
-      const dnaDest = join(TARGET_DIR, 'docs', 'product-dna.md');
+      const dnaDest = join(TARGET_DIR, '.organic-growth', 'product-dna.md');
+      mkdirSync(dirname(dnaDest), { recursive: true });
       copyFileSync(dnaSource, dnaDest);
       success(`Product DNA copied from ${dna}`);
     } else {
       warn(`DNA file not found: ${dna}`);
+    }
+  }
+
+  if (migrate) {
+    const migrated = migrateLegacyState(TARGET_DIR);
+    if (migrated.length > 0) {
+      log('');
+      log(`${GREEN}Migrated:${RESET}`);
+      for (const step of migrated) {
+        log(`  ${DIM}${step}${RESET}`);
+      }
+    } else {
+      info('No legacy docs/ state found to migrate');
     }
   }
 
@@ -167,7 +254,7 @@ async function install() {
   log('');
   if (isOpencode) {
     if (dna) {
-      info(`Run ${CYAN}/seed docs/product-dna.md${RESET} to bootstrap from your DNA document`);
+      info(`Run ${CYAN}/seed .organic-growth/product-dna.md${RESET} to bootstrap from your DNA document`);
     } else {
       info(`Run ${CYAN}/seed${RESET} to bootstrap a new project (interview mode)`);
       info(`Or: ${CYAN}/seed path/to/product-doc.md${RESET} if you have a product document`);
@@ -175,7 +262,7 @@ async function install() {
     info(`Edit ${CYAN}AGENTS.md${RESET} to fill in your tech stack and quality tools`);
   } else {
     if (dna) {
-      info(`Run ${CYAN}/seed docs/product-dna.md${RESET} to bootstrap from your DNA document`);
+      info(`Run ${CYAN}/seed .organic-growth/product-dna.md${RESET} to bootstrap from your DNA document`);
     } else {
       info(`Run ${CYAN}/seed${RESET} to bootstrap a new project (interview mode)`);
       info(`Or: ${CYAN}/seed path/to/product-doc.md${RESET} if you have a product document`);
@@ -186,28 +273,10 @@ async function install() {
   log(`${DIM}Commands available after setup:${RESET}`);
   log(`  ${CYAN}/seed${RESET}    — bootstrap project (interview or DNA document)`);
   log(`  ${CYAN}/grow${RESET}    — plan and start a new feature`);
+  log(`  ${CYAN}/map${RESET}     — view or adjust the system growth map`);
   log(`  ${CYAN}/next${RESET}    — implement the next growth stage`);
   log(`  ${CYAN}/replan${RESET}  — re-evaluate when things change`);
   log(`  ${CYAN}/review${RESET}  — deep quality review of recent stages`);
-
-  if (!isOpencode) {
-    // Detect superpowers plugin (Claude Code only — opencode uses a different plugin system)
-    const homedir = process.env.HOME || process.env.USERPROFILE || '';
-    const pluginsDir = join(homedir, '.claude', 'plugins');
-    let hasSuperpowers = false;
-    if (existsSync(pluginsDir)) {
-      try {
-        const entries = readdirSync(pluginsDir, { recursive: true });
-        hasSuperpowers = entries.some(e => String(e).includes('superpowers'));
-      } catch { /* ignore */ }
-    }
-
-    if (hasSuperpowers) {
-      success(`Superpowers plugin detected — TDD, debugging, and brainstorming skills are integrated into commands and gardener`);
-    } else {
-      info(`Tip: Install the superpowers plugin for integrated TDD, debugging, and brainstorming process skills`);
-    }
-  }
 
   log('');
 }

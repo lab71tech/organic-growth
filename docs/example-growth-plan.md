@@ -1,6 +1,7 @@
 # Feature: Task Completion
 Created: 2026-01-15
 Status: 🌱 Growing
+Capabilities: task-list, task-completion, todo-workflow, cli-commands
 
 ## Seed (what & why)
 

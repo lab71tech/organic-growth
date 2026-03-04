@@ -23,7 +23,7 @@ the implementation session.
    **Consistency:**
    - Does new code follow the same patterns as existing code?
    - Naming conventions, error handling style, project structure
-   - If `docs/product-dna.md` exists: do domain terms match?
+   - If `.organic-growth/product-dna.md` exists: do domain terms match?
 
    **Simplicity:**
    - Is anything over-engineered for the current stage?

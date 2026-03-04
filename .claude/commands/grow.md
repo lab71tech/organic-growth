@@ -4,16 +4,23 @@ description: Plan and start growing a new feature from seed
 
 Grow a new feature using the Organic Growth approach.
 
-1. Invoke the brainstorming skill to explore the problem space for: $ARGUMENTS
-   Think broadly about approaches, risks, and edge cases before committing to a plan.
+1. Before planning, briefly explore the problem space for: $ARGUMENTS
+   - What are 2-3 possible approaches?
+   - What is the riskiest assumption?
+   - What could fail or be harder than expected?
+   Think through this internally. Do not create separate brainstorming artifacts.
 2. Use the gardener agent in PLAN mode
 3. Feature to grow: $ARGUMENTS
-4. When reviewing the plan, focus on PROPERTIES (not implementation hints) —
+4. If `.organic-growth/growth-map.md` exists:
+   - If capability exists on the map: set status to 🌱 and add plan link
+   - If missing: add it in the best-fit section and note it was unplanned
+   - If this modifies a 🌳 capability: add as a sub-entry under the parent capability
+5. When reviewing the plan, focus on PROPERTIES (not implementation hints) —
    these are the primary quality gate. Ask yourself:
    - Are the properties complete? Could someone implement this WRONG
      and still pass all properties?
    - Are properties from earlier stages preserved in later ones?
-   - Do the properties express domain rules, not implementation details?
-5. After the plan is created and approved, ask:
+   - Do properties express domain rules, not implementation details?
+6. After the plan is created and approved, ask:
    "Plan ready. Start growing stage 1?"
-6. If yes, immediately proceed with GROW mode for stage 1
+7. If yes, immediately proceed with GROW mode for stage 1
