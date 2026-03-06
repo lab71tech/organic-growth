@@ -3,7 +3,7 @@
 ## Product (THE SEED — fill this in)
 
 <!-- Without this section, the agent grows weeds. Be brief but specific. -->
-<!-- If you have a full product document, put it in docs/product-dna.md -->
+<!-- If you have a full product document, put it in .organic-growth/product-dna.md -->
 <!-- This section is the distilled version — what the agent sees always. -->
 <!-- The DNA document is read only during planning (/grow, /replan). -->
 
@@ -12,7 +12,7 @@
 **Core problem:** [What pain does it solve?]
 **Key domain concepts:** [3-7 terms that someone new needs to understand]
 **Current state:** [Greenfield / MVP exists / Production system]
-**Full DNA:** [docs/product-dna.md if exists, otherwise "N/A"]
+**Full DNA:** [.organic-growth/product-dna.md if exists, otherwise "N/A"]
 
 ## Tech Stack (THE SOIL — auto-discovered, but document the non-obvious)
 
@@ -61,17 +61,17 @@ A seedling is a whole plant, not 10% of a tree.
    - Never plan more than 5 concrete stages ahead
    - Keep a rough outline of what comes after, but expect it to change
    - Re-evaluate the plan every 3 stages or when something unexpected happens
-   - Update `docs/growth/<feature>.md` after every stage
+   - Update `.organic-growth/growth/<feature>.md` after every stage
 
 3. **Vertical, not horizontal**
    - Each stage touches all layers needed (API + service + DB + test)
    - No "build all the backend first, then the frontend"
    - Early stages can return hardcoded values — that's natural
-   - Growth: hardcoded → configurable → dynamic → optimized
+   - Growth: hardcoded -> configurable -> dynamic -> optimized
 
 4. **Context hygiene**
    - Start a fresh session every 3 stages
-   - The growth plan in `docs/growth/` is the continuity mechanism
+   - The growth plan in `.organic-growth/growth/` is the continuity mechanism
    - After `/clear`, run `/next` — the agent reads the plan and continues
 
 5. **Quality gate after every stage**
@@ -107,10 +107,12 @@ For **existing** projects, first stages are:
 ```
 feat(scope): stage N — <what grew>
 
-Growth plan: docs/growth/<feature>.md
+Growth plan: .organic-growth/growth/<feature>.md
 ```
 
 ## Growth Plan Location
 
-All plans live in `docs/growth/<feature-name>.md`.
+All plans live in `.organic-growth/growth/<feature-name>.md`.
+Product DNA lives in `.organic-growth/product-dna.md`.
+Growth map lives in `.organic-growth/growth-map.md` (if exists).
 Format documented in the gardener agent.

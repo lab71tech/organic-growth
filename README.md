@@ -40,6 +40,7 @@ CLAUDE.md                           # Project context template + growth philosop
 ├── commands/
 │   ├── seed.md                     # /seed     — bootstrap new project
 │   ├── grow.md                     # /grow     — plan a new feature
+│   ├── map.md                      # /map      — view or adjust growth map
 │   ├── next.md                     # /next     — implement next stage
 │   ├── replan.md                   # /replan   — adjust when things change
 │   └── review.md                   # /review   — deep quality review
@@ -47,9 +48,13 @@ CLAUDE.md                           # Project context template + growth philosop
 │   ├── post-stage-test.sh          # Automatic test run after stage commits
 │   └── post-stage-review.sh        # Automatic diff review after stage commits
 └── settings.json                   # Claude Code hook configuration
+.organic-growth/
+├── product-dna.md                  # Full product DNA (structured)
+├── growth-map.md                   # System-level capability map (optional)
+└── growth/                         # One growth plan per feature
 ```
 
-Growth plan files (`docs/growth/*.md`) use plant-themed visual markers -- seedlings for pending stages, trees for completed ones, vines between sections -- so you can tell at a glance where a feature stands.
+Growth plan files (`.organic-growth/growth/*.md`) use plant-themed visual markers -- seedlings for pending stages, trees for completed ones, vines between sections -- so you can tell at a glance where a feature stands.
 
 A **post-stage test** hook and a **post-stage review** hook run automatically after every stage commit, in order:
 
@@ -63,10 +68,11 @@ Tests run first so failures are caught before the review. This makes the quality
 ```bash
 # 1. Bootstrap (new project)
 > /seed                          # interview mode
-> /seed docs/product-dna.md      # from existing product document
+> /seed .organic-growth/product-dna.md  # from existing product document
 
 # 2. Grow features
 > /grow Add user authentication
+> /map                           # check/update system-level growth sequence
 > /next                          # stage 1
 > /next                          # stage 2
 > /next                          # stage 3

@@ -19,6 +19,13 @@ each stage produces a complete, living system.
 
 # How You Work
 
+## Paths
+
+Growth plans, Product DNA, and growth map live in `.organic-growth/`:
+- Plans: `.organic-growth/growth/<feature-name>.md`
+- DNA: `.organic-growth/product-dna.md`
+- Map: `.organic-growth/growth-map.md`
+
 You have three modes, determined by what you're asked to do:
 
 ## Mode: PLAN (invoked by /grow)
@@ -30,20 +37,39 @@ You have three modes, determined by what you're asked to do:
    it in now." If the user describes the project, fill in the
    Product/Tech Stack/Priorities sections before continuing.
 1. Read AGENTS.md to understand the product (seed), stack (soil),
-   and priorities (light & water)
-2. Check if `docs/product-dna.md` exists. If yes, read it —
-   it contains the full domain knowledge, business rules, and
-   invariants. Use it to make informed planning decisions.
-   If no, AGENTS.md Product section is sufficient.
-3. Explore the codebase to understand current state
+   and priorities (light & water).
+2. Check if `.organic-growth/product-dna.md` exists. If yes, read it.
+   Pay special attention to:
+   - Business Rules (`BR-*`): global invariants.
+     Properties tied to a rule should reference it: `Refs: BR-3`.
+   - Core Domain Concepts: use these exact names in code.
+     If planning introduces a new concept, add it to DNA after delivery.
+   - Users & Roles: permission properties should reference these roles.
+   If no DNA exists, AGENTS.md Product section is sufficient.
+2b. Check if `.organic-growth/growth-map.md` exists. If yes, read it.
+    Use it to:
+    - Understand what capabilities already exist (🌳)
+    - Follow map links to completed plans and their properties
+    - See expected sequence and likely dependencies
+    If no map exists, search related plans by tag:
+    `grep -r "Capabilities:" .organic-growth/growth/`.
+3. Explore the codebase to understand current state.
+   Search for related growth plans:
+   a. If map exists: follow links to relevant 🌳 plans.
+   b. If no map: find likely related plans by overlapping capability tags.
+   c. If related plans are found: treat their completed properties as
+      constraints. Preserve with `Depends on` or explicitly declare
+      `Breaks: <plan/property> — <reason>`.
+   d. If no related plans are found: proceed normally.
 4. Ask the user 2-3 clarifying questions — no more.
    Focus on: acceptance criteria, constraints, riskiest part.
-5. Create a growth plan in `docs/growth/<feature-name>.md`:
+5. Create a growth plan in `.organic-growth/growth/<feature-name>.md`:
 
 ```markdown
 # 🌱 Feature: <name>
 Created: <date>
 Status: 🌱 Growing
+Capabilities: <3-7 domain tags, comma-separated>
 
 ## Seed (what & why)
 <one paragraph: what this feature does and why it matters>
@@ -56,8 +82,10 @@ Status: 🌱 Growing
   - Properties:
     - P1: <property statement> [invariant|transition|roundtrip|boundary]
       Captures: <what bug this prevents>
+      Refs: BR-<n> (optional)
     - P2: ...
   - Depends on: (properties from earlier stages that must still hold)
+  - Breaks: <plan/property> — <reason> (optional, only for intentional breaks)
   - Touches: <which areas of the code>
   - Implementation hint: <brief guidance for GROW mode>
 
@@ -76,11 +104,12 @@ Status: 🌱 Growing
 
 ### Planning Principles
 - First stage is always the simplest possible thing that proves
-  the idea works end-to-end (even with hardcoded values)
-- Order by: risk reduction first, then user value
-- Each stage must be vertical (touch all necessary layers)
-- If a stage feels bigger than "one intent" — split it
-- For greenfield: follow the greenfield pattern from AGENTS.md
+  the idea works end-to-end (even with hardcoded values).
+- Order by: risk reduction first, then user value.
+- Each stage must be vertical (touch all necessary layers).
+- If a stage feels bigger than "one intent" — split it.
+- Use 3-7 domain capability tags per plan.
+- For greenfield: follow the greenfield pattern from AGENTS.md.
 
 ### Property-Based Planning
 
@@ -141,27 +170,28 @@ This is the primary review gate.
 
 ## Mode: GROW (invoked by /next)
 
-1. Read the growth plan from `docs/growth/`
-2. Find the next 🌱 stage
+1. Read the growth plan from `.organic-growth/growth/`.
+2. Find the next 🌱 stage.
 3. Check the stage counter:
    - If this is stage 3, 6, 9... → re-evaluate the plan first
-     (are remaining stages still correct? adjust if needed)
+     (are remaining stages still correct? adjust if needed).
 4. Implement ONLY this stage:
-   a. Read the stage's properties — these are your acceptance criteria
+   a. Read the stage's properties — these are your acceptance criteria.
    b. Write tests that encode the properties FIRST:
       - Follow red/green/refactor — write a failing test first, then the minimum code to pass it.
-      - Each property (P1, P2, ...) becomes one or more tests
-      - Tests express the RULE, not a specific scenario
-      - Tests for properties from "Depends on" must still pass
-   c. Write the code to make the property tests pass
+      - Each property (P1, P2, ...) becomes one or more tests.
+      - Tests express the RULE, not a specific scenario.
+      - Tests for properties from "Depends on" must still pass.
+   c. Write the code to make the property tests pass.
    d. Quality gate — run ALL checks, fix before proceeding:
-      - Build: verify it compiles (`./gradlew build`, `npm run build`, etc.)
-      - Lint: run the project linter (`./gradlew ktlintCheck`, `npm run lint`, etc.)
-      - Type check: if applicable (`tsc --noEmit`, strict mode, etc.)
-      - Tests: ALL tests pass — current stage AND all previous properties
-      - Smoke: app starts, health endpoint responds (or equivalent)
+      - Build: verify it compiles (`./gradlew build`, `npm run build`, etc.).
+      - Lint: run the project linter (`./gradlew ktlintCheck`, `npm run lint`, etc.).
+      - Type check: if applicable (`tsc --noEmit`, strict mode, etc.).
+      - Tests: ALL tests pass — current stage AND all previous properties.
+      - Smoke: app starts, health endpoint responds (or equivalent).
    e. If any check fails — fix it within this stage, don't leave it
       for the next one. Quality debt doesn't carry forward.
+      - Debug systematically: read the error, reproduce, hypothesize, verify.
 5. Self-review:
    - Do ALL property tests for this stage pass?
    - Do ALL property tests from previous stages still pass?
@@ -172,13 +202,22 @@ This is the primary review gate.
      If yes — the plan has a gap. Note it in the growth log and
      flag to the user, but do not block the stage.
 6. Update the growth plan:
-   - Mark stage as 🌳 with brief note of what was done
-   - Add entry to Growth Log with date
+   - Mark stage as 🌳 with brief note of what was done.
+   - Add entry to Growth Log with date.
    - If this was a re-evaluation point, update upcoming stages
-     (including their properties)
+     (including their properties).
    - If all stages (Concrete + Horizon) are done, set
      `Status: 🌳 Complete` at the top of the plan.
-7. Commit: `feat(scope): stage N — <what grew>`
+     If working on a feature branch: summarize what was built,
+     list verified properties, and note open PR items.
+6b. If `.organic-growth/growth-map.md` exists:
+    - Update this capability status to 🌳.
+    - After reporting, suggest: "Growth map updated. What grows next?"
+6c. If `.organic-growth/product-dna.md` exists and this stage introduced
+    new domain concepts not in DNA:
+    - Add them to Core Domain Concepts.
+    - Note in growth log: "Added concept: <name> to DNA".
+7. Commit: `feat(scope): stage N — <what grew>`.
 8. Report:
    - What grew
    - Properties verified (list P-numbers that pass)
@@ -194,34 +233,38 @@ This is the primary review gate.
 
 ## Mode: REPLAN (invoked by /replan)
 
-1. Read the current growth plan
-2. Read the user's reason for replanning
-3. If `docs/product-dna.md` exists, consult it — the reason for
-   replanning may relate to domain rules or business invariants
-4. Assess current state: what's built, what works, what changed
+1. Read the current growth plan.
+2. Read the user's reason for replanning.
+3. If `.organic-growth/product-dna.md` exists, consult it — the reason for
+   replanning may relate to domain rules or business invariants.
+4. Assess current state: what's built, what works, what changed.
 5. Rewrite the Concrete stages (next 3-5) from current state,
-   including new properties per stage
+   including new properties per stage.
 6. Verify property accumulation: new stages must not invalidate
    properties from completed stages. If they do, flag this
    explicitly — it means a breaking change.
-7. Update the Horizon section
-8. Do NOT undo or modify completed stages
+7. Update the Horizon section.
+8. Do NOT undo or modify completed stages.
 9. Report what changed and why, including:
    - Properties added, removed, or modified
    - Properties from completed stages that may be at risk
+10. If `.organic-growth/growth-map.md` exists and this replan changes
+    scope significantly, flag it:
+    "This replan may affect the growth map. Review growth-map.md
+    after completing this feature."
 
 # Critical Rules
 
-- NEVER implement more than one stage per /next invocation
-- NEVER plan more than 5 concrete stages ahead
-- ALWAYS define properties before describing implementation
-- ALWAYS write property tests before writing implementation code
-- ALWAYS run build + tests + smoke check before committing
-- ALWAYS update the growth plan after each stage
+- NEVER implement more than one stage per /next invocation.
+- NEVER plan more than 5 concrete stages ahead.
+- ALWAYS define properties before describing implementation.
+- ALWAYS write property tests before writing implementation code.
+- ALWAYS run build + tests + smoke check before committing.
+- ALWAYS update the growth plan after each stage.
 - Properties from completed stages are PERMANENT — they must
   keep passing. If a new stage needs to break an old property,
   this is a REPLAN, not a quiet change.
-- If a stage reveals the plan is wrong, STOP and replan before continuing
-- Hardcoded values are natural in early stages — don't optimize prematurely
-- The growth plan file is the source of truth, not your memory
-- If you don't understand the domain, ASK — don't guess
+- If a stage reveals the plan is wrong, STOP and replan before continuing.
+- Hardcoded values are natural in early stages — don't optimize prematurely.
+- The growth plan file is the source of truth, not your memory.
+- If you don't understand the domain, ASK — don't guess.

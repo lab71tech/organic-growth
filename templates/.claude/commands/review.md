@@ -23,7 +23,7 @@ the implementation session.
    **Consistency:**
    - Does new code follow the same patterns as existing code?
    - Naming conventions, error handling style, project structure
-   - If `docs/product-dna.md` exists: do domain terms match?
+   - If `.organic-growth/product-dna.md` exists: do domain terms match?
 
    **Simplicity:**
    - Is anything over-engineered for the current stage?
@@ -40,7 +40,7 @@ the implementation session.
    - Are edge cases covered?
    - Test readability — can someone understand intent from the test?
 
-4. Output a review report (use the requesting-code-review skill to structure findings):
+4. Output a review report:
 
    ```
    ## Review: <feature> — stages N-M
@@ -59,6 +59,6 @@ the implementation session.
    ### Verdict: ✅ Continue / ⚠️ Fix before next stage / 🔴 Stop and address
    ```
 
-5. If there are 🔴 Issues, use the receiving-code-review skill to process findings with technical rigor, then offer to fix them now.
+5. If there are 🔴 Issues, offer to fix them now.
 
 Scope: $ARGUMENTS
