@@ -21,6 +21,6 @@ Grow a new feature using the Organic Growth approach.
      and still pass all properties?
    - Are properties from earlier stages preserved in later ones?
    - Do properties express domain rules, not implementation details?
-6. After the plan is created and approved, ask:
-   "Plan ready. Start growing stage 1?"
-7. If yes, immediately proceed with GROW mode for stage 1
+6. After the plan is created and approved, STOP here.
+   Do NOT start implementing stage 1.
+   Say: "Plan ready. Run `/next` when you're ready to grow stage 1."

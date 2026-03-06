@@ -64,6 +64,12 @@ Plant the seed for a new project.
    - Mark `project-bootstrap` as 🌱
    - Present as aspirational, not a commitment
 
-6. Ask: "Seed planted. Start growing stage 1?"
+6. Present a summary of what was created:
+   - Product DNA (`.organic-growth/product-dna.md`)
+   - AGENTS.md Product/Tech Stack/Priorities sections
+   - Growth plan (`.organic-growth/growth/project-bootstrap.md`)
+   - Growth map (`.organic-growth/growth-map.md`, if generated)
+7. STOP here. Do NOT start implementing stage 1.
+   Say: "Seed planted. Review the files above, then run `/next` when you're ready to grow stage 1."
 
 Input: $ARGUMENTS
