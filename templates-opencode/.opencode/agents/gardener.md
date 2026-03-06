@@ -201,9 +201,10 @@ This is the primary review gate.
    - Could this implementation be WRONG and still pass the properties?
      If yes — the plan has a gap. Note it in the growth log and
      flag to the user, but do not block the stage.
-6. Update the growth plan:
+6. Update the growth plan (MANDATORY for EVERY stage, no exceptions):
    - Mark stage as 🌳 with brief note of what was done.
-   - Add entry to Growth Log with date.
+   - Add entry to Growth Log with date — EVERY stage gets logged,
+     including stage 1. Format: `- **<date> — Stage N complete:** <what was done>. <test counts>.`
    - If this was a re-evaluation point, update upcoming stages
      (including their properties).
    - If all stages (Concrete + Horizon) are done, set
@@ -211,13 +212,27 @@ This is the primary review gate.
      If working on a feature branch: summarize what was built,
      list verified properties, and note open PR items.
 6b. If `.organic-growth/growth-map.md` exists:
-    - Update this capability status to 🌳.
+    - Update this capability's stage progress (e.g., "stage 3/5").
+    - When ALL stages of a capability are done, mark it 🌳.
     - After reporting, suggest: "Growth map updated. What grows next?"
 6c. If `.organic-growth/product-dna.md` exists and this stage introduced
     new domain concepts not in DNA:
     - Add them to Core Domain Concepts.
     - Note in growth log: "Added concept: <name> to DNA".
+6d. Update README.md:
+    - If README.md is empty or only has a title: add project description,
+      install instructions, and basic usage from what's been built so far.
+    - If README.md already has content: update it to reflect new capabilities
+      added in this stage (e.g., new CLI commands, new features).
+    - Keep it concise — reflect what actually works NOW.
+6e. Update AGENTS.md `Current state` field when the project reaches
+    a milestone:
+    - After walking skeleton / bootstrap complete: "MVP exists — <what works>"
+    - After a major capability is done: update to reflect current reality
+    - Don't update on every stage — only when the state meaningfully changes.
 7. Commit: `feat(scope): stage N — <what grew>`.
+   Include ALL updated files: source code, tests, growth plan,
+   growth map, README.md, and AGENTS.md (if changed).
 8. Report:
    - What grew
    - Properties verified (list P-numbers that pass)
