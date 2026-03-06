@@ -93,7 +93,7 @@ Good: "cart.items contains no duplicate productIds — adding an
 existing product increments quantity"
 
 Bad:  "total should be correct after adding items"
-Good: "cart.total = Σ(item.price × item.quantity) — invariant,
+Good: "cart.total = item.price x item.quantity — invariant,
 always true regardless of operation sequence"
 
 For each stage, consider ALL of these property categories:
@@ -147,6 +147,12 @@ This is the primary review gate.
      (are remaining stages still correct? adjust if needed)
 4. Implement ONLY this stage:
    a. Read the stage's properties — these are your acceptance criteria
+      i. Self-check properties for implementation leaks: scan each
+         property for function names, class names, table names, column
+         names, or other implementation details. If any are found,
+         rewrite the property to express the domain rule it represents
+         before proceeding. Properties must describe WHAT the system
+         guarantees, not HOW the code is structured.
    b. Write tests that encode the properties FIRST:
       - Follow red/green/refactor — write a failing test first, then the minimum code to pass it.
       - Each property (P1, P2, ...) becomes one or more tests
@@ -169,17 +175,38 @@ This is the primary review gate.
    - Is this stage vertical? (touches all needed layers)
    - Did I only implement ONE intent?
    - Did I smuggle in work from future stages?
+   - Is there test utility duplication across test files that should
+     be extracted to a shared fixture/helper?
    - Could this implementation be WRONG and still pass the properties?
      If yes — the plan has a gap. Note it in the growth log and
      flag to the user, but do not block the stage.
 6. Update the growth plan:
    - Mark stage as 🌳 with brief note of what was done
-   - Add entry to Growth Log with date
+   - Add entry to Growth Log using this format:
+     ```
+     ### <date> — Stage N: <title>
+     - <1-2 sentences: what was built, key decisions>
+     - Properties verified: P1, P2, ...
+     ```
    - If this was a re-evaluation point, update upcoming stages
      (including their properties)
+   - If all Concrete stages are done but Horizon stages remain, set
+     `Status: 🌿 Concrete complete — run /grow to plan next stages or /next to promote horizon stages`
    - If all stages (Concrete + Horizon) are done, set
-     `Status: 🌳 Complete` at the top of the plan and follow the finishing-a-development-branch checklist for PR preparation.
-7. Commit: `feat(scope): stage N — <what grew>`
+     `Status: 🌳 Complete` at the top of the plan and follow the
+     finishing-a-development-branch checklist for PR preparation.
+     When preparing the PR, include a PR body that:
+     - Summarizes all stages completed (one line each)
+     - Links to the growth plan: `docs/growth/<feature>.md`
+     - Lists key properties verified across the feature
+     - Notes any known gaps or future work
+7. Commit with message and body:
+   ```
+   feat(scope): stage N — <what grew>
+
+   <1-2 sentences: what was added, key decisions>
+   Growth plan: docs/growth/<feature>.md
+   ```
 8. Report:
    - What grew
    - Properties verified (list P-numbers that pass)
@@ -191,17 +218,10 @@ This is the primary review gate.
        - `🌿` — current (active — the stage you just finished)
        - `⬜` — upcoming (pending — not yet started)
      Format each line as: `<marker> Stage N: <title>`
-     Example (after completing Stage 3 of a 5-stage plan):
-     ```
-     ✅ Stage 1: Hello world endpoint
-     ✅ Stage 2: Domain model with hardcoded data
-     🌿 Stage 3: Persistence layer
-     ⬜ Stage 4: Real business logic
-     ⬜ Stage 5: Input validation
-     ```
      Include all stages — both Concrete and Horizon.
-     This stage progress section replaces the old single-line format.
-   - If stage counter is multiple of 3: recommend `/clear` + new session
+   - If stage counter is multiple of 3: STOP here. Run /clear and
+     start a new session before continuing to stage N+1. Context
+     hygiene prevents accumulated bias from degrading quality.
 
 ## Mode: REPLAN (invoked by /replan)
 
@@ -229,6 +249,7 @@ This is the primary review gate.
 - ALWAYS write property tests before writing implementation code
 - ALWAYS run build + tests + smoke check before committing
 - ALWAYS update the growth plan after each stage
+- Branch naming: use `feature/<feature-name>` (e.g., `feature/project-bootstrap`), not `feature/stage-N`
 - Properties from completed stages are PERMANENT — they must
   keep passing. If a new stage needs to break an old property,
   this is a REPLAN, not a quiet change.

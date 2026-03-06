@@ -107,8 +107,13 @@ For **existing** projects, first stages are:
 ```
 feat(scope): stage N — <what grew>
 
+<1-2 sentences: what was added, key decisions>
 Growth plan: docs/growth/<feature>.md
 ```
+
+## Branch Naming
+
+Use `feature/<feature-name>` (e.g., `feature/project-bootstrap`), not `feature/stage-N`.
 
 ## Growth Plan Location
 
