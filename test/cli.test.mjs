@@ -547,6 +547,90 @@ describe('Upgrade mode (--upgrade)', () => {
   });
 });
 
+describe('Upgrade CLI output (Stage 3)', () => {
+  const pkg = JSON.parse(readFileSync(PKG_PATH, 'utf8'));
+
+  // P13: --help output includes --upgrade with description
+  it('P13: --help includes --upgrade with description mentioning managed files and user customizations', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+    const output = execFileSync('node', [CLI_PATH, '--help'], {
+      cwd: tmp, encoding: 'utf8', timeout: 5000,
+    });
+    const clean = output.replace(/\x1b\[[0-9;]*m/g, '');
+
+    assert.ok(clean.includes('--upgrade'), 'help should include --upgrade flag');
+    assert.ok(/--upgrade.*managed/i.test(clean) || /--upgrade[\s\S]*managed/i.test(clean.split('\n').join(' ')),
+      'help --upgrade description should mention managed files');
+  });
+
+  // P14: Fresh install output mentions --upgrade for future upgrades
+  it('P14: fresh install "Done!" output mentions --upgrade for future upgrades', () => {
+    const { output } = runCLI();
+    const clean = output.replace(/\x1b\[[0-9;]*m/g, '');
+
+    assert.ok(/--upgrade/i.test(clean), 'fresh install output should mention --upgrade');
+    assert.ok(/upgrade/i.test(clean), 'fresh install output should mention upgrading');
+  });
+
+  it('P14: fresh install --opencode output also mentions --upgrade', () => {
+    const { output } = runCLI(['--opencode']);
+    const clean = output.replace(/\x1b\[[0-9;]*m/g, '');
+
+    assert.ok(/--upgrade/i.test(clean), 'opencode fresh install output should mention --upgrade');
+  });
+
+  // P15: --upgrade output does NOT show first-time setup instructions
+  it('P15: --upgrade output does not show /seed or "edit CLAUDE.md" instructions', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+    execFileSync('node', [CLI_PATH, '--force'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    const output = execFileSync('node', [CLI_PATH, '--upgrade'], {
+      cwd: tmp, encoding: 'utf8', timeout: 10000,
+    });
+    const clean = output.replace(/\x1b\[[0-9;]*m/g, '');
+
+    // Should not contain instructional lines like "Run /seed" or "Edit CLAUDE.md"
+    // (file names like seed.md in the updated list are fine — we're checking for setup instructions)
+    assert.ok(!/Run\s+\/seed/i.test(clean), 'upgrade output should not instruct to run /seed');
+    assert.ok(!/edit\s+(CLAUDE\.md|AGENTS\.md)/i.test(clean), 'upgrade output should not mention editing CLAUDE.md or AGENTS.md');
+    assert.ok(!/Next steps/i.test(clean), 'upgrade output should not show "Next steps"');
+    assert.ok(!/Commands available/i.test(clean), 'upgrade output should not show "Commands available" section');
+  });
+
+  // P16: --upgrade output shows summary line with counts
+  it('P16: --upgrade output shows summary with count of files updated and skipped', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+    execFileSync('node', [CLI_PATH, '--force'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    const output = execFileSync('node', [CLI_PATH, '--upgrade'], {
+      cwd: tmp, encoding: 'utf8', timeout: 10000,
+    });
+    const clean = output.replace(/\x1b\[[0-9;]*m/g, '');
+
+    // Should contain counts — e.g., "3 updated, 1 skipped" or similar
+    assert.ok(/\d+\s+updated/i.test(clean), 'upgrade output should show count of updated files');
+    assert.ok(/\d+\s+skipped/i.test(clean), 'upgrade output should show count of skipped files');
+  });
+
+  it('P16: --upgrade with no user files to skip shows 0 skipped', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+    execFileSync('node', [CLI_PATH, '--force'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    // Delete all user files so nothing gets skipped
+    for (const f of ['CLAUDE.md', '.mcp.json']) {
+      const p = join(tmp, f);
+      if (existsSync(p)) unlinkSync(p);
+    }
+
+    const output = execFileSync('node', [CLI_PATH, '--upgrade'], {
+      cwd: tmp, encoding: 'utf8', timeout: 10000,
+    });
+    const clean = output.replace(/\x1b\[[0-9;]*m/g, '');
+
+    assert.ok(/0\s+skipped/i.test(clean), 'should show 0 skipped when no user files exist');
+  });
+});
+
 describe('Package metadata', () => {
   it('package includes templates and templates-opencode in files array', () => {
     const pkg = JSON.parse(readFileSync(PKG_PATH, 'utf8'));

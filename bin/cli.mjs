@@ -129,6 +129,7 @@ function printHelp() {
   log('');
   log(`${CYAN}Options:${RESET}`);
   log(`  -f, --force     Overwrite existing files without prompting`);
+  log(`      --upgrade   Update managed files while preserving user customizations`);
   log(`      --migrate   Move legacy docs/growth and docs/product-dna.md to .organic-growth/`);
   log(`  -h, --help      Show this help message`);
   log(`  -v, --version   Show version number`);
@@ -141,6 +142,7 @@ function printHelp() {
   log(`  npx organic-growth                  Install Claude Code templates`);
   log(`  npx organic-growth --opencode       Install opencode templates`);
   log(`  npx organic-growth --force          Install templates (overwrite existing)`);
+  log(`  npx organic-growth --upgrade         Update managed files, keep user customizations`);
   log(`  npx organic-growth --migrate        Migrate legacy docs/ state into .organic-growth/`);
   log(`  npx organic-growth spec.md          Install templates + copy DNA document`);
   log('');
@@ -249,7 +251,7 @@ async function install() {
     writeFileSync(join(ogDir, '.version'), toVersion);
 
     log('');
-    log(`${GREEN}Done!${RESET} Upgrade complete.`);
+    log(`${GREEN}Done!${RESET} ${updated.length} updated, ${skippedUser.length} skipped.`);
     log('');
   } else {
     // Normal install flow
@@ -368,6 +370,8 @@ async function install() {
     log(`  ${CYAN}/replan${RESET}  — re-evaluate when things change`);
     log(`  ${CYAN}/review${RESET}  — deep quality review of recent stages`);
 
+    log('');
+    log(`${DIM}To upgrade later: npx organic-growth --upgrade${RESET}`);
     log('');
   }
 }

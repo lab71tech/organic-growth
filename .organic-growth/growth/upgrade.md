@@ -48,7 +48,7 @@ An `--upgrade` flag for the organic-growth CLI that distinguishes between manage
   - Touches: `bin/cli.mjs`, `test/cli.test.mjs`
   - Implementation hint: Add `--upgrade` to arg parsing. When upgrade mode: iterate template files, classify each as managed or user-customized based on filename (CLAUDE.md, AGENTS.md, .mcp.json, opencode.json are user files — everything else is managed). For managed files that exist: overwrite. For user files that exist: skip. For files that don't exist: only create if managed. Read existing `.version` for display. Write new `.version` at end. Error if both --upgrade and --force.
 
-- Stage 3: Help text, CLI output, and documentation
+- 🌳 Stage 3: Help text, CLI output, and documentation
   - Intent: Update --help output to document --upgrade, update post-install output to mention upgrade path, and ensure the upgrade workflow is discoverable.
   - Properties:
     - P13: `--help` output includes `--upgrade` with a description that mentions updating managed files while preserving user customizations [invariant]
@@ -87,3 +87,4 @@ An `--upgrade` flag for the organic-growth CLI that distinguishes between manage
 <!-- Auto-updated after each stage -->
 - **2026-03-07 — Stage 1 complete:** Added `.organic-growth/.version` file written at end of every install (fresh, --force, --opencode). Contains exact semver string from package.json. 5 property tests added (P1-P5), all passing. 61/63 tests pass (2 pre-existing failures from docs/ migration unrelated to this stage).
 - **2026-03-07 — Stage 2 complete:** Added `--upgrade` flag that overwrites managed files (.claude/, .opencode/) while preserving user-customized files (CLAUDE.md, AGENTS.md, .mcp.json, opencode.json). User files that don't exist are not created. Output shows updated/skipped lists and version info (from/to or "unknown"). --upgrade and --force are mutually exclusive. 14 property tests added (P6-P12), all 77 tests passing.
+- **2026-03-07 — Stage 3 complete:** Added `--upgrade` to `--help` output with description. Fresh install now shows "To upgrade later: npx organic-growth --upgrade". Upgrade completion shows summary counts ("N updated, M skipped") instead of first-time setup instructions. 6 property tests added (P13-P16), all 45 tests passing.
