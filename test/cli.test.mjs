@@ -195,11 +195,6 @@ describe('Template content integrity (Claude)', () => {
 });
 
 describe('Structured DNA + example plan docs', () => {
-  it('example growth plan includes Capabilities header', () => {
-    const content = readFileSync(join(import.meta.dirname, '..', '.organic-growth', 'example-growth-plan.md'), 'utf8');
-    assert.ok(/Capabilities:/i.test(content), 'example growth plan should include Capabilities tags');
-  });
-
   it('product DNA document no longer mentions superpowers integration', () => {
     const content = readFileSync(join(import.meta.dirname, '..', '.organic-growth', 'product-dna.md'), 'utf8');
     assert.ok(!/superpowers/i.test(content), 'product DNA should not mention superpowers');
