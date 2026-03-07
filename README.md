@@ -113,7 +113,7 @@ A **post-stage test** hook and a **post-stage review** hook run automatically af
 
 Tests run first so failures are caught before the review. This makes the quality gate deterministic — tests always run after stage commits, regardless of whether the agent remembers to.
 
-Codex support uses prompt files in `.codex/prompts/`. Launch Codex with `CODEX_HOME=.codex codex` to use the repo-local Organic Growth prompts. Claude-style post-stage hooks are not currently installed for Codex. Upgrade auto-detects the installed target when the repo contains only one managed config tree, but the explicit form `npx organic-growth --upgrade --codex` is also supported.
+Codex support uses prompt files in `.codex/prompts/`. Launch Codex with `CODEX_HOME=.codex codex` to use the repo-local Organic Growth prompts. Depending on Codex UI, they may not appear in a slash-command picker; if they do not, type `/grow`, `/next`, `/review`, and the other prompts directly. Claude-style post-stage hooks are not currently installed for Codex. Upgrade auto-detects the installed target when the repo contains only one managed config tree, but the explicit form `npx organic-growth --upgrade --codex` is also supported.
 
 ## Workflow
 
@@ -167,7 +167,7 @@ The gardener agent handles the full property format — categories, failure anal
 
 1. Edit `CLAUDE.md` or `AGENTS.md` — fill in the Product section (or run `/seed`)
 2. Fill in Quality Tools section with your project's lint/test commands
-3. For Codex, launch with `CODEX_HOME=.codex codex`
+3. For Codex, launch with `CODEX_HOME=.codex codex`; if no Organic Growth slash menu appears, invoke `/grow` or the other prompts directly
 4. Start building with `/grow`
 
 See the [example growth plan](.organic-growth/example-growth-plan.md) to see properties, stages, and accumulation in action.

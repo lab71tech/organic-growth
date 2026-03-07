@@ -294,6 +294,8 @@ describe('Codex installation', () => {
 
     assert.ok(output.includes('AGENTS.md'), 'output should reference AGENTS.md');
     assert.ok(output.includes('CODEX_HOME=.codex codex'), 'output should mention CODEX_HOME launch instructions');
+    assert.ok(output.includes('If Codex does not list them in a slash menu'), 'output should explain slash-menu fallback behavior');
+    assert.ok(output.includes('Prompts available after setup:'), 'output should label codex actions as prompts');
     assert.ok(output.includes('npx organic-growth --upgrade --codex'), 'output should mention the codex upgrade command');
   });
 });
@@ -308,6 +310,7 @@ describe('Template content integrity (Codex)', () => {
     assert.ok(content.includes('.organic-growth/product-dna.md'), 'should reference product DNA in .organic-growth');
     assert.ok(content.includes('.codex/prompts/'), 'should reference .codex prompt locations');
     assert.ok(content.includes('CODEX_HOME=.codex codex'), 'should mention CODEX_HOME launch instructions');
+    assert.ok(content.includes('may not appear in a slash-command picker'), 'should explain prompt visibility expectations');
   });
 
   it('prompts reference .organic-growth and contain no subagent or superpowers references', () => {

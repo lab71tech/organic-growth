@@ -1,44 +1,37 @@
 # Project Context
 
-## Product (THE SEED — fill this in)
+## Product (THE SEED)
 
-<!-- Without this section, the agent grows weeds. Be brief but specific. -->
-<!-- If you have a full product document, put it in .organic-growth/product-dna.md -->
-<!-- This section is the distilled version — what the agent sees always. -->
-<!-- The DNA document is read only during planning (/grow, /replan). -->
+**What:** A CLI tool and template system that installs an incremental development workflow (agents, commands, hooks, skills) into any project using Codex or opencode.
+**For whom:** Developers using AI-assisted coding who want structured, reviewable, incremental feature growth instead of monolithic changes.
+**Core problem:** AI coding agents produce large, hard-to-review changes. Organic Growth constrains the agent into small vertical stages with properties-first planning and quality gates, so every commit is a working system.
+**Key domain concepts:** Growth Stage, Property (invariant rule), Growth Plan, Product DNA, Growth Map, Gardener Agent, Quality Gate, Context Hygiene
+**Current state:** Production — published on npm v3.x with CI/CD pipeline
+**Full DNA:** .organic-growth/product-dna.md
 
-**What:** [One sentence. What is this product?]
-**For whom:** [Who uses it? What's their context?]
-**Core problem:** [What pain does it solve?]
-**Key domain concepts:** [3-7 terms that someone new needs to understand]
-**Current state:** [Greenfield / MVP exists / Production system]
-**Full DNA:** [.organic-growth/product-dna.md if exists, otherwise "N/A"]
+## Tech Stack (THE SOIL)
 
-## Tech Stack (THE SOIL — auto-discovered, but document the non-obvious)
+- Node.js >= 20, zero runtime dependencies
+- CLI entry point: `bin/cli.mjs` (pure ESM)
+- Templates copied to target projects — no transpilation, no bundling
+- Supports both Codex (`.Codex/`) and opencode (`.opencode/`) template sets
+- Tests use Node's built-in test runner (`node:test` + `node:assert/strict`)
+- Published to npm with provenance; works with both `npx` and `bunx`
 
-<!-- Codex reads your build files. Only add what it CAN'T discover. -->
+### Quality tools
 
-- [Any non-standard commands, e.g.: `./gradlew test --profile staging`]
-- [Unusual conventions, e.g.: "endpoint names in Polish"]
-- [Hard constraints, e.g.: "no Lombok", "Flyway not Liquibase"]
-
-### Quality tools (fill in for your project)
-
-<!-- Organic Growth runs these after every stage. List the exact commands. -->
-
-- **Build:** [e.g.: `./gradlew build` or `npm run build`]
-- **Lint:** [e.g.: `./gradlew ktlintCheck` or `npm run lint`]
-- **Type check:** [e.g.: `tsc --noEmit` or N/A for dynamic languages]
-- **Test:** [e.g.: `./gradlew test` or `npm test`]
-- **Smoke:** [e.g.: `curl http://localhost:8080/health` or `npm run dev` + check]
+- **Build:** N/A (no build step — plain JS)
+- **Lint:** N/A
+- **Type check:** N/A (plain JavaScript)
+- **Test:** `node --test`
+- **Smoke:** `node bin/cli.mjs --help` and `node bin/cli.mjs --version`
 
 ## Priorities (LIGHT & WATER — what matters now)
 
-<!-- This changes. Update it when priorities shift. -->
-
-- [e.g.: "MVP speed over production polish"]
-- [e.g.: "Must work offline first"]
-- [e.g.: "Security is non-negotiable, even for MVP"]
+- Zero dependencies — the CLI must remain dependency-free
+- Upgrade safety — `--upgrade` must never overwrite user-customized files
+- Template quality — commands, agents, and skills are the core product; they must produce excellent growth plans
+- Dual-platform parity — Codex and opencode templates should offer equivalent functionality
 
 ---
 
@@ -70,9 +63,9 @@ A seedling is a whole plant, not 10% of a tree.
    - Growth: hardcoded -> configurable -> dynamic -> optimized
 
 4. **Context hygiene**
-   - Start a fresh Codex session every 3 stages
+   - Start a fresh session every 3 stages
    - The growth plan in `.organic-growth/growth/` is the continuity mechanism
-   - Relaunch Codex with `CODEX_HOME=.codex codex` before continuing if context gets stale
+   - After `/clear`, run `/next` — the agent reads the plan and continues
 
 5. **Quality gate after every stage**
    - Build must pass
@@ -115,5 +108,4 @@ Growth plan: .organic-growth/growth/<feature>.md
 All plans live in `.organic-growth/growth/<feature-name>.md`.
 Product DNA lives in `.organic-growth/product-dna.md`.
 Growth map lives in `.organic-growth/growth-map.md` (if exists).
-Prompt files live in `.codex/prompts/` and are used when you launch Codex with `CODEX_HOME=.codex codex`.
-Depending on Codex UI, these prompts may not appear in a slash-command picker; if they do not, type `/grow`, `/next`, `/review`, and the other Organic Growth prompts directly.
+Format documented in the gardener agent.

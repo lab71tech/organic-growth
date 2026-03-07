@@ -421,9 +421,11 @@ async function install() {
     info(`Edit ${CYAN}${targetConfig.contextFile}${RESET} to fill in your tech stack and quality tools`);
     if (target === 'codex') {
       info(`Launch Codex with ${CYAN}CODEX_HOME=.codex codex${RESET} so the installed prompts are used for this repo`);
+      info(`If Codex does not list them in a slash menu, type ${CYAN}/grow${RESET}, ${CYAN}/next${RESET}, or the other Organic Growth prompts directly`);
     }
     log('');
-    log(`${DIM}Commands available after setup:${RESET}`);
+    const availableLabel = target === 'codex' ? 'Prompts available after setup:' : 'Commands available after setup:';
+    log(`${DIM}${availableLabel}${RESET}`);
     log(`  ${CYAN}/seed${RESET}    — bootstrap project (interview or DNA document)`);
     log(`  ${CYAN}/grow${RESET}    — plan and start a new feature`);
     log(`  ${CYAN}/map${RESET}     — view or adjust the system growth map`);
