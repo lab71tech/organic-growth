@@ -50,7 +50,22 @@ Plant the seed for a project.
    - If Business Rules are missing, ask: "Any rules that must ALWAYS hold?"
    - Confirm with the user: "Here's what I extracted. Anything to adjust?"
 
-   **Path B — No DNA:**
+   **Path B1 — Existing project, no DNA (EXISTING = true):**
+   - Present what you discovered in Step 0 to the user:
+     "Here's what I discovered about your project:" followed by a summary of
+     the tech stack, quality tools, and any product context from README.md.
+   - Ask the user to confirm or adjust what was discovered.
+   - Then ask only gap-filling questions ONE AT A TIME (skip any already
+     answered by the discoveries):
+     - What core problem does this project solve?
+     - What business rules must ALWAYS be true?
+     - What are the current priorities? (e.g., new feature, refactor, stabilize)
+     - Any hard constraints? (performance, compliance, deployment, backwards compatibility)
+   - Generate `.organic-growth/product-dna.md` using the structured template.
+     Leave missing sections as `<!-- to be filled -->`.
+   - Fill in AGENTS.md Product section from discoveries + answers.
+
+   **Path B2 — Greenfield, no DNA (EXISTING = false):**
    - Before the interview, briefly consider what this project could be:
      what kind of system, likely domain risks, and which questions matter most.
      Do not create separate brainstorming artifacts.

@@ -960,6 +960,131 @@ describe('Seed template: auto-discovery checklist (seed-existing-project Stage 2
   });
 });
 
+describe('Seed template: interview path split (seed-existing-project Stage 3)', () => {
+  const claudeSeed = readFileSync(join(import.meta.dirname, '..', 'templates', '.claude', 'commands', 'seed.md'), 'utf8');
+  const opencodeSeed = readFileSync(join(import.meta.dirname, '..', 'templates-opencode', '.opencode', 'commands', 'seed.md'), 'utf8');
+
+  // Helper: extract Path B1 (existing project, no DNA) from template
+  function getPathB1(content) {
+    const match = content.match(/Path B1[^\n]*existing[^\n]*[\s\S]*?(?=\n\s*\*\*Path B2)/im);
+    assert.ok(match, 'should have a Path B1 for existing projects');
+    return match[0];
+  }
+
+  // Helper: extract Path B2 (greenfield, no DNA) from template
+  function getPathB2(content) {
+    const match = content.match(/Path B2[^\n]*[Gg]reenfield[^\n]*[\s\S]*?(?=\n\d+\.)/m);
+    assert.ok(match, 'should have a Path B2 for greenfield projects');
+    return match[0];
+  }
+
+  // P8: existing project path does NOT contain greenfield questions
+  it('P8: Claude Path B1 does not ask "What are you building?"', () => {
+    const b1 = getPathB1(claudeSeed);
+    assert.ok(!/What are you building/i.test(b1),
+      'Path B1 should not ask "What are you building?" for existing projects');
+  });
+
+  it('P8: Claude Path B1 does not ask "What tech stack do you want?"', () => {
+    const b1 = getPathB1(claudeSeed);
+    assert.ok(!/What tech stack do you want/i.test(b1),
+      'Path B1 should not ask "What tech stack do you want?" for existing projects');
+  });
+
+  it('P8: opencode Path B1 does not ask "What are you building?"', () => {
+    const b1 = getPathB1(opencodeSeed);
+    assert.ok(!/What are you building/i.test(b1),
+      'Path B1 should not ask "What are you building?" for existing projects');
+  });
+
+  it('P8: opencode Path B1 does not ask "What tech stack do you want?"', () => {
+    const b1 = getPathB1(opencodeSeed);
+    assert.ok(!/What tech stack do you want/i.test(b1),
+      'Path B1 should not ask "What tech stack do you want?" for existing projects');
+  });
+
+  // P9: existing project path presents discoveries first and asks user to confirm
+  it('P9: Claude Path B1 presents auto-discovered context first', () => {
+    const b1 = getPathB1(claudeSeed);
+    assert.ok(/discovered/i.test(b1),
+      'Path B1 should mention presenting what was discovered');
+  });
+
+  it('P9: Claude Path B1 asks user to confirm or adjust discovered context', () => {
+    const b1 = getPathB1(claudeSeed);
+    assert.ok(/confirm|adjust/i.test(b1),
+      'Path B1 should ask user to confirm or adjust');
+  });
+
+  it('P9: opencode Path B1 presents auto-discovered context first', () => {
+    const b1 = getPathB1(opencodeSeed);
+    assert.ok(/discovered/i.test(b1),
+      'Path B1 should mention presenting what was discovered');
+  });
+
+  it('P9: opencode Path B1 asks user to confirm or adjust discovered context', () => {
+    const b1 = getPathB1(opencodeSeed);
+    assert.ok(/confirm|adjust/i.test(b1),
+      'Path B1 should ask user to confirm or adjust');
+  });
+
+  // P10: existing project path asks only gap-filling questions
+  const gapQuestions = ['core problem', 'business rules', 'priorities', 'constraints'];
+
+  for (const question of gapQuestions) {
+    it(`P10: Claude Path B1 asks about ${question}`, () => {
+      const b1 = getPathB1(claudeSeed);
+      assert.ok(b1.toLowerCase().includes(question),
+        `Path B1 should ask about ${question}`);
+    });
+
+    it(`P10: opencode Path B1 asks about ${question}`, () => {
+      const b1 = getPathB1(opencodeSeed);
+      assert.ok(b1.toLowerCase().includes(question),
+        `Path B1 should ask about ${question}`);
+    });
+  }
+
+  // P11: greenfield path preserves the full original interview question set
+  const greenfieldQuestions = [
+    'What are you building?',
+    'Who is it for?',
+    'What core problem does it solve?',
+    'What tech stack do you want?',
+    'Any hard constraints?',
+    'priority',
+    'user roles',
+    'business rules',
+    'process flow',
+  ];
+
+  for (const question of greenfieldQuestions) {
+    it(`P11: Claude Path B2 preserves greenfield question: "${question}"`, () => {
+      const b2 = getPathB2(claudeSeed);
+      assert.ok(b2.toLowerCase().includes(question.toLowerCase()),
+        `Path B2 should contain "${question}" for greenfield projects`);
+    });
+
+    it(`P11: opencode Path B2 preserves greenfield question: "${question}"`, () => {
+      const b2 = getPathB2(opencodeSeed);
+      assert.ok(b2.toLowerCase().includes(question.toLowerCase()),
+        `Path B2 should contain "${question}" for greenfield projects`);
+    });
+  }
+
+  // P4 (carried): templates remain structurally identical
+  it('P4: Claude and opencode seed templates remain structurally identical after path split', () => {
+    const normalize = (s) => s
+      .replace(/CLAUDE\.md/g, 'CONFIG.md')
+      .replace(/AGENTS\.md/g, 'CONFIG.md')
+      .replace(/\.claude\b/g, '.configdir')
+      .replace(/\.opencode\b/g, '.configdir');
+
+    assert.equal(normalize(claudeSeed), normalize(opencodeSeed),
+      'templates should be identical after normalizing config file references');
+  });
+});
+
 describe('Package metadata', () => {
   it('package includes templates and templates-opencode in files array', () => {
     const pkg = JSON.parse(readFileSync(PKG_PATH, 'utf8'));

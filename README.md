@@ -41,7 +41,7 @@ CLAUDE.md                           # Project context template + growth philosop
 ├── agents/
 │   └── gardener.md                 # Plans, implements, and validates growth stages
 ├── commands/
-│   ├── seed.md                     # /seed     — bootstrap new project
+│   ├── seed.md                     # /seed     — plant the seed (new or existing project)
 │   ├── grow.md                     # /grow     — plan a new feature
 │   ├── map.md                      # /map      — view or adjust growth map
 │   ├── next.md                     # /next     — implement next stage

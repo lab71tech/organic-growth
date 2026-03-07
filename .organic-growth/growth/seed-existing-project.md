@@ -40,7 +40,7 @@ The `/seed` command currently assumes greenfield projects: its description says 
   - Touches: templates/.claude/commands/seed.md, templates-opencode/.opencode/commands/seed.md, test/cli.test.mjs
   - Implementation hint: Expand Step 0's existing-project branch with the explicit checklist. The checklist is instructions for the agent (markdown), not executable code.
 
-- Stage 3: Interview path split -- existing vs greenfield questions
+- 🌳 Stage 3: Interview path split -- existing vs greenfield questions (done)
   - Intent: When an existing project is detected, replace the greenfield interview questions with discovery-first questions that document what already exists, then ask only about gaps the code cannot reveal.
   - Properties:
     - P8: When existing project is detected (Step 0 = EXISTING), Path B does NOT contain the questions "What are you building?" or "What tech stack do you want?" [invariant]
@@ -96,3 +96,4 @@ The `/seed` command currently assumes greenfield projects: its description says 
 <!-- Auto-updated after each stage -->
 - **2026-03-07 -- Stage 1 complete:** Removed greenfield-only language from seed template frontmatter and opening line. Restructured Step 0 into a clear EXISTING = true/false detection gate. Synced both Claude Code and opencode templates. 7 tests added, all pass.
 - **2026-03-07 -- Stage 2 complete:** Added explicit auto-discovery checklist to Step 0 naming 10 file types (package.json, build.gradle/.kts, pyproject.toml, Cargo.toml, go.mod, pom.xml, Makefile, README.md, GitHub/GitLab CI configs) with extraction instructions for each. Added Quality Tools population instructions with user confirmation gate. 22 tests added, 86 total pass.
+- **2026-03-07 -- Stage 3 complete:** Split Path B into Path B1 (existing project) and Path B2 (greenfield). B1 presents auto-discovered context first, asks user to confirm/adjust, then asks only gap-filling questions (core problem, business rules, priorities, constraints). B2 preserves original greenfield interview verbatim. Both Claude Code and opencode templates updated in parity. 39 tests added, 159 total pass.
