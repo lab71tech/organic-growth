@@ -6,6 +6,9 @@
 # Wired via .claude/settings.json PostToolUse hook.
 # Runs BEFORE the review hook so tests gate the review.
 # Requires: jq (for JSON I/O). Silently exits if jq is missing.
+#
+# Test command is auto-discovered from the **Test:** field in CLAUDE.md.
+# If the field is empty or contains a placeholder, the hook exits silently.
 
 # Bail out if jq is not available
 command -v jq >/dev/null 2>&1 || exit 0
@@ -27,17 +30,36 @@ if ! echo "$COMMIT_MSG" | grep -qiE 'stage [0-9]+'; then
   exit 0
 fi
 
+# Discover the test command from CLAUDE.md
+CLAUDE_MD="CLAUDE.md"
+if [ ! -f "$CLAUDE_MD" ]; then
+  exit 0
+fi
+
+# Extract content between backticks after **Test:**
+TEST_CMD=$(sed -n 's/.*\*\*Test:\*\*.*`\([^`]*\)`.*/\1/p' "$CLAUDE_MD" | head -1)
+
+# Exit silently if no test command found or if it's a placeholder
+if [ -z "$TEST_CMD" ]; then
+  exit 0
+fi
+if echo "$TEST_CMD" | grep -qE '^\[e\.g\.|^\['; then
+  exit 0
+fi
+
 # This was a stage commit — run tests
 SUBJECT=$(git log -1 --pretty=%s 2>/dev/null)
 
 echo "🧪 Running quality gate tests..." >&2
 
-TEST_OUTPUT=$(node --test 2>&1 || true)
+# Safety: eval is acceptable here because CLAUDE.md is local project config
+# authored by the team, not untrusted external input.
+TEST_OUTPUT=$(eval "$TEST_CMD" 2>&1 || true)
 
 # Cap output to 100 lines to avoid overwhelming context
 TEST_OUTPUT=$(echo "$TEST_OUTPUT" | tail -100)
 
-if echo "$TEST_OUTPUT" | grep -qE '# fail [1-9]|failing|not ok'; then
+if echo "$TEST_OUTPUT" | grep -qE '# fail [1-9]|failing|not ok|FAIL|FAILED'; then
   echo "❌ Tests failed after: ${SUBJECT}" >&2
   TEST_CONTEXT="TESTS FAILED after stage commit: ${SUBJECT}
 
