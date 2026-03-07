@@ -1,6 +1,6 @@
 {
   "name": "organic-growth",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "description": "Claude Code and opencode setup for incremental software development — grow features in natural stages",
   "bin": {
     "organic-growth": "bin/cli.mjs"
