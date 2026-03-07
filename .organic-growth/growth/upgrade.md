@@ -1,6 +1,6 @@
 # Feature: upgrade
 Created: 2026-03-07
-Status: Growing
+Status: 🌳 Complete
 Capabilities: upgrade, version-tracking, cli, managed-files, user-files, templates
 
 ## Seed (what & why)
@@ -63,7 +63,7 @@ An `--upgrade` flag for the organic-growth CLI that distinguishes between manage
   - Touches: `bin/cli.mjs`, `test/cli.test.mjs`
   - Implementation hint: Add `--upgrade` line to `printHelp()`. Modify post-install output to show "To upgrade later: npx organic-growth --upgrade". When in upgrade mode, show a different completion message with summary counts instead of first-time setup instructions.
 
-- Stage 4: .organic-growth/growth/ directory preserved on upgrade and new managed files added
+- 🌳 Stage 4: .organic-growth/growth/ directory preserved on upgrade and new managed files added
   - Intent: Ensure upgrade handles edge cases: the `.organic-growth/growth/` directory and its contents are never touched, new template files that didn't exist in the previous version are created, and the DNA file is not affected.
   - Properties:
     - P17: When --upgrade is passed, files inside `.organic-growth/growth/` are never modified, deleted, or overwritten [invariant]
@@ -88,3 +88,4 @@ An `--upgrade` flag for the organic-growth CLI that distinguishes between manage
 - **2026-03-07 — Stage 1 complete:** Added `.organic-growth/.version` file written at end of every install (fresh, --force, --opencode). Contains exact semver string from package.json. 5 property tests added (P1-P5), all passing. 61/63 tests pass (2 pre-existing failures from docs/ migration unrelated to this stage).
 - **2026-03-07 — Stage 2 complete:** Added `--upgrade` flag that overwrites managed files (.claude/, .opencode/) while preserving user-customized files (CLAUDE.md, AGENTS.md, .mcp.json, opencode.json). User files that don't exist are not created. Output shows updated/skipped lists and version info (from/to or "unknown"). --upgrade and --force are mutually exclusive. 14 property tests added (P6-P12), all 77 tests passing.
 - **2026-03-07 — Stage 3 complete:** Added `--upgrade` to `--help` output with description. Fresh install now shows "To upgrade later: npx organic-growth --upgrade". Upgrade completion shows summary counts ("N updated, M skipped") instead of first-time setup instructions. 6 property tests added (P13-P16), all 45 tests passing.
+- **2026-03-07 — Stage 4 complete:** Verified upgrade preserves `.organic-growth/growth/` files and `product-dna.md`, creates new managed files, and does not redundantly re-create the growth directory. No code changes needed -- existing design already satisfies all properties. 7 property tests added (P17-P20), all 90 tests passing.

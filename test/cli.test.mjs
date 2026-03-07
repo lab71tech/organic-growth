@@ -631,6 +631,128 @@ describe('Upgrade CLI output (Stage 3)', () => {
   });
 });
 
+describe('Upgrade preserves .organic-growth/ contents (Stage 4)', () => {
+  // P17: Files inside .organic-growth/growth/ are never modified, deleted, or overwritten
+  it('P17: --upgrade does not modify files inside .organic-growth/growth/', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+    execFileSync('node', [CLI_PATH, '--force'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    // Create growth plans
+    const growthDir = join(tmp, '.organic-growth', 'growth');
+    writeFileSync(join(growthDir, 'my-feature.md'), '# My Feature Plan\nStatus: Growing\n');
+    writeFileSync(join(growthDir, 'done-feature.md'), '# Done Feature\nStatus: Complete\n');
+
+    // Run upgrade
+    execFileSync('node', [CLI_PATH, '--upgrade'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    // Growth plans must be untouched
+    assert.equal(
+      readFileSync(join(growthDir, 'my-feature.md'), 'utf8'),
+      '# My Feature Plan\nStatus: Growing\n',
+      'growth plan should not be modified by upgrade'
+    );
+    assert.equal(
+      readFileSync(join(growthDir, 'done-feature.md'), 'utf8'),
+      '# Done Feature\nStatus: Complete\n',
+      'completed growth plan should not be modified by upgrade'
+    );
+  });
+
+  it('P17: --upgrade does not delete files from .organic-growth/growth/', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+    execFileSync('node', [CLI_PATH, '--force'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    const growthDir = join(tmp, '.organic-growth', 'growth');
+    writeFileSync(join(growthDir, 'feature.md'), '# Feature\n');
+
+    execFileSync('node', [CLI_PATH, '--upgrade'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    assert.ok(existsSync(join(growthDir, 'feature.md')), 'growth plan file should still exist after upgrade');
+  });
+
+  // P18: .organic-growth/product-dna.md is never modified or overwritten
+  it('P18: --upgrade does not modify .organic-growth/product-dna.md', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+    execFileSync('node', [CLI_PATH, '--force'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    // Create a DNA file
+    const dnaPath = join(tmp, '.organic-growth', 'product-dna.md');
+    writeFileSync(dnaPath, '# My Product DNA\n\nCustom content here.\n');
+
+    execFileSync('node', [CLI_PATH, '--upgrade'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    assert.equal(
+      readFileSync(dnaPath, 'utf8'),
+      '# My Product DNA\n\nCustom content here.\n',
+      'product-dna.md should not be modified by upgrade'
+    );
+  });
+
+  it('P18: --upgrade does not create product-dna.md if it does not exist', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+    execFileSync('node', [CLI_PATH, '--force'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    // Ensure no DNA file
+    const dnaPath = join(tmp, '.organic-growth', 'product-dna.md');
+    assert.ok(!existsSync(dnaPath), 'precondition: no DNA file');
+
+    execFileSync('node', [CLI_PATH, '--upgrade'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    assert.ok(!existsSync(dnaPath), 'product-dna.md should not be created by upgrade');
+  });
+
+  // P19: New managed files from templates are created during upgrade
+  it('P19: --upgrade creates new managed files that did not exist before', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+    execFileSync('node', [CLI_PATH, '--force'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    // Delete a managed file to simulate it not existing in the previous version
+    const managedFile = join(tmp, '.claude', 'settings.json');
+    assert.ok(existsSync(managedFile), 'precondition: managed file exists after fresh install');
+    unlinkSync(managedFile);
+
+    // Run upgrade — the "new" managed file should be created
+    const output = execFileSync('node', [CLI_PATH, '--upgrade'], {
+      cwd: tmp, encoding: 'utf8', timeout: 10000,
+    });
+
+    assert.ok(existsSync(managedFile), 'new managed file should be created during upgrade');
+    // It should appear in the "updated" list
+    const clean = output.replace(/\x1b\[[0-9;]*m/g, '');
+    assert.ok(clean.includes('.claude/settings.json'), 'new managed file should appear in upgrade output');
+  });
+
+  it('P19: --upgrade --opencode creates new managed files that did not exist before', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+    execFileSync('node', [CLI_PATH, '--force', '--opencode'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    // Delete a managed opencode file
+    const managedFile = join(tmp, '.opencode', 'agents', 'gardener.md');
+    assert.ok(existsSync(managedFile), 'precondition: opencode managed file exists');
+    unlinkSync(managedFile);
+
+    execFileSync('node', [CLI_PATH, '--upgrade', '--opencode'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    assert.ok(existsSync(managedFile), 'new opencode managed file should be created during upgrade');
+  });
+
+  // P20: .organic-growth/growth/ directory is not re-created if it already exists
+  it('P20: --upgrade does not show growth directory in output when it already exists', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+    execFileSync('node', [CLI_PATH, '--force'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    assert.ok(existsSync(join(tmp, '.organic-growth', 'growth')), 'precondition: growth dir exists');
+
+    const output = execFileSync('node', [CLI_PATH, '--upgrade'], {
+      cwd: tmp, encoding: 'utf8', timeout: 10000,
+    });
+    const clean = output.replace(/\x1b\[[0-9;]*m/g, '');
+
+    // Should not mention .organic-growth/growth/ as created or updated
+    assert.ok(!clean.includes('.organic-growth/growth'), 'upgrade output should not mention .organic-growth/growth/ directory');
+  });
+});
+
 describe('Package metadata', () => {
   it('package includes templates and templates-opencode in files array', () => {
     const pkg = JSON.parse(readFileSync(PKG_PATH, 'utf8'));
