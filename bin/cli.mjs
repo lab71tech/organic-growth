@@ -249,6 +249,14 @@ async function install() {
     }
   }
 
+  // Write version file after all templates and DNA are handled
+  const versionFilePath = join(TARGET_DIR, '.organic-growth', '.version');
+  const ogDir = dirname(versionFilePath);
+  if (!existsSync(ogDir)) {
+    mkdirSync(ogDir, { recursive: true });
+  }
+  writeFileSync(versionFilePath, readVersion());
+
   log('');
   log(`${GREEN}Done!${RESET} Next steps:`);
   log('');

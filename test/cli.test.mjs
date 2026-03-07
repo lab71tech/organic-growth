@@ -249,6 +249,60 @@ describe('opencode installation', () => {
   });
 });
 
+describe('Version file (.organic-growth/.version)', () => {
+  const pkg = JSON.parse(readFileSync(PKG_PATH, 'utf8'));
+
+  // P1: Fresh install writes .version with exact package version, no trailing whitespace
+  it('P1: fresh install creates .version with exact package version string', () => {
+    const { tmp } = runCLI();
+    const versionFile = join(tmp, '.organic-growth', '.version');
+    assert.ok(existsSync(versionFile), '.version file should exist after fresh install');
+    const content = readFileSync(versionFile, 'utf8');
+    assert.equal(content, pkg.version, '.version should contain exactly the semver string from package.json');
+  });
+
+  // P2: --force install writes .version
+  it('P2: --force install creates .version with current package version', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+    // Pre-populate to make --force meaningful
+    mkdirSync(join(tmp, '.organic-growth'), { recursive: true });
+    writeFileSync(join(tmp, '.organic-growth', '.version'), '0.0.0');
+    const { output } = runCLI([], tmp); // runCLI already includes --force
+    const content = readFileSync(join(tmp, '.organic-growth', '.version'), 'utf8');
+    assert.equal(content, pkg.version, '.version should be updated to current version on --force install');
+  });
+
+  // P3: --opencode install writes .version
+  it('P3: --opencode install creates .version with current package version', () => {
+    const { tmp } = runCLI(['--opencode']);
+    const versionFile = join(tmp, '.organic-growth', '.version');
+    assert.ok(existsSync(versionFile), '.version should exist after --opencode install');
+    const content = readFileSync(versionFile, 'utf8');
+    assert.equal(content, pkg.version, '.version should contain current version in opencode mode');
+  });
+
+  // P4: version file is written AFTER template files (verified by checking both exist)
+  it('P4: version file exists alongside all template files (written after templates)', () => {
+    const { tmp } = runCLI();
+    // Templates must exist
+    assert.ok(existsSync(join(tmp, 'CLAUDE.md')), 'CLAUDE.md should exist before .version is meaningful');
+    assert.ok(existsSync(join(tmp, '.claude')), '.claude directory should exist');
+    // Version file must also exist
+    assert.ok(existsSync(join(tmp, '.organic-growth', '.version')), '.version should exist after all templates');
+  });
+
+  // P5: version file contains only parseable semver string
+  it('P5: .version contains only a semver string, no JSON or extra content', () => {
+    const { tmp } = runCLI();
+    const content = readFileSync(join(tmp, '.organic-growth', '.version'), 'utf8');
+    // Must match semver pattern exactly (no wrapping, no newline, no extra text)
+    assert.match(content, /^\d+\.\d+\.\d+$/, '.version should be a clean semver string');
+    // Must not contain JSON markers
+    assert.ok(!content.includes('{'), '.version should not contain JSON');
+    assert.ok(!content.includes('"'), '.version should not contain quotes');
+  });
+});
+
 describe('Package metadata', () => {
   it('package includes templates and templates-opencode in files array', () => {
     const pkg = JSON.parse(readFileSync(PKG_PATH, 'utf8'));
