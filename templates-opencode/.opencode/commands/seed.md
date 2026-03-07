@@ -17,7 +17,7 @@ Plant the seed for a new project.
 
    **Path A — DNA exists:**
    - Read the document
-   - Distill it into AGENTS.md Product section (~10 lines: what, for whom,
+   - Distill it into CLAUDE.md Product section (~10 lines: what, for whom,
      core problem, key domain concepts, current state)
    - Map content into the structured DNA format and store in
      `.organic-growth/product-dna.md`
@@ -40,13 +40,13 @@ Plant the seed for a new project.
      - What's the main process flow? (e.g. browse -> cart -> order -> approval -> invoice)
    - Generate `.organic-growth/product-dna.md` using the structured template.
      Leave missing sections as `<!-- to be filled -->`.
-   - Fill in AGENTS.md Product section from answers.
+   - Fill in CLAUDE.md Product section from answers.
 
 2. In both paths, also fill in:
    - Tech Stack (THE SOIL): from DNA/interview + scan of existing project files
    - Priorities (LIGHT & WATER): from DNA/interview
 
-3. Check if AGENTS.md already has a filled Product section.
+3. Check if CLAUDE.md already has a filled Product section.
    If yes, ask: "Product context already exists. Overwrite or update?"
 
 4. Generate `.organic-growth/growth/project-bootstrap.md` — the first growth plan:
@@ -66,10 +66,28 @@ Plant the seed for a new project.
 
 6. Present a summary of what was created:
    - Product DNA (`.organic-growth/product-dna.md`)
-   - AGENTS.md Product/Tech Stack/Priorities sections
+   - CLAUDE.md Product/Tech Stack/Priorities sections
    - Growth plan (`.organic-growth/growth/project-bootstrap.md`)
    - Growth map (`.organic-growth/growth-map.md`, if generated)
-7. STOP here. Do NOT start implementing stage 1.
-   Say: "Seed planted. Review the files above, then run `/next` when you're ready to grow stage 1."
+
+7. **MANDATORY STOP — THIS IS NON-NEGOTIABLE.**
+   Your job ends here. You have planted the seed. You do NOT grow it.
+
+   - Do NOT implement any stage.
+   - Do NOT write source code, tests, or application files.
+   - Do NOT run build/lint/test commands.
+   - Do NOT create src/, lib/, app/, or any implementation directories.
+   - Do NOT commit anything beyond the seed files created above.
+
+   The ONLY files you create are:
+   - `.organic-growth/product-dna.md`
+   - `.organic-growth/growth/project-bootstrap.md`
+   - `.organic-growth/growth-map.md` (if applicable)
+   - `CLAUDE.md` (fill in Product/Tech Stack/Priorities sections)
+
+   Say exactly:
+   "Seed planted. Review the files above, then run `/next` when you're ready to grow stage 1."
+
+   Then STOP. Do not continue. Do not offer to implement. Wait for the user.
 
 Input: $ARGUMENTS
