@@ -803,6 +803,163 @@ describe('Seed template: description and framing (seed-existing-project Stage 1)
   });
 });
 
+describe('Seed template: auto-discovery checklist (seed-existing-project Stage 2)', () => {
+  const claudeSeed = readFileSync(join(import.meta.dirname, '..', 'templates', '.claude', 'commands', 'seed.md'), 'utf8');
+  const opencodeSeed = readFileSync(join(import.meta.dirname, '..', 'templates-opencode', '.opencode', 'commands', 'seed.md'), 'utf8');
+
+  // Extract Step 0 from template (everything from "0." to the next numbered step)
+  function getStep0(content) {
+    const match = content.match(/^0\.\s[\s\S]*?(?=\n\d+\.)/m);
+    assert.ok(match, 'should have a Step 0');
+    return match[0];
+  }
+
+  // P5: Step 0 contains an explicit file-scanning checklist naming required files
+  const requiredFiles = [
+    'package.json',
+    'Makefile',
+    'build.gradle',
+    'pyproject.toml',
+    'Cargo.toml',
+    'go.mod',
+    'pom.xml',
+    'README.md',
+  ];
+
+  for (const file of requiredFiles) {
+    it(`P5: Claude seed Step 0 checklist includes ${file}`, () => {
+      const step0 = getStep0(claudeSeed);
+      assert.ok(step0.includes(file), `Step 0 should mention ${file} in scanning checklist`);
+    });
+
+    it(`P5: opencode seed Step 0 checklist includes ${file}`, () => {
+      const step0 = getStep0(opencodeSeed);
+      assert.ok(step0.includes(file), `Step 0 should mention ${file} in scanning checklist`);
+    });
+  }
+
+  it('P5: Claude seed Step 0 checklist includes CI config files', () => {
+    const step0 = getStep0(claudeSeed);
+    assert.ok(
+      step0.includes('.github/workflows') || step0.includes('github/workflows'),
+      'Step 0 should mention GitHub Actions workflow files'
+    );
+    assert.ok(
+      step0.includes('.gitlab-ci.yml'),
+      'Step 0 should mention GitLab CI config'
+    );
+  });
+
+  it('P5: opencode seed Step 0 checklist includes CI config files', () => {
+    const step0 = getStep0(opencodeSeed);
+    assert.ok(
+      step0.includes('.github/workflows') || step0.includes('github/workflows'),
+      'Step 0 should mention GitHub Actions workflow files'
+    );
+    assert.ok(
+      step0.includes('.gitlab-ci.yml'),
+      'Step 0 should mention GitLab CI config'
+    );
+  });
+
+  // P6: For each file in the checklist, the template specifies what to extract
+  it('P6: Claude seed Step 0 specifies what to extract from package.json', () => {
+    const step0 = getStep0(claudeSeed);
+    // Should mention scripts (build, test, lint) and dependencies/engines for stack detection
+    assert.ok(step0.includes('scripts'), 'should mention scripts to extract from package.json');
+    assert.ok(
+      step0.includes('dependencies') || step0.includes('devDependencies'),
+      'should mention dependencies for stack detection from package.json'
+    );
+  });
+
+  it('P6: opencode seed Step 0 specifies what to extract from package.json', () => {
+    const step0 = getStep0(opencodeSeed);
+    assert.ok(step0.includes('scripts'), 'should mention scripts to extract from package.json');
+    assert.ok(
+      step0.includes('dependencies') || step0.includes('devDependencies'),
+      'should mention dependencies for stack detection from package.json'
+    );
+  });
+
+  it('P6: Claude seed Step 0 specifies what to extract from build.gradle', () => {
+    const step0 = getStep0(claudeSeed);
+    assert.ok(
+      step0.includes('plugins') || step0.includes('tasks'),
+      'should mention what to extract from build.gradle (plugins or tasks)'
+    );
+  });
+
+  it('P6: Claude seed Step 0 specifies what to extract from Cargo.toml', () => {
+    const step0 = getStep0(claudeSeed);
+    // For Cargo.toml, relevant fields are dependencies, features, or workspace members
+    assert.ok(
+      step0.includes('dependencies') || step0.includes('[dependencies]'),
+      'should mention what to extract from Cargo.toml'
+    );
+  });
+
+  it('P6: Claude seed Step 0 specifies what to extract from CI config files', () => {
+    const step0 = getStep0(claudeSeed);
+    // CI configs should extract build/test/lint commands
+    assert.ok(
+      /CI.*command|command.*CI|workflow.*steps|steps.*commands|build.*test.*lint/i.test(step0) ||
+      (step0.includes('CI') && (step0.includes('commands') || step0.includes('steps'))),
+      'should mention extracting commands from CI config files'
+    );
+  });
+
+  it('P6: Claude seed Step 0 specifies what to extract from README.md', () => {
+    const step0 = getStep0(claudeSeed);
+    assert.ok(
+      /README.*product|README.*description|README.*what|product.*context/i.test(step0) ||
+      step0.includes('product description') || step0.includes('project description'),
+      'should mention extracting product/project description from README.md'
+    );
+  });
+
+  // P7: Step 0 instructs agent to populate Quality Tools section and present for confirmation
+  it('P7: Claude seed Step 0 instructs populating Quality Tools section', () => {
+    const step0 = getStep0(claudeSeed);
+    assert.ok(
+      /Quality\s+[Tt]ools/i.test(step0),
+      'Step 0 should mention Quality Tools section'
+    );
+    assert.ok(
+      step0.includes('CLAUDE.md'),
+      'Step 0 should mention populating CLAUDE.md'
+    );
+  });
+
+  it('P7: opencode seed Step 0 instructs populating Quality Tools section', () => {
+    const step0 = getStep0(opencodeSeed);
+    assert.ok(
+      /Quality\s+[Tt]ools/i.test(step0),
+      'Step 0 should mention Quality Tools section'
+    );
+    assert.ok(
+      step0.includes('AGENTS.md'),
+      'Step 0 should mention populating AGENTS.md'
+    );
+  });
+
+  it('P7: Claude seed Step 0 instructs presenting discoveries for user confirmation', () => {
+    const step0 = getStep0(claudeSeed);
+    assert.ok(
+      /confirm/i.test(step0) || /present.*user/i.test(step0) || /review/i.test(step0),
+      'Step 0 should instruct presenting discovered tools to user for confirmation'
+    );
+  });
+
+  it('P7: opencode seed Step 0 instructs presenting discoveries for user confirmation', () => {
+    const step0 = getStep0(opencodeSeed);
+    assert.ok(
+      /confirm/i.test(step0) || /present.*user/i.test(step0) || /review/i.test(step0),
+      'Step 0 should instruct presenting discovered tools to user for confirmation'
+    );
+  });
+});
+
 describe('Package metadata', () => {
   it('package includes templates and templates-opencode in files array', () => {
     const pkg = JSON.parse(readFileSync(PKG_PATH, 'utf8'));

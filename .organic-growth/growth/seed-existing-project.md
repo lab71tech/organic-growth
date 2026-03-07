@@ -26,7 +26,7 @@ The `/seed` command currently assumes greenfield projects: its description says 
   - Touches: templates/.claude/commands/seed.md, templates-opencode/.opencode/commands/seed.md, test/cli.test.mjs
   - Implementation hint: Change description to "Plant the seed for a project -- from DNA document or interview". Change opening line to "Plant the seed for a project." Make Step 0 produce an explicit "EXISTING = true/false" decision. Add tests asserting the template content.
 
-- Stage 2: Auto-discovery checklist -- explicit file scanning instructions
+- 🌳 Stage 2: Auto-discovery checklist -- explicit file scanning instructions (done)
   - Intent: Replace Step 0's vague "Read README/build files" with an explicit checklist of files to scan and what to extract from each, so the agent reliably fills in Tech Stack and Quality Tools.
   - Properties:
     - P5: Step 0 contains an explicit file-scanning checklist that names at least: package.json, Makefile, build.gradle(.kts), pyproject.toml, Cargo.toml, go.mod, pom.xml, README.md, and CI config files (.github/workflows/*.yml or .gitlab-ci.yml) [invariant]
@@ -95,3 +95,4 @@ The `/seed` command currently assumes greenfield projects: its description says 
 ## Growth Log
 <!-- Auto-updated after each stage -->
 - **2026-03-07 -- Stage 1 complete:** Removed greenfield-only language from seed template frontmatter and opening line. Restructured Step 0 into a clear EXISTING = true/false detection gate. Synced both Claude Code and opencode templates. 7 tests added, all pass.
+- **2026-03-07 -- Stage 2 complete:** Added explicit auto-discovery checklist to Step 0 naming 10 file types (package.json, build.gradle/.kts, pyproject.toml, Cargo.toml, go.mod, pom.xml, Makefile, README.md, GitHub/GitLab CI configs) with extraction instructions for each. Added Quality Tools population instructions with user confirmation gate. 22 tests added, 86 total pass.
