@@ -1,18 +1,21 @@
 {
   "name": "organic-growth",
   "version": "3.2.0",
-  "description": "Claude Code and opencode setup for incremental software development — grow features in natural stages",
+  "description": "Claude Code, opencode, and Codex setup for incremental software development — grow features in natural stages",
   "bin": {
     "organic-growth": "bin/cli.mjs"
   },
   "files": [
     "bin/",
     "templates/",
-    "templates-opencode/"
+    "templates-opencode/",
+    "templates-codex/"
   ],
   "keywords": [
     "claude-code",
     "opencode",
+    "codex",
+    "openai",
     "ai",
     "agents",
     "agile",

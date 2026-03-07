@@ -18,6 +18,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const TEMPLATES_DIR = join(__dirname, '..', 'templates');
 const TEMPLATES_OPENCODE_DIR = join(__dirname, '..', 'templates-opencode');
+const TEMPLATES_CODEX_DIR = join(__dirname, '..', 'templates-codex');
 const TARGET_DIR = process.cwd();
 
 const RESET = '\x1b[0m';
@@ -120,9 +121,74 @@ function readVersion() {
   return pkg.version;
 }
 
+const TARGETS = {
+  claude: {
+    label: 'Claude Code',
+    templatesDir: TEMPLATES_DIR,
+    contextFile: 'CLAUDE.md',
+    userFiles: ['CLAUDE.md', '.mcp.json'],
+  },
+  opencode: {
+    label: 'opencode',
+    templatesDir: TEMPLATES_OPENCODE_DIR,
+    contextFile: 'AGENTS.md',
+    userFiles: ['AGENTS.md', 'opencode.json'],
+  },
+  codex: {
+    label: 'Codex',
+    templatesDir: TEMPLATES_CODEX_DIR,
+    contextFile: 'AGENTS.md',
+    userFiles: ['AGENTS.md'],
+  }
+};
+
+function detectInstalledTarget(targetDir) {
+  const installedTargets = [];
+
+  if (existsSync(join(targetDir, '.claude'))) installedTargets.push('claude');
+  if (existsSync(join(targetDir, '.opencode'))) installedTargets.push('opencode');
+  if (existsSync(join(targetDir, '.codex'))) installedTargets.push('codex');
+
+  if (installedTargets.length > 1) {
+    console.error(`Error: multiple managed target directories found (${installedTargets.join(', ')}). Re-run with --target, --opencode, or --codex.`);
+    process.exit(1);
+  }
+
+  return installedTargets[0] || null;
+}
+
+function parseTarget(args, targetDir, upgrade) {
+  const explicitTargetIndex = args.findIndex(arg => arg === '--target');
+  const explicitTarget = explicitTargetIndex >= 0 ? args[explicitTargetIndex + 1] : null;
+  const isOpencode = args.includes('--opencode');
+  const isCodex = args.includes('--codex');
+
+  if (explicitTargetIndex >= 0 && !explicitTarget) {
+    console.error(`Error: missing value for --target. Expected one of: ${Object.keys(TARGETS).join(', ')}.`);
+    process.exit(1);
+  }
+
+  if (explicitTarget && !TARGETS[explicitTarget]) {
+    console.error(`Error: unknown target "${explicitTarget}". Expected one of: ${Object.keys(TARGETS).join(', ')}.`);
+    process.exit(1);
+  }
+
+  const selected = [explicitTarget, isOpencode ? 'opencode' : null, isCodex ? 'codex' : null].filter(Boolean);
+  if (selected.length > 1) {
+    console.error('Error: choose only one install target. Use either --target, --opencode, or --codex.');
+    process.exit(1);
+  }
+
+  if (selected.length === 0 && upgrade) {
+    return detectInstalledTarget(targetDir) || 'claude';
+  }
+
+  return selected[0] || 'claude';
+}
+
 function printHelp() {
   log('');
-  log(`${GREEN}🌱 Organic Growth${RESET} — Claude Code + opencode setup for incremental development`);
+  log(`${GREEN}🌱 Organic Growth${RESET} — Claude Code, opencode, and Codex setup for incremental development`);
   log('');
   log(`${CYAN}Usage:${RESET}`);
   log(`  npx organic-growth [options] [dna-file.md]`);
@@ -133,7 +199,9 @@ function printHelp() {
   log(`      --migrate   Move legacy docs/growth and docs/product-dna.md to .organic-growth/`);
   log(`  -h, --help      Show this help message`);
   log(`  -v, --version   Show version number`);
+  log(`      --target    Install templates for claude, opencode, or codex`);
   log(`      --opencode  Install opencode templates (AGENTS.md + .opencode/)`);
+  log(`      --codex     Install Codex templates (AGENTS.md + .codex/)`);
   log('');
   log(`${CYAN}Arguments:${RESET}`);
   log(`  dna-file.md     Path to a product DNA document to copy into .organic-growth/`);
@@ -141,6 +209,8 @@ function printHelp() {
   log(`${CYAN}Examples:${RESET}`);
   log(`  npx organic-growth                  Install Claude Code templates`);
   log(`  npx organic-growth --opencode       Install opencode templates`);
+  log(`  npx organic-growth --codex          Install Codex templates`);
+  log(`  npx organic-growth --target codex   Install Codex templates`);
   log(`  npx organic-growth --force          Install templates (overwrite existing)`);
   log(`  npx organic-growth --upgrade         Update managed files, keep user customizations`);
   log(`  npx organic-growth --migrate        Migrate legacy docs/ state into .organic-growth/`);
@@ -164,7 +234,8 @@ async function install() {
   const force = args.includes('--force') || args.includes('-f');
   const upgrade = args.includes('--upgrade');
   const migrate = args.includes('--migrate');
-  const isOpencode = args.includes('--opencode');
+  const target = parseTarget(args, TARGET_DIR, upgrade);
+  const targetConfig = TARGETS[target];
   const dna = args.find(a => !a.startsWith('-') && a.endsWith('.md'));
 
   // --upgrade and --force are mutually exclusive
@@ -174,7 +245,7 @@ async function install() {
   }
 
   // User-customized files that --upgrade should never overwrite or create
-  const USER_FILES = new Set(['CLAUDE.md', 'AGENTS.md', '.mcp.json', 'opencode.json']);
+  const USER_FILES = new Set(targetConfig.userFiles);
 
   function isUserFile(filePath) {
     // Check if the file's basename (top-level name) is in the user files set
@@ -184,10 +255,8 @@ async function install() {
   log('');
   if (upgrade) {
     log(`${GREEN}🌱 Organic Growth${RESET} — upgrading managed files`);
-  } else if (isOpencode) {
-    log(`${GREEN}🌱 Organic Growth${RESET} — opencode setup for incremental development`);
   } else {
-    log(`${GREEN}🌱 Organic Growth${RESET} — Claude Code setup for incremental development`);
+    log(`${GREEN}🌱 Organic Growth${RESET} — ${targetConfig.label} setup for incremental development`);
   }
   log('');
 
@@ -199,7 +268,7 @@ async function install() {
       : 'unknown';
     const toVersion = readVersion();
 
-    const templatesDir = isOpencode ? TEMPLATES_OPENCODE_DIR : TEMPLATES_DIR;
+    const templatesDir = targetConfig.templatesDir;
     const files = getAllFiles(templatesDir);
     const updated = [];
     const skippedUser = [];
@@ -255,7 +324,7 @@ async function install() {
     log('');
   } else {
     // Normal install flow
-    const templatesDir = isOpencode ? TEMPLATES_OPENCODE_DIR : TEMPLATES_DIR;
+    const templatesDir = targetConfig.templatesDir;
     const files = getAllFiles(templatesDir);
     const created = [];
     const skipped = [];
@@ -343,22 +412,15 @@ async function install() {
     log('');
     log(`${GREEN}Done!${RESET} Next steps:`);
     log('');
-    if (isOpencode) {
-      if (dna) {
-        info(`Run ${CYAN}/seed .organic-growth/product-dna.md${RESET} to bootstrap from your DNA document`);
-      } else {
-        info(`Run ${CYAN}/seed${RESET} to bootstrap a new project (interview mode)`);
-        info(`Or: ${CYAN}/seed path/to/product-doc.md${RESET} if you have a product document`);
-      }
-      info(`Edit ${CYAN}AGENTS.md${RESET} to fill in your tech stack and quality tools`);
+    if (dna) {
+      info(`Run ${CYAN}/seed .organic-growth/product-dna.md${RESET} to bootstrap from your DNA document`);
     } else {
-      if (dna) {
-        info(`Run ${CYAN}/seed .organic-growth/product-dna.md${RESET} to bootstrap from your DNA document`);
-      } else {
-        info(`Run ${CYAN}/seed${RESET} to bootstrap a new project (interview mode)`);
-        info(`Or: ${CYAN}/seed path/to/product-doc.md${RESET} if you have a product document`);
-      }
-      info(`Edit ${CYAN}CLAUDE.md${RESET} to fill in your tech stack and quality tools`);
+      info(`Run ${CYAN}/seed${RESET} to bootstrap a new project (interview mode)`);
+      info(`Or: ${CYAN}/seed path/to/product-doc.md${RESET} if you have a product document`);
+    }
+    info(`Edit ${CYAN}${targetConfig.contextFile}${RESET} to fill in your tech stack and quality tools`);
+    if (target === 'codex') {
+      info(`Launch Codex with ${CYAN}CODEX_HOME=.codex codex${RESET} so the installed prompts are used for this repo`);
     }
     log('');
     log(`${DIM}Commands available after setup:${RESET}`);
@@ -371,7 +433,10 @@ async function install() {
     log(`  ${CYAN}/review${RESET}  — deep quality review of recent stages`);
 
     log('');
-    log(`${DIM}To upgrade later: npx organic-growth --upgrade${RESET}`);
+    const upgradeHint = target === 'claude'
+      ? 'npx organic-growth --upgrade'
+      : `npx organic-growth --upgrade --${target}`;
+    log(`${DIM}To upgrade later: ${upgradeHint}${RESET}`);
     log('');
   }
 }
