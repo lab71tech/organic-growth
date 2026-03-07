@@ -1103,13 +1103,6 @@ describe('Seed template: skip bootstrap for existing projects (seed-existing-pro
     return match[0];
   }
 
-  // Helper: extract Step 6 content
-  function getStep6(content) {
-    const match = content.match(/^6\.\s[\s\S]*?(?=\n\d+\.)/m);
-    assert.ok(match, 'should have a Step 6');
-    return match[0];
-  }
-
   // Helper: extract Step 7 content
   function getStep7(content) {
     const match = content.match(/^7\.\s[\s\S]*?(?=\nInput:)/m);
@@ -1256,6 +1249,61 @@ describe('Seed template: skip bootstrap for existing projects (seed-existing-pro
 
     assert.equal(normalize(claudeSeed), normalize(opencodeSeed),
       'templates should be identical after normalizing config file references');
+  });
+});
+
+describe('Seed template: project copy sync and full parity (seed-existing-project Stage 5)', () => {
+  const claudeTemplate = readFileSync(join(import.meta.dirname, '..', 'templates', '.claude', 'commands', 'seed.md'), 'utf8');
+  const opencodeTemplate = readFileSync(join(import.meta.dirname, '..', 'templates-opencode', '.opencode', 'commands', 'seed.md'), 'utf8');
+
+  // P17: Project's own .claude/commands/seed.md is identical to template
+  it('P17: project .claude/commands/seed.md is identical to templates/.claude/commands/seed.md', () => {
+    const projectCopy = readFileSync(join(import.meta.dirname, '..', '.claude', 'commands', 'seed.md'), 'utf8');
+    assert.equal(projectCopy, claudeTemplate,
+      'project copy .claude/commands/seed.md must be identical to templates/.claude/commands/seed.md');
+  });
+
+  // P18: Every numbered step in Claude Code template has a corresponding step in opencode
+  it('P18: every numbered step in Claude Code template exists in opencode template with identical logic', () => {
+    // Extract all numbered steps from both templates
+    const stepPattern = /^(\d+)\.\s/gm;
+
+    const claudeSteps = [...claudeTemplate.matchAll(stepPattern)].map(m => m[1]);
+    const opencodeSteps = [...opencodeTemplate.matchAll(stepPattern)].map(m => m[1]);
+
+    assert.ok(claudeSteps.length > 0, 'Claude template should have numbered steps');
+    assert.deepEqual(claudeSteps, opencodeSteps,
+      'both templates should have the same numbered steps in the same order');
+
+    // For each step, normalize platform references and verify logic is identical
+    const normalize = (s) => s
+      .replace(/CLAUDE\.md/g, 'CONFIG.md')
+      .replace(/AGENTS\.md/g, 'CONFIG.md')
+      .replace(/\.claude\b/g, '.configdir')
+      .replace(/\.opencode\b/g, '.configdir');
+
+    // Extract each step's content and compare after normalization
+    for (const stepNum of claudeSteps) {
+      const stepRegex = new RegExp(`^${stepNum}\\.\\s[\\s\\S]*?(?=\\n\\d+\\.|\\nInput:)`, 'm');
+      const claudeStep = claudeTemplate.match(stepRegex);
+      const opencodeStep = opencodeTemplate.match(stepRegex);
+      assert.ok(claudeStep, `Claude template should have Step ${stepNum}`);
+      assert.ok(opencodeStep, `opencode template should have Step ${stepNum}`);
+      assert.equal(normalize(claudeStep[0]), normalize(opencodeStep[0]),
+        `Step ${stepNum} should be identical after normalizing platform references`);
+    }
+  });
+
+  // P4 (carried): full template parity
+  it('P4: full template parity -- templates are identical after normalizing all platform references', () => {
+    const normalize = (s) => s
+      .replace(/CLAUDE\.md/g, 'CONFIG.md')
+      .replace(/AGENTS\.md/g, 'CONFIG.md')
+      .replace(/\.claude\b/g, '.configdir')
+      .replace(/\.opencode\b/g, '.configdir');
+
+    assert.equal(normalize(claudeTemplate), normalize(opencodeTemplate),
+      'entire templates should be identical after normalizing config file references');
   });
 });
 
