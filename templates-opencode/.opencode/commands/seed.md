@@ -69,7 +69,25 @@ Plant the seed for a new project.
    - AGENTS.md Product/Tech Stack/Priorities sections
    - Growth plan (`.organic-growth/growth/project-bootstrap.md`)
    - Growth map (`.organic-growth/growth-map.md`, if generated)
-7. STOP here. Do NOT start implementing stage 1.
-   Say: "Seed planted. Review the files above, then run `/next` when you're ready to grow stage 1."
+
+7. **MANDATORY STOP — THIS IS NON-NEGOTIABLE.**
+   Your job ends here. You have planted the seed. You do NOT grow it.
+
+   - Do NOT implement any stage.
+   - Do NOT write source code, tests, or application files.
+   - Do NOT run build/lint/test commands.
+   - Do NOT create src/, lib/, app/, or any implementation directories.
+   - Do NOT commit anything beyond the seed files created above.
+
+   The ONLY files you create are:
+   - `.organic-growth/product-dna.md`
+   - `.organic-growth/growth/project-bootstrap.md`
+   - `.organic-growth/growth-map.md` (if applicable)
+   - `AGENTS.md` (fill in Product/Tech Stack/Priorities sections)
+
+   Say exactly:
+   "Seed planted. Review the files above, then run `/next` when you're ready to grow stage 1."
+
+   Then STOP. Do not continue. Do not offer to implement. Wait for the user.
 
 Input: $ARGUMENTS

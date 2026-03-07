@@ -211,28 +211,53 @@ This is the primary review gate.
      `Status: 🌳 Complete` at the top of the plan.
      If working on a feature branch: summarize what was built,
      list verified properties, and note open PR items.
-6b. If `.organic-growth/growth-map.md` exists:
-    - Update this capability's stage progress (e.g., "stage 3/5").
-    - When ALL stages of a capability are done, mark it 🌳.
+
+   **VERIFICATION:** Before proceeding to step 7, confirm:
+   - [ ] Growth Log has an entry for THIS stage (not just previous ones)
+   - [ ] Stage marker changed from 🌱 to 🌳
+   - [ ] If all concrete stages done → Status header says 🌳 Complete
+   If any check fails, fix it NOW before continuing.
+
+6b. Update `.organic-growth/growth-map.md` (MANDATORY if file exists):
+    - Update this capability's status marker and stage progress.
+    - When ALL stages of a capability are done, change 🌱 to 🌳.
+    - This is NOT optional — the growth map must reflect reality.
     - After reporting, suggest: "Growth map updated. What grows next?"
+
+    **VERIFICATION:** Read growth-map.md after editing and confirm
+    the capability status matches the growth plan status.
+
 6c. If `.organic-growth/product-dna.md` exists and this stage introduced
     new domain concepts not in DNA:
     - Add them to Core Domain Concepts.
     - Note in growth log: "Added concept: <name> to DNA".
-6d. Update README.md:
+
+6d. Update README.md (MANDATORY — do NOT skip):
     - If README.md is empty or only has a title: add project description,
       install instructions, and basic usage from what's been built so far.
     - If README.md already has content: update it to reflect new capabilities
       added in this stage (e.g., new CLI commands, new features).
     - Keep it concise — reflect what actually works NOW.
+
+    **VERIFICATION:** Read README.md after editing and confirm it
+    describes the current state of the project, not just the title.
+
 6e. Update AGENTS.md `Current state` field when the project reaches
-    a milestone:
+    a milestone (MANDATORY at milestones):
     - After walking skeleton / bootstrap complete: "MVP exists — <what works>"
     - After a major capability is done: update to reflect current reality
     - Don't update on every stage — only when the state meaningfully changes.
+    - Walking skeleton complete = ALWAYS a milestone. Update it.
 7. Commit: `feat(scope): stage N — <what grew>`.
-   Include ALL updated files: source code, tests, growth plan,
-   growth map, README.md, and AGENTS.md (if changed).
+
+   **MANDATORY PRE-COMMIT CHECKLIST — verify ALL before committing:**
+   - [ ] Growth plan updated (stage marked 🌳, Growth Log entry added)
+   - [ ] Growth map updated (if file exists — capability progress reflected)
+   - [ ] README.md updated (describes what the project does NOW)
+   - [ ] AGENTS.md updated (if milestone reached — Current state field)
+   - [ ] `git add` includes ALL of: source code, tests, growth plan,
+         growth map, README.md, and AGENTS.md (if changed)
+   Do NOT commit until all applicable items are checked.
 8. Report:
    - What grew
    - Properties verified (list P-numbers that pass)
@@ -276,6 +301,8 @@ This is the primary review gate.
 - ALWAYS write property tests before writing implementation code.
 - ALWAYS run build + tests + smoke check before committing.
 - ALWAYS update the growth plan after each stage.
+- ALWAYS update growth map, README.md, and AGENTS.md after each stage
+  (see steps 6b-6e for when each applies).
 - Properties from completed stages are PERMANENT — they must
   keep passing. If a new stage needs to break an old property,
   this is a REPLAN, not a quiet change.
