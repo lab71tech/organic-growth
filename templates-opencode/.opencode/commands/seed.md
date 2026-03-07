@@ -1,11 +1,16 @@
 ---
-description: Bootstrap a new project — from DNA document or interview
+description: Plant the seed for a project — from DNA document or interview
 ---
 
-Plant the seed for a new project.
+Plant the seed for a project.
 
-0. Scan project root for existing code (`src/`, `package.json`, `build.gradle`, `README.md`, etc.).
-   If code already exists:
+0. **Detect existing project.**
+   Scan project root for existing code (`src/`, `lib/`, `app/`, `package.json`, `build.gradle`, `Cargo.toml`, `go.mod`, `pyproject.toml`, `pom.xml`, `README.md`, etc.).
+
+   - If code or build files already exist → **EXISTING = true**
+   - If the project root is empty or contains only config files → **EXISTING = false**
+
+   When EXISTING = true:
    - Read README/build files to auto-fill Tech Stack
    - Discover quality commands (build, lint, test)
    - Adjust interview: skip "what tech stack?" and "what are you building?"

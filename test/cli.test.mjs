@@ -739,6 +739,75 @@ describe('Upgrade preserves .organic-growth/ contents (Stage 4)', () => {
   });
 });
 
+describe('Seed template: description and framing (seed-existing-project Stage 1)', () => {
+  const claudeSeed = readFileSync(join(import.meta.dirname, '..', 'templates', '.claude', 'commands', 'seed.md'), 'utf8');
+  const opencodeSeed = readFileSync(join(import.meta.dirname, '..', 'templates-opencode', '.opencode', 'commands', 'seed.md'), 'utf8');
+
+  // P1: frontmatter description does not contain "new"
+  it('P1: Claude seed frontmatter description does not contain the word "new"', () => {
+    const descMatch = claudeSeed.match(/^---\n([\s\S]*?)\n---/);
+    assert.ok(descMatch, 'should have frontmatter');
+    const frontmatter = descMatch[1];
+    assert.ok(!/\bnew\b/i.test(frontmatter), 'frontmatter description should not contain "new"');
+  });
+
+  it('P1: opencode seed frontmatter description does not contain the word "new"', () => {
+    const descMatch = opencodeSeed.match(/^---\n([\s\S]*?)\n---/);
+    assert.ok(descMatch, 'should have frontmatter');
+    const frontmatter = descMatch[1];
+    assert.ok(!/\bnew\b/i.test(frontmatter), 'frontmatter description should not contain "new"');
+  });
+
+  // P2: opening instruction line (first non-frontmatter line) does not contain "new"
+  it('P2: Claude seed opening line does not contain the word "new"', () => {
+    const afterFrontmatter = claudeSeed.replace(/^---\n[\s\S]*?\n---\n*/, '');
+    const firstLine = afterFrontmatter.split('\n').find(l => l.trim().length > 0);
+    assert.ok(firstLine, 'should have a first line after frontmatter');
+    assert.ok(!/\bnew\b/i.test(firstLine), `opening line should not contain "new": "${firstLine}"`);
+  });
+
+  it('P2: opencode seed opening line does not contain the word "new"', () => {
+    const afterFrontmatter = opencodeSeed.replace(/^---\n[\s\S]*?\n---\n*/, '');
+    const firstLine = afterFrontmatter.split('\n').find(l => l.trim().length > 0);
+    assert.ok(firstLine, 'should have a first line after frontmatter');
+    assert.ok(!/\bnew\b/i.test(firstLine), `opening line should not contain "new": "${firstLine}"`);
+  });
+
+  // P3: Step 0 defines a clear boolean outcome (EXISTING = true/false)
+  it('P3: Claude seed Step 0 defines EXISTING boolean outcome', () => {
+    const step0Match = claudeSeed.match(/^0\.\s[\s\S]*?(?=\n\d+\.)/m);
+    assert.ok(step0Match, 'should have a Step 0');
+    const step0 = step0Match[0];
+    assert.ok(/EXISTING\s*=\s*(true|false)/i.test(step0) || /EXISTING/i.test(step0),
+      'Step 0 should define EXISTING boolean');
+    // Must have both true and false outcomes
+    assert.ok(/EXISTING\s*=\s*true/i.test(step0), 'Step 0 should define EXISTING = true case');
+    assert.ok(/EXISTING\s*=\s*false/i.test(step0), 'Step 0 should define EXISTING = false case');
+  });
+
+  it('P3: opencode seed Step 0 defines EXISTING boolean outcome', () => {
+    const step0Match = opencodeSeed.match(/^0\.\s[\s\S]*?(?=\n\d+\.)/m);
+    assert.ok(step0Match, 'should have a Step 0');
+    const step0 = step0Match[0];
+    assert.ok(/EXISTING\s*=\s*true/i.test(step0), 'Step 0 should define EXISTING = true case');
+    assert.ok(/EXISTING\s*=\s*false/i.test(step0), 'Step 0 should define EXISTING = false case');
+  });
+
+  // P4: Claude Code and opencode seed templates have identical step structure
+  it('P4: Claude and opencode seed templates have identical step structure (differing only in CLAUDE.md vs AGENTS.md)', () => {
+    // Normalize: replace CLAUDE.md with CONFIG.md, AGENTS.md with CONFIG.md,
+    // .claude with .configdir, .opencode with .configdir
+    const normalize = (s) => s
+      .replace(/CLAUDE\.md/g, 'CONFIG.md')
+      .replace(/AGENTS\.md/g, 'CONFIG.md')
+      .replace(/\.claude\b/g, '.configdir')
+      .replace(/\.opencode\b/g, '.configdir');
+
+    assert.equal(normalize(claudeSeed), normalize(opencodeSeed),
+      'templates should be identical after normalizing config file references');
+  });
+});
+
 describe('Package metadata', () => {
   it('package includes templates and templates-opencode in files array', () => {
     const pkg = JSON.parse(readFileSync(PKG_PATH, 'utf8'));
