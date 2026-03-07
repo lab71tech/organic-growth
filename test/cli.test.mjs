@@ -70,7 +70,7 @@ describe('CLI smoke test', () => {
 });
 
 describe('CLI options', () => {
-  it('--help includes --migrate and --opencode', () => {
+  it('--help includes --migrate, --opencode, --codex, and --target', () => {
     const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
     const output = execFileSync('node', [CLI_PATH, '--help'], {
       cwd: tmp,
@@ -80,6 +80,8 @@ describe('CLI options', () => {
 
     assert.ok(output.includes('--migrate'), 'help should include --migrate');
     assert.ok(output.includes('--opencode'), 'help should include --opencode');
+    assert.ok(output.includes('--codex'), 'help should include --codex');
+    assert.ok(output.includes('--target'), 'help should include --target');
   });
 
   it('--version prints package version', () => {
@@ -244,6 +246,92 @@ describe('opencode installation', () => {
   });
 });
 
+describe('Codex installation', () => {
+  it('installs AGENTS.md, .codex prompts, and .organic-growth/growth in --codex mode', () => {
+    const { tmp } = runCLI(['--codex']);
+
+    assert.ok(existsSync(join(tmp, 'AGENTS.md')), 'AGENTS.md should exist');
+    assert.ok(!existsSync(join(tmp, 'CLAUDE.md')), 'CLAUDE.md should not exist in codex mode');
+    assert.ok(existsSync(join(tmp, '.codex', 'prompts', 'grow.md')), 'codex grow prompt should exist');
+    assert.ok(existsSync(join(tmp, '.organic-growth', 'growth')), '.organic-growth/growth should exist');
+    assert.ok(!existsSync(join(tmp, '.claude')), '.claude should not be installed in codex mode');
+    assert.ok(!existsSync(join(tmp, '.opencode')), '.opencode should not be installed in codex mode');
+  });
+
+  it('installs all 7 Codex prompts including map and next-automatic', () => {
+    const { tmp } = runCLI(['--codex']);
+    const commands = ['seed', 'grow', 'map', 'next', 'next-automatic', 'replan', 'review'];
+
+    for (const cmd of commands) {
+      const file = join(tmp, '.codex', 'prompts', `${cmd}.md`);
+      assert.ok(existsSync(file), `${cmd}.md should exist in .codex/prompts`);
+      assert.ok(statSync(file).size > 0, `${cmd}.md should be non-empty`);
+    }
+  });
+
+  it('supports --target codex as an alias for --codex', () => {
+    const { tmp } = runCLI(['--target', 'codex']);
+
+    assert.ok(existsSync(join(tmp, 'AGENTS.md')), 'AGENTS.md should exist');
+    assert.ok(existsSync(join(tmp, '.codex', 'prompts', 'next.md')), 'codex next prompt should exist');
+  });
+
+  it('codex DNA argument copies to .organic-growth/product-dna.md', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+    const dnaContent = '# DNA\n';
+    writeFileSync(join(tmp, 'spec.md'), dnaContent);
+
+    const { output } = runCLI(['--codex', 'spec.md'], tmp);
+
+    const dnaPath = join(tmp, '.organic-growth', 'product-dna.md');
+    assert.ok(existsSync(dnaPath), 'DNA should be copied in codex mode');
+    assert.equal(readFileSync(dnaPath, 'utf8'), dnaContent, 'DNA content should match');
+    assert.ok(output.includes('Product DNA copied'), 'output should mention copied DNA');
+  });
+
+  it('codex next steps references AGENTS.md and CODEX_HOME launch instructions', () => {
+    const { output } = runCLI(['--codex']);
+
+    assert.ok(output.includes('AGENTS.md'), 'output should reference AGENTS.md');
+    assert.ok(output.includes('CODEX_HOME=.codex codex'), 'output should mention CODEX_HOME launch instructions');
+    assert.ok(output.includes('npx organic-growth --upgrade --codex'), 'output should mention the codex upgrade command');
+  });
+});
+
+describe('Template content integrity (Codex)', () => {
+  const { tmp } = runCLI(['--codex']);
+
+  it('AGENTS.md references .organic-growth locations and Codex launch instructions', () => {
+    const content = readFileSync(join(tmp, 'AGENTS.md'), 'utf8');
+
+    assert.ok(content.includes('.organic-growth/growth/'), 'should reference growth plans in .organic-growth');
+    assert.ok(content.includes('.organic-growth/product-dna.md'), 'should reference product DNA in .organic-growth');
+    assert.ok(content.includes('.codex/prompts/'), 'should reference .codex prompt locations');
+    assert.ok(content.includes('CODEX_HOME=.codex codex'), 'should mention CODEX_HOME launch instructions');
+  });
+
+  it('prompts reference .organic-growth and contain no subagent or superpowers references', () => {
+    const commands = ['seed', 'grow', 'map', 'next', 'next-automatic', 'replan', 'review'];
+    const forbidden = [
+      'superpowers',
+      '@gardener',
+      'use the gardener agent',
+      'fresh gardener agent invocation',
+    ];
+
+    for (const cmd of commands) {
+      const content = readFileSync(join(tmp, '.codex', 'prompts', `${cmd}.md`), 'utf8');
+      assert.ok(
+        content.includes('.organic-growth/') || content.includes('AGENTS.md'),
+        `${cmd}.md should reference repo state files`
+      );
+      for (const token of forbidden) {
+        assert.ok(!content.toLowerCase().includes(token), `${cmd}.md should not contain ${token}`);
+      }
+    }
+  });
+});
+
 describe('Version file (.organic-growth/.version)', () => {
   const pkg = JSON.parse(readFileSync(PKG_PATH, 'utf8'));
 
@@ -274,6 +362,14 @@ describe('Version file (.organic-growth/.version)', () => {
     assert.ok(existsSync(versionFile), '.version should exist after --opencode install');
     const content = readFileSync(versionFile, 'utf8');
     assert.equal(content, pkg.version, '.version should contain current version in opencode mode');
+  });
+
+  it('P3: --codex install creates .version with current package version', () => {
+    const { tmp } = runCLI(['--codex']);
+    const versionFile = join(tmp, '.organic-growth', '.version');
+    assert.ok(existsSync(versionFile), '.version should exist after --codex install');
+    const content = readFileSync(versionFile, 'utf8');
+    assert.equal(content, pkg.version, '.version should contain current version in codex mode');
   });
 
   // P4: version file is written AFTER template files (verified by checking both exist)
@@ -386,6 +482,18 @@ describe('Upgrade mode (--upgrade)', () => {
 
     const content = readFileSync(join(tmp, 'opencode.json'), 'utf8');
     assert.equal(content, '{"custom": true}', 'opencode.json should be preserved on upgrade');
+  });
+
+  it('P7: --upgrade never overwrites AGENTS.md in codex mode', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+    execFileSync('node', [CLI_PATH, '--force', '--codex'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    writeFileSync(join(tmp, 'AGENTS.md'), '# My Custom AGENTS.md\n');
+
+    execFileSync('node', [CLI_PATH, '--upgrade', '--codex'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    const content = readFileSync(join(tmp, 'AGENTS.md'), 'utf8');
+    assert.equal(content, '# My Custom AGENTS.md\n', 'AGENTS.md should be preserved on upgrade');
   });
 
   // P8: User-customized files that don't exist are NOT created on upgrade
@@ -528,6 +636,33 @@ describe('Upgrade mode (--upgrade)', () => {
     const content = readFileSync(managedFile, 'utf8');
     assert.ok(!content.includes('# modified gardener'), 'opencode managed file should be overwritten by upgrade');
   });
+
+  it('P6: --upgrade --codex overwrites managed files under .codex/', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+    execFileSync('node', [CLI_PATH, '--force', '--codex'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    const managedFile = join(tmp, '.codex', 'prompts', 'next.md');
+    writeFileSync(managedFile, '# modified prompt');
+
+    execFileSync('node', [CLI_PATH, '--upgrade', '--codex'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    const content = readFileSync(managedFile, 'utf8');
+    assert.ok(!content.includes('# modified prompt'), 'codex managed file should be overwritten by upgrade');
+  });
+
+  it('P6: --upgrade infers codex target from an installed .codex directory', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+    execFileSync('node', [CLI_PATH, '--force', '--codex'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    const codexFile = join(tmp, '.codex', 'prompts', 'next.md');
+    writeFileSync(codexFile, '# modified prompt');
+
+    execFileSync('node', [CLI_PATH, '--upgrade'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    const content = readFileSync(codexFile, 'utf8');
+    assert.ok(!content.includes('# modified prompt'), 'upgrade should infer codex and refresh .codex prompts');
+    assert.ok(!existsSync(join(tmp, '.claude')), 'upgrade should not create .claude when refreshing a codex install');
+  });
 });
 
 describe('Upgrade CLI output (Stage 3)', () => {
@@ -558,6 +693,13 @@ describe('Upgrade CLI output (Stage 3)', () => {
     const clean = output.replace(/\x1b\[[0-9;]*m/g, '');
 
     assert.ok(/--upgrade/i.test(clean), 'opencode fresh install output should mention --upgrade');
+  });
+
+  it('P14: fresh install --codex output also mentions --upgrade', () => {
+    const { output } = runCLI(['--codex']);
+    const clean = output.replace(/\x1b\[[0-9;]*m/g, '');
+
+    assert.ok(/--upgrade/i.test(clean), 'codex fresh install output should mention --upgrade');
   });
 
   // P15: --upgrade output does NOT show first-time setup instructions
@@ -717,6 +859,19 @@ describe('Upgrade preserves .organic-growth/ contents (Stage 4)', () => {
     assert.ok(existsSync(managedFile), 'new opencode managed file should be created during upgrade');
   });
 
+  it('P19: --upgrade --codex creates new managed files that did not exist before', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+    execFileSync('node', [CLI_PATH, '--force', '--codex'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    const managedFile = join(tmp, '.codex', 'prompts', 'review.md');
+    assert.ok(existsSync(managedFile), 'precondition: codex managed file exists');
+    unlinkSync(managedFile);
+
+    execFileSync('node', [CLI_PATH, '--upgrade', '--codex'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    assert.ok(existsSync(managedFile), 'new codex managed file should be created during upgrade');
+  });
+
   // P20: .organic-growth/growth/ directory is not re-created if it already exists
   it('P20: --upgrade does not show growth directory in output when it already exists', () => {
     const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
@@ -737,6 +892,7 @@ describe('Upgrade preserves .organic-growth/ contents (Stage 4)', () => {
 describe('Seed template: description and framing (seed-existing-project Stage 1)', () => {
   const claudeSeed = readFileSync(join(import.meta.dirname, '..', 'templates', '.claude', 'commands', 'seed.md'), 'utf8');
   const opencodeSeed = readFileSync(join(import.meta.dirname, '..', 'templates-opencode', '.opencode', 'commands', 'seed.md'), 'utf8');
+  const codexSeed = readFileSync(join(import.meta.dirname, '..', 'templates-codex', '.codex', 'prompts', 'seed.md'), 'utf8');
 
   // P1: frontmatter description does not contain "new"
   it('P1: Claude seed frontmatter description does not contain the word "new"', () => {
@@ -800,6 +956,16 @@ describe('Seed template: description and framing (seed-existing-project Stage 1)
 
     assert.equal(normalize(claudeSeed), normalize(opencodeSeed),
       'templates should be identical after normalizing config file references');
+  });
+
+  it('P4: Codex DNA path fills Product, Tech Stack, Priorities, and Quality Tools', () => {
+    const dnaBlockMatch = codexSeed.match(/Path A — DNA exists:[\s\S]*?(?=\n\s*Path B1)/);
+    assert.ok(dnaBlockMatch, 'Codex seed prompt should include a DNA path block');
+    const dnaBlock = dnaBlockMatch[0];
+
+    assert.ok(dnaBlock.includes('Product, Tech Stack, and Priorities'), 'DNA path should populate AGENTS.md core sections');
+    assert.ok(dnaBlock.includes('Quality Tools'), 'DNA path should mention Quality Tools');
+    assert.ok(dnaBlock.includes('build, lint, typecheck, test, and smoke'), 'DNA path should require concrete quality commands');
   });
 });
 
@@ -1308,17 +1474,20 @@ describe('Seed template: project copy sync and full parity (seed-existing-projec
 });
 
 describe('Package metadata', () => {
-  it('package includes templates and templates-opencode in files array', () => {
+  it('package includes templates, templates-opencode, and templates-codex in files array', () => {
     const pkg = JSON.parse(readFileSync(PKG_PATH, 'utf8'));
 
     assert.ok(pkg.files.includes('templates/'), 'package files should include templates/');
     assert.ok(pkg.files.includes('templates-opencode/'), 'package files should include templates-opencode/');
+    assert.ok(pkg.files.includes('templates-codex/'), 'package files should include templates-codex/');
   });
 
-  it('package description and keywords include opencode', () => {
+  it('package description and keywords include opencode and codex', () => {
     const pkg = JSON.parse(readFileSync(PKG_PATH, 'utf8'));
 
     assert.ok(/opencode/i.test(pkg.description), 'description should mention opencode');
+    assert.ok(/codex/i.test(pkg.description), 'description should mention codex');
     assert.ok(Array.isArray(pkg.keywords) && pkg.keywords.includes('opencode'), 'keywords should include opencode');
+    assert.ok(Array.isArray(pkg.keywords) && pkg.keywords.includes('codex'), 'keywords should include codex');
   });
 });

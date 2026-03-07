@@ -2,7 +2,7 @@
 
 [![Test](https://github.com/lab71tech/organic-growth/actions/workflows/test.yml/badge.svg)](https://github.com/lab71tech/organic-growth/actions/workflows/test.yml) [![GitHub Release](https://img.shields.io/github/v/release/lab71tech/organic-growth)](https://github.com/lab71tech/organic-growth/releases)
 
-Claude Code setup for incremental software development.
+Claude Code, opencode, and Codex setup for incremental software development.
 
 Grow features in natural stages, where each stage delivers a complete, working system.
 
@@ -21,6 +21,14 @@ bunx organic-growth
 # Or with npx:
 npx organic-growth
 
+# Install for opencode:
+bunx organic-growth --opencode
+
+# Install for Codex:
+bunx organic-growth --codex
+# Or:
+bunx organic-growth --target codex
+
 # With a product DNA document:
 bunx organic-growth docs/my-product-spec.md
 
@@ -29,11 +37,16 @@ bunx organic-growth --force
 
 # Upgrade managed files (preserves CLAUDE.md, .mcp.json, etc.):
 bunx organic-growth --upgrade
+
+# Upgrade Codex templates explicitly:
+bunx organic-growth --upgrade --codex
 ```
 
-This installs `CLAUDE.md` at your project root and a `.claude/` directory with agents and commands. No runtime dependencies.
+Default install creates `CLAUDE.md` and `.claude/` for Claude Code. `--opencode` installs `AGENTS.md` and `.opencode/`. `--codex` installs `AGENTS.md` and `.codex/`. No runtime dependencies.
 
 ## What You Get
+
+### Claude Code (default)
 
 ```
 CLAUDE.md                           # Project context template + growth philosophy
@@ -58,14 +71,49 @@ CLAUDE.md                           # Project context template + growth philosop
 └── growth/                         # One growth plan per feature
 ```
 
+### opencode
+
+```
+AGENTS.md                           # Project context template + growth philosophy
+.opencode/
+├── agents/
+│   └── gardener.md
+├── commands/
+│   ├── seed.md
+│   ├── grow.md
+│   ├── map.md
+│   ├── next.md
+│   ├── next-automatic.md
+│   ├── replan.md
+│   └── review.md
+└── ...
+```
+
+### Codex
+
+```
+AGENTS.md                           # Project context template + growth philosophy
+.codex/
+└── prompts/
+    ├── seed.md
+    ├── grow.md
+    ├── map.md
+    ├── next.md
+    ├── next-automatic.md
+    ├── replan.md
+    └── review.md
+```
+
 Growth plan files (`.organic-growth/growth/*.md`) use plant-themed visual markers -- seedlings for pending stages, trees for completed ones, vines between sections -- so you can tell at a glance where a feature stands.
 
 A **post-stage test** hook and a **post-stage review** hook run automatically after every stage commit, in order:
 
-1. **Test hook** — runs your test suite (discovered from the `**Test:**` field in CLAUDE.md) and injects pass/fail results into the conversation. On failure, tells Claude to fix before continuing.
+1. **Test hook** — runs your test suite (discovered from the `**Test:**` field in `CLAUDE.md`) and injects pass/fail results into the conversation. On failure, tells Claude to fix before continuing.
 2. **Review hook** — captures the commit diff and injects it as review context, giving the gardener agent an immediate second look at what changed.
 
 Tests run first so failures are caught before the review. This makes the quality gate deterministic — tests always run after stage commits, regardless of whether the agent remembers to.
+
+Codex support uses prompt files in `.codex/prompts/`. Launch Codex with `CODEX_HOME=.codex codex` to use the repo-local Organic Growth prompts. Claude-style post-stage hooks are not currently installed for Codex. Upgrade auto-detects the installed target when the repo contains only one managed config tree, but the explicit form `npx organic-growth --upgrade --codex` is also supported.
 
 ## Workflow
 
@@ -95,7 +143,7 @@ Tests run first so failures are caught before the review. This makes the quality
 - **Rolling plan:** 3-5 stages ahead, re-evaluate every 3
 - **Two-layer quality:** [properties](#property-based-planning) before code, deterministic tools after every stage, LLM review on demand
 - **Context hygiene:** fresh session every 3 stages
-- **Product context required:** fill in CLAUDE.md or provide a DNA document
+- **Product context required:** fill in `CLAUDE.md` or `AGENTS.md`, or provide a DNA document
 
 ## Property-Based Planning
 
@@ -109,7 +157,7 @@ Properties are not test cases or user stories. A test says "when I do X, Y happe
                      count decreases by exactly one" [invariant]
 ```
 
-**Why this matters for LLM-assisted development:** When Claude generates a stage, you review 3-5 properties instead of a 300-line diff. If the properties are right, the code is constrained to be right. The review shifts from "is this code correct?" to "are these rules complete?"
+**Why this matters for LLM-assisted development:** When your coding agent generates a stage, you review 3-5 properties instead of a 300-line diff. If the properties are right, the code is constrained to be right. The review shifts from "is this code correct?" to "are these rules complete?"
 
 Properties **accumulate** across stages. Stage 3 must still satisfy the properties from stages 1 and 2. They are permanent commitments, not checkboxes to discard. This is what prevents regressions as the feature grows.
 
@@ -117,9 +165,10 @@ The gardener agent handles the full property format — categories, failure anal
 
 ## After Install
 
-1. Edit `CLAUDE.md` — fill in the Product section (or run `/seed`)
+1. Edit `CLAUDE.md` or `AGENTS.md` — fill in the Product section (or run `/seed`)
 2. Fill in Quality Tools section with your project's lint/test commands
-3. Start building with `/grow`
+3. For Codex, launch with `CODEX_HOME=.codex codex`
+4. Start building with `/grow`
 
 See the [example growth plan](.organic-growth/example-growth-plan.md) to see properties, stages, and accumulation in action.
 
