@@ -1,13 +1,39 @@
 ---
-description: Bootstrap a new project — from DNA document or interview
+description: Plant the seed for a project — from DNA document or interview
 ---
 
-Plant the seed for a new project.
+Plant the seed for a project.
 
-0. Scan project root for existing code (`src/`, `package.json`, `build.gradle`, `README.md`, etc.).
-   If code already exists:
-   - Read README/build files to auto-fill Tech Stack
-   - Discover quality commands (build, lint, test)
+0. **Detect existing project.**
+   Scan project root for existing code (`src/`, `lib/`, `app/`, `package.json`, `build.gradle`, `Cargo.toml`, `go.mod`, `pyproject.toml`, `pom.xml`, `README.md`, etc.).
+
+   - If code or build files already exist → **EXISTING = true**
+   - If the project root is empty or contains only config files → **EXISTING = false**
+
+   When EXISTING = true, scan these files and extract the noted information:
+
+   **Auto-discovery checklist:**
+   - `package.json` → scripts (build, test, lint, start), engines, dependencies and devDependencies for stack detection (e.g., react, express, typescript)
+   - `build.gradle` / `build.gradle.kts` → plugins (java, kotlin, spring-boot), tasks (test, check, ktlintCheck), dependencies for framework detection
+   - `pyproject.toml` → build-system, project.scripts, dependencies, optional-dependencies, tool sections (pytest, ruff, mypy, black)
+   - `Cargo.toml` → edition, dependencies, dev-dependencies, workspace members, features
+   - `go.mod` → go version, module path, require directives for framework detection (gin, echo, fiber)
+   - `pom.xml` → plugins, parent (spring-boot-starter-parent), dependencies, build configuration
+   - `Makefile` → target names (build, test, lint, check, fmt, run) and the commands they execute
+   - `README.md` → project description, setup/install instructions, usage examples for product context
+   - `.github/workflows/*.yml` → build/test/lint commands used in CI steps, language versions in matrix
+   - `.gitlab-ci.yml` → build/test/lint commands used in CI stages, image versions
+
+   From the discovered files, populate the **Quality Tools** section of AGENTS.md with the exact commands for:
+   - **Build:** (e.g., `npm run build`, `./gradlew build`, `cargo build`)
+   - **Lint:** (e.g., `npm run lint`, `./gradlew ktlintCheck`, `cargo clippy`)
+   - **Type check:** (e.g., `tsc --noEmit`, or N/A)
+   - **Test:** (e.g., `npm test`, `./gradlew test`, `cargo test`)
+   - **Smoke:** (e.g., `npm start`, `./gradlew bootRun`, or a health endpoint)
+
+   Present the discovered tech stack and quality tools to the user for confirmation before writing them.
+
+   Also:
    - Adjust interview: skip "what tech stack?" and "what are you building?"
    - Ask instead: "what change do you want to make?" and "any constraints?"
    - Check recent git commits and ask whether to follow existing commit convention
@@ -24,7 +50,22 @@ Plant the seed for a new project.
    - If Business Rules are missing, ask: "Any rules that must ALWAYS hold?"
    - Confirm with the user: "Here's what I extracted. Anything to adjust?"
 
-   **Path B — No DNA:**
+   **Path B1 — Existing project, no DNA (EXISTING = true):**
+   - Present what you discovered in Step 0 to the user:
+     "Here's what I discovered about your project:" followed by a summary of
+     the tech stack, quality tools, and any product context from README.md.
+   - Ask the user to confirm or adjust what was discovered.
+   - Then ask only gap-filling questions ONE AT A TIME (skip any already
+     answered by the discoveries):
+     - What core problem does this project solve?
+     - What business rules must ALWAYS be true?
+     - What are the current priorities? (e.g., new feature, refactor, stabilize)
+     - Any hard constraints? (performance, compliance, deployment, backwards compatibility)
+   - Generate `.organic-growth/product-dna.md` using the structured template.
+     Leave missing sections as `<!-- to be filled -->`.
+   - Fill in AGENTS.md Product section from discoveries + answers.
+
+   **Path B2 — Greenfield, no DNA (EXISTING = false):**
    - Before the interview, briefly consider what this project could be:
      what kind of system, likely domain risks, and which questions matter most.
      Do not create separate brainstorming artifacts.
@@ -49,7 +90,13 @@ Plant the seed for a new project.
 3. Check if AGENTS.md already has a filled Product section.
    If yes, ask: "Product context already exists. Overwrite or update?"
 
-4. Generate `.organic-growth/growth/project-bootstrap.md` — the first growth plan:
+4. **Growth plan generation (greenfield only).**
+
+   If EXISTING = true → **skip this step entirely.** Do NOT generate
+   `project-bootstrap.md`. Existing projects do not need bootstrap stages —
+   the user will run `/grow` to plan their first feature against the existing codebase.
+
+   If EXISTING = false → generate `.organic-growth/growth/project-bootstrap.md` — the first growth plan:
    - Stage 1: Initialize project (build tool, dependencies, empty build passes)
    - Stage 2: Hello World endpoint/page (proves stack works end-to-end)
    - Stage 3: First domain concept with hardcoded data
@@ -57,7 +104,12 @@ Plant the seed for a new project.
    - Stage 5: First real behavior with real data
    - Include `Capabilities:` tags in the plan header
 
-5. If the project has 4+ distinct capabilities (from DNA/interview),
+5. **Growth map generation (greenfield only).**
+
+   If EXISTING = true → **skip this step entirely.** Do NOT generate
+   `growth-map.md`. There is no bootstrap plan to map.
+
+   If EXISTING = false → if the project has 4+ distinct capabilities (from DNA/interview),
    generate `.organic-growth/growth-map.md` draft:
    - Organize sequence into Walking Skeleton and what follows
    - Add short "Why This Order"
@@ -65,6 +117,12 @@ Plant the seed for a new project.
    - Present as aspirational, not a commitment
 
 6. Present a summary of what was created:
+
+   If EXISTING = true:
+   - Product DNA (`.organic-growth/product-dna.md`)
+   - AGENTS.md Product/Tech Stack/Priorities sections
+
+   If EXISTING = false:
    - Product DNA (`.organic-growth/product-dna.md`)
    - AGENTS.md Product/Tech Stack/Priorities sections
    - Growth plan (`.organic-growth/growth/project-bootstrap.md`)
@@ -79,7 +137,14 @@ Plant the seed for a new project.
    - Do NOT create src/, lib/, app/, or any implementation directories.
    - Do NOT commit anything beyond the seed files created above.
 
-   The ONLY files you create are:
+   If EXISTING = true, the ONLY files you create are:
+   - `.organic-growth/product-dna.md`
+   - `AGENTS.md` (fill in Product/Tech Stack/Priorities sections)
+
+   Say exactly:
+   "Seed planted. Run `/grow` when you're ready to plan your first feature."
+
+   If EXISTING = false, the ONLY files you create are:
    - `.organic-growth/product-dna.md`
    - `.organic-growth/growth/project-bootstrap.md`
    - `.organic-growth/growth-map.md` (if applicable)

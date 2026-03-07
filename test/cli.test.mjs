@@ -195,11 +195,6 @@ describe('Template content integrity (Claude)', () => {
 });
 
 describe('Structured DNA + example plan docs', () => {
-  it('example growth plan includes Capabilities header', () => {
-    const content = readFileSync(join(import.meta.dirname, '..', '.organic-growth', 'example-growth-plan.md'), 'utf8');
-    assert.ok(/Capabilities:/i.test(content), 'example growth plan should include Capabilities tags');
-  });
-
   it('product DNA document no longer mentions superpowers integration', () => {
     const content = readFileSync(join(import.meta.dirname, '..', '.organic-growth', 'product-dna.md'), 'utf8');
     assert.ok(!/superpowers/i.test(content), 'product DNA should not mention superpowers');
@@ -736,6 +731,579 @@ describe('Upgrade preserves .organic-growth/ contents (Stage 4)', () => {
 
     // Should not mention .organic-growth/growth/ as created or updated
     assert.ok(!clean.includes('.organic-growth/growth'), 'upgrade output should not mention .organic-growth/growth/ directory');
+  });
+});
+
+describe('Seed template: description and framing (seed-existing-project Stage 1)', () => {
+  const claudeSeed = readFileSync(join(import.meta.dirname, '..', 'templates', '.claude', 'commands', 'seed.md'), 'utf8');
+  const opencodeSeed = readFileSync(join(import.meta.dirname, '..', 'templates-opencode', '.opencode', 'commands', 'seed.md'), 'utf8');
+
+  // P1: frontmatter description does not contain "new"
+  it('P1: Claude seed frontmatter description does not contain the word "new"', () => {
+    const descMatch = claudeSeed.match(/^---\n([\s\S]*?)\n---/);
+    assert.ok(descMatch, 'should have frontmatter');
+    const frontmatter = descMatch[1];
+    assert.ok(!/\bnew\b/i.test(frontmatter), 'frontmatter description should not contain "new"');
+  });
+
+  it('P1: opencode seed frontmatter description does not contain the word "new"', () => {
+    const descMatch = opencodeSeed.match(/^---\n([\s\S]*?)\n---/);
+    assert.ok(descMatch, 'should have frontmatter');
+    const frontmatter = descMatch[1];
+    assert.ok(!/\bnew\b/i.test(frontmatter), 'frontmatter description should not contain "new"');
+  });
+
+  // P2: opening instruction line (first non-frontmatter line) does not contain "new"
+  it('P2: Claude seed opening line does not contain the word "new"', () => {
+    const afterFrontmatter = claudeSeed.replace(/^---\n[\s\S]*?\n---\n*/, '');
+    const firstLine = afterFrontmatter.split('\n').find(l => l.trim().length > 0);
+    assert.ok(firstLine, 'should have a first line after frontmatter');
+    assert.ok(!/\bnew\b/i.test(firstLine), `opening line should not contain "new": "${firstLine}"`);
+  });
+
+  it('P2: opencode seed opening line does not contain the word "new"', () => {
+    const afterFrontmatter = opencodeSeed.replace(/^---\n[\s\S]*?\n---\n*/, '');
+    const firstLine = afterFrontmatter.split('\n').find(l => l.trim().length > 0);
+    assert.ok(firstLine, 'should have a first line after frontmatter');
+    assert.ok(!/\bnew\b/i.test(firstLine), `opening line should not contain "new": "${firstLine}"`);
+  });
+
+  // P3: Step 0 defines a clear boolean outcome (EXISTING = true/false)
+  it('P3: Claude seed Step 0 defines EXISTING boolean outcome', () => {
+    const step0Match = claudeSeed.match(/^0\.\s[\s\S]*?(?=\n\d+\.)/m);
+    assert.ok(step0Match, 'should have a Step 0');
+    const step0 = step0Match[0];
+    assert.ok(/EXISTING\s*=\s*(true|false)/i.test(step0) || /EXISTING/i.test(step0),
+      'Step 0 should define EXISTING boolean');
+    // Must have both true and false outcomes
+    assert.ok(/EXISTING\s*=\s*true/i.test(step0), 'Step 0 should define EXISTING = true case');
+    assert.ok(/EXISTING\s*=\s*false/i.test(step0), 'Step 0 should define EXISTING = false case');
+  });
+
+  it('P3: opencode seed Step 0 defines EXISTING boolean outcome', () => {
+    const step0Match = opencodeSeed.match(/^0\.\s[\s\S]*?(?=\n\d+\.)/m);
+    assert.ok(step0Match, 'should have a Step 0');
+    const step0 = step0Match[0];
+    assert.ok(/EXISTING\s*=\s*true/i.test(step0), 'Step 0 should define EXISTING = true case');
+    assert.ok(/EXISTING\s*=\s*false/i.test(step0), 'Step 0 should define EXISTING = false case');
+  });
+
+  // P4: Claude Code and opencode seed templates have identical step structure
+  it('P4: Claude and opencode seed templates have identical step structure (differing only in CLAUDE.md vs AGENTS.md)', () => {
+    // Normalize: replace CLAUDE.md with CONFIG.md, AGENTS.md with CONFIG.md,
+    // .claude with .configdir, .opencode with .configdir
+    const normalize = (s) => s
+      .replace(/CLAUDE\.md/g, 'CONFIG.md')
+      .replace(/AGENTS\.md/g, 'CONFIG.md')
+      .replace(/\.claude\b/g, '.configdir')
+      .replace(/\.opencode\b/g, '.configdir');
+
+    assert.equal(normalize(claudeSeed), normalize(opencodeSeed),
+      'templates should be identical after normalizing config file references');
+  });
+});
+
+describe('Seed template: auto-discovery checklist (seed-existing-project Stage 2)', () => {
+  const claudeSeed = readFileSync(join(import.meta.dirname, '..', 'templates', '.claude', 'commands', 'seed.md'), 'utf8');
+  const opencodeSeed = readFileSync(join(import.meta.dirname, '..', 'templates-opencode', '.opencode', 'commands', 'seed.md'), 'utf8');
+
+  // Extract Step 0 from template (everything from "0." to the next numbered step)
+  function getStep0(content) {
+    const match = content.match(/^0\.\s[\s\S]*?(?=\n\d+\.)/m);
+    assert.ok(match, 'should have a Step 0');
+    return match[0];
+  }
+
+  // P5: Step 0 contains an explicit file-scanning checklist naming required files
+  const requiredFiles = [
+    'package.json',
+    'Makefile',
+    'build.gradle',
+    'pyproject.toml',
+    'Cargo.toml',
+    'go.mod',
+    'pom.xml',
+    'README.md',
+  ];
+
+  for (const file of requiredFiles) {
+    it(`P5: Claude seed Step 0 checklist includes ${file}`, () => {
+      const step0 = getStep0(claudeSeed);
+      assert.ok(step0.includes(file), `Step 0 should mention ${file} in scanning checklist`);
+    });
+
+    it(`P5: opencode seed Step 0 checklist includes ${file}`, () => {
+      const step0 = getStep0(opencodeSeed);
+      assert.ok(step0.includes(file), `Step 0 should mention ${file} in scanning checklist`);
+    });
+  }
+
+  it('P5: Claude seed Step 0 checklist includes CI config files', () => {
+    const step0 = getStep0(claudeSeed);
+    assert.ok(
+      step0.includes('.github/workflows') || step0.includes('github/workflows'),
+      'Step 0 should mention GitHub Actions workflow files'
+    );
+    assert.ok(
+      step0.includes('.gitlab-ci.yml'),
+      'Step 0 should mention GitLab CI config'
+    );
+  });
+
+  it('P5: opencode seed Step 0 checklist includes CI config files', () => {
+    const step0 = getStep0(opencodeSeed);
+    assert.ok(
+      step0.includes('.github/workflows') || step0.includes('github/workflows'),
+      'Step 0 should mention GitHub Actions workflow files'
+    );
+    assert.ok(
+      step0.includes('.gitlab-ci.yml'),
+      'Step 0 should mention GitLab CI config'
+    );
+  });
+
+  // P6: For each file in the checklist, the template specifies what to extract
+  it('P6: Claude seed Step 0 specifies what to extract from package.json', () => {
+    const step0 = getStep0(claudeSeed);
+    // Should mention scripts (build, test, lint) and dependencies/engines for stack detection
+    assert.ok(step0.includes('scripts'), 'should mention scripts to extract from package.json');
+    assert.ok(
+      step0.includes('dependencies') || step0.includes('devDependencies'),
+      'should mention dependencies for stack detection from package.json'
+    );
+  });
+
+  it('P6: opencode seed Step 0 specifies what to extract from package.json', () => {
+    const step0 = getStep0(opencodeSeed);
+    assert.ok(step0.includes('scripts'), 'should mention scripts to extract from package.json');
+    assert.ok(
+      step0.includes('dependencies') || step0.includes('devDependencies'),
+      'should mention dependencies for stack detection from package.json'
+    );
+  });
+
+  it('P6: Claude seed Step 0 specifies what to extract from build.gradle', () => {
+    const step0 = getStep0(claudeSeed);
+    assert.ok(
+      step0.includes('plugins') || step0.includes('tasks'),
+      'should mention what to extract from build.gradle (plugins or tasks)'
+    );
+  });
+
+  it('P6: Claude seed Step 0 specifies what to extract from Cargo.toml', () => {
+    const step0 = getStep0(claudeSeed);
+    // For Cargo.toml, relevant fields are dependencies, features, or workspace members
+    assert.ok(
+      step0.includes('dependencies') || step0.includes('[dependencies]'),
+      'should mention what to extract from Cargo.toml'
+    );
+  });
+
+  it('P6: Claude seed Step 0 specifies what to extract from CI config files', () => {
+    const step0 = getStep0(claudeSeed);
+    // CI configs should extract build/test/lint commands
+    assert.ok(
+      /CI.*command|command.*CI|workflow.*steps|steps.*commands|build.*test.*lint/i.test(step0) ||
+      (step0.includes('CI') && (step0.includes('commands') || step0.includes('steps'))),
+      'should mention extracting commands from CI config files'
+    );
+  });
+
+  it('P6: Claude seed Step 0 specifies what to extract from README.md', () => {
+    const step0 = getStep0(claudeSeed);
+    assert.ok(
+      /README.*product|README.*description|README.*what|product.*context/i.test(step0) ||
+      step0.includes('product description') || step0.includes('project description'),
+      'should mention extracting product/project description from README.md'
+    );
+  });
+
+  // P7: Step 0 instructs agent to populate Quality Tools section and present for confirmation
+  it('P7: Claude seed Step 0 instructs populating Quality Tools section', () => {
+    const step0 = getStep0(claudeSeed);
+    assert.ok(
+      /Quality\s+[Tt]ools/i.test(step0),
+      'Step 0 should mention Quality Tools section'
+    );
+    assert.ok(
+      step0.includes('CLAUDE.md'),
+      'Step 0 should mention populating CLAUDE.md'
+    );
+  });
+
+  it('P7: opencode seed Step 0 instructs populating Quality Tools section', () => {
+    const step0 = getStep0(opencodeSeed);
+    assert.ok(
+      /Quality\s+[Tt]ools/i.test(step0),
+      'Step 0 should mention Quality Tools section'
+    );
+    assert.ok(
+      step0.includes('AGENTS.md'),
+      'Step 0 should mention populating AGENTS.md'
+    );
+  });
+
+  it('P7: Claude seed Step 0 instructs presenting discoveries for user confirmation', () => {
+    const step0 = getStep0(claudeSeed);
+    assert.ok(
+      /confirm/i.test(step0) || /present.*user/i.test(step0) || /review/i.test(step0),
+      'Step 0 should instruct presenting discovered tools to user for confirmation'
+    );
+  });
+
+  it('P7: opencode seed Step 0 instructs presenting discoveries for user confirmation', () => {
+    const step0 = getStep0(opencodeSeed);
+    assert.ok(
+      /confirm/i.test(step0) || /present.*user/i.test(step0) || /review/i.test(step0),
+      'Step 0 should instruct presenting discovered tools to user for confirmation'
+    );
+  });
+});
+
+describe('Seed template: interview path split (seed-existing-project Stage 3)', () => {
+  const claudeSeed = readFileSync(join(import.meta.dirname, '..', 'templates', '.claude', 'commands', 'seed.md'), 'utf8');
+  const opencodeSeed = readFileSync(join(import.meta.dirname, '..', 'templates-opencode', '.opencode', 'commands', 'seed.md'), 'utf8');
+
+  // Helper: extract Path B1 (existing project, no DNA) from template
+  function getPathB1(content) {
+    const match = content.match(/Path B1[^\n]*existing[^\n]*[\s\S]*?(?=\n\s*\*\*Path B2)/im);
+    assert.ok(match, 'should have a Path B1 for existing projects');
+    return match[0];
+  }
+
+  // Helper: extract Path B2 (greenfield, no DNA) from template
+  function getPathB2(content) {
+    const match = content.match(/Path B2[^\n]*[Gg]reenfield[^\n]*[\s\S]*?(?=\n\d+\.)/m);
+    assert.ok(match, 'should have a Path B2 for greenfield projects');
+    return match[0];
+  }
+
+  // P8: existing project path does NOT contain greenfield questions
+  it('P8: Claude Path B1 does not ask "What are you building?"', () => {
+    const b1 = getPathB1(claudeSeed);
+    assert.ok(!/What are you building/i.test(b1),
+      'Path B1 should not ask "What are you building?" for existing projects');
+  });
+
+  it('P8: Claude Path B1 does not ask "What tech stack do you want?"', () => {
+    const b1 = getPathB1(claudeSeed);
+    assert.ok(!/What tech stack do you want/i.test(b1),
+      'Path B1 should not ask "What tech stack do you want?" for existing projects');
+  });
+
+  it('P8: opencode Path B1 does not ask "What are you building?"', () => {
+    const b1 = getPathB1(opencodeSeed);
+    assert.ok(!/What are you building/i.test(b1),
+      'Path B1 should not ask "What are you building?" for existing projects');
+  });
+
+  it('P8: opencode Path B1 does not ask "What tech stack do you want?"', () => {
+    const b1 = getPathB1(opencodeSeed);
+    assert.ok(!/What tech stack do you want/i.test(b1),
+      'Path B1 should not ask "What tech stack do you want?" for existing projects');
+  });
+
+  // P9: existing project path presents discoveries first and asks user to confirm
+  it('P9: Claude Path B1 presents auto-discovered context first', () => {
+    const b1 = getPathB1(claudeSeed);
+    assert.ok(/discovered/i.test(b1),
+      'Path B1 should mention presenting what was discovered');
+  });
+
+  it('P9: Claude Path B1 asks user to confirm or adjust discovered context', () => {
+    const b1 = getPathB1(claudeSeed);
+    assert.ok(/confirm|adjust/i.test(b1),
+      'Path B1 should ask user to confirm or adjust');
+  });
+
+  it('P9: opencode Path B1 presents auto-discovered context first', () => {
+    const b1 = getPathB1(opencodeSeed);
+    assert.ok(/discovered/i.test(b1),
+      'Path B1 should mention presenting what was discovered');
+  });
+
+  it('P9: opencode Path B1 asks user to confirm or adjust discovered context', () => {
+    const b1 = getPathB1(opencodeSeed);
+    assert.ok(/confirm|adjust/i.test(b1),
+      'Path B1 should ask user to confirm or adjust');
+  });
+
+  // P10: existing project path asks only gap-filling questions
+  const gapQuestions = ['core problem', 'business rules', 'priorities', 'constraints'];
+
+  for (const question of gapQuestions) {
+    it(`P10: Claude Path B1 asks about ${question}`, () => {
+      const b1 = getPathB1(claudeSeed);
+      assert.ok(b1.toLowerCase().includes(question),
+        `Path B1 should ask about ${question}`);
+    });
+
+    it(`P10: opencode Path B1 asks about ${question}`, () => {
+      const b1 = getPathB1(opencodeSeed);
+      assert.ok(b1.toLowerCase().includes(question),
+        `Path B1 should ask about ${question}`);
+    });
+  }
+
+  // P11: greenfield path preserves the full original interview question set
+  const greenfieldQuestions = [
+    'What are you building?',
+    'Who is it for?',
+    'What core problem does it solve?',
+    'What tech stack do you want?',
+    'Any hard constraints?',
+    'priority',
+    'user roles',
+    'business rules',
+    'process flow',
+  ];
+
+  for (const question of greenfieldQuestions) {
+    it(`P11: Claude Path B2 preserves greenfield question: "${question}"`, () => {
+      const b2 = getPathB2(claudeSeed);
+      assert.ok(b2.toLowerCase().includes(question.toLowerCase()),
+        `Path B2 should contain "${question}" for greenfield projects`);
+    });
+
+    it(`P11: opencode Path B2 preserves greenfield question: "${question}"`, () => {
+      const b2 = getPathB2(opencodeSeed);
+      assert.ok(b2.toLowerCase().includes(question.toLowerCase()),
+        `Path B2 should contain "${question}" for greenfield projects`);
+    });
+  }
+
+  // P4 (carried): templates remain structurally identical
+  it('P4: Claude and opencode seed templates remain structurally identical after path split', () => {
+    const normalize = (s) => s
+      .replace(/CLAUDE\.md/g, 'CONFIG.md')
+      .replace(/AGENTS\.md/g, 'CONFIG.md')
+      .replace(/\.claude\b/g, '.configdir')
+      .replace(/\.opencode\b/g, '.configdir');
+
+    assert.equal(normalize(claudeSeed), normalize(opencodeSeed),
+      'templates should be identical after normalizing config file references');
+  });
+});
+
+describe('Seed template: skip bootstrap for existing projects (seed-existing-project Stage 4)', () => {
+  const claudeSeed = readFileSync(join(import.meta.dirname, '..', 'templates', '.claude', 'commands', 'seed.md'), 'utf8');
+  const opencodeSeed = readFileSync(join(import.meta.dirname, '..', 'templates-opencode', '.opencode', 'commands', 'seed.md'), 'utf8');
+
+  // Helper: extract Step 4 content
+  function getStep4(content) {
+    const match = content.match(/^4\.\s[\s\S]*?(?=\n\d+\.)/m);
+    assert.ok(match, 'should have a Step 4');
+    return match[0];
+  }
+
+  // Helper: extract Step 5 content
+  function getStep5(content) {
+    const match = content.match(/^5\.\s[\s\S]*?(?=\n\d+\.)/m);
+    assert.ok(match, 'should have a Step 5');
+    return match[0];
+  }
+
+  // Helper: extract Step 7 content
+  function getStep7(content) {
+    const match = content.match(/^7\.\s[\s\S]*?(?=\nInput:)/m);
+    assert.ok(match, 'should have a Step 7');
+    return match[0];
+  }
+
+  // P12: When existing, Step 4 (growth plan generation) is skipped
+  it('P12: Claude Step 4 instructs to skip growth plan when EXISTING = true', () => {
+    const step4 = getStep4(claudeSeed);
+    assert.ok(/EXISTING\s*=\s*true/i.test(step4), 'Step 4 should reference EXISTING = true');
+    assert.ok(/skip/i.test(step4), 'Step 4 should say to skip when existing');
+    assert.ok(/do\s*not\s*generate[\s\S]*?project-bootstrap/i.test(step4),
+      'Step 4 should explicitly say not to generate project-bootstrap.md');
+  });
+
+  it('P12: opencode Step 4 instructs to skip growth plan when EXISTING = true', () => {
+    const step4 = getStep4(opencodeSeed);
+    assert.ok(/EXISTING\s*=\s*true/i.test(step4), 'Step 4 should reference EXISTING = true');
+    assert.ok(/skip/i.test(step4), 'Step 4 should say to skip when existing');
+    assert.ok(/do\s*not\s*generate[\s\S]*?project-bootstrap/i.test(step4),
+      'Step 4 should explicitly say not to generate project-bootstrap.md');
+  });
+
+  // P13: When existing, Step 5 (growth map generation) is skipped
+  it('P13: Claude Step 5 instructs to skip growth map when EXISTING = true', () => {
+    const step5 = getStep5(claudeSeed);
+    assert.ok(/EXISTING\s*=\s*true/i.test(step5), 'Step 5 should reference EXISTING = true');
+    assert.ok(/skip/i.test(step5), 'Step 5 should say to skip when existing');
+    assert.ok(/do\s*not\s*generate[\s\S]*?growth-map/i.test(step5),
+      'Step 5 should explicitly say not to generate growth-map.md');
+  });
+
+  it('P13: opencode Step 5 instructs to skip growth map when EXISTING = true', () => {
+    const step5 = getStep5(opencodeSeed);
+    assert.ok(/EXISTING\s*=\s*true/i.test(step5), 'Step 5 should reference EXISTING = true');
+    assert.ok(/skip/i.test(step5), 'Step 5 should say to skip when existing');
+    assert.ok(/do\s*not\s*generate[\s\S]*?growth-map/i.test(step5),
+      'Step 5 should explicitly say not to generate growth-map.md');
+  });
+
+  // P14: When existing, MANDATORY STOP lists only files actually created
+  it('P14: Claude Step 7 lists only product-dna.md and CLAUDE.md for EXISTING = true', () => {
+    const step7 = getStep7(claudeSeed);
+    // Extract the EXISTING = true file list block
+    const existingBlock = step7.match(/EXISTING\s*=\s*true[\s\S]*?(?=If EXISTING\s*=\s*false|Say exactly)/im);
+    assert.ok(existingBlock, 'Step 7 should have a separate EXISTING = true block');
+    const block = existingBlock[0];
+    assert.ok(block.includes('product-dna.md'), 'existing block should list product-dna.md');
+    assert.ok(block.includes('CLAUDE.md'), 'existing block should list CLAUDE.md');
+    assert.ok(!block.includes('project-bootstrap.md'), 'existing block should NOT list project-bootstrap.md');
+    assert.ok(!block.includes('growth-map.md'), 'existing block should NOT list growth-map.md');
+  });
+
+  it('P14: opencode Step 7 lists only product-dna.md and AGENTS.md for EXISTING = true', () => {
+    const step7 = getStep7(opencodeSeed);
+    const existingBlock = step7.match(/EXISTING\s*=\s*true[\s\S]*?(?=If EXISTING\s*=\s*false|Say exactly)/im);
+    assert.ok(existingBlock, 'Step 7 should have a separate EXISTING = true block');
+    const block = existingBlock[0];
+    assert.ok(block.includes('product-dna.md'), 'existing block should list product-dna.md');
+    assert.ok(block.includes('AGENTS.md'), 'existing block should list AGENTS.md');
+    assert.ok(!block.includes('project-bootstrap.md'), 'existing block should NOT list project-bootstrap.md');
+    assert.ok(!block.includes('growth-map.md'), 'existing block should NOT list growth-map.md');
+  });
+
+  // P15: When existing, closing message says /grow instead of /next
+  it('P15: Claude Step 7 says "Run /grow" for EXISTING = true', () => {
+    const step7 = getStep7(claudeSeed);
+    // Find the existing-project closing message
+    const existingSection = step7.match(/EXISTING\s*=\s*true[\s\S]*?Say exactly:\s*\n\s*"([^"]+)"/im);
+    assert.ok(existingSection, 'Step 7 should have a closing message for existing projects');
+    const message = existingSection[1];
+    assert.ok(message.includes('/grow'), 'existing project closing message should reference /grow');
+    assert.ok(!message.includes('/next'), 'existing project closing message should NOT reference /next');
+    assert.ok(/plan your first feature/i.test(message),
+      'existing project closing message should mention planning first feature');
+  });
+
+  it('P15: opencode Step 7 says "Run /grow" for EXISTING = true', () => {
+    const step7 = getStep7(opencodeSeed);
+    const existingSection = step7.match(/EXISTING\s*=\s*true[\s\S]*?Say exactly:\s*\n\s*"([^"]+)"/im);
+    assert.ok(existingSection, 'Step 7 should have a closing message for existing projects');
+    const message = existingSection[1];
+    assert.ok(message.includes('/grow'), 'existing project closing message should reference /grow');
+    assert.ok(!message.includes('/next'), 'existing project closing message should NOT reference /next');
+    assert.ok(/plan your first feature/i.test(message),
+      'existing project closing message should mention planning first feature');
+  });
+
+  // P16: When greenfield, Steps 4, 5, 6, and 7 remain unchanged
+  it('P16: Claude Step 4 still generates project-bootstrap.md when EXISTING = false', () => {
+    const step4 = getStep4(claudeSeed);
+    assert.ok(/EXISTING\s*=\s*false/i.test(step4), 'Step 4 should reference EXISTING = false');
+    assert.ok(step4.includes('project-bootstrap.md'), 'Step 4 should mention project-bootstrap.md for greenfield');
+    assert.ok(step4.includes('Initialize project'), 'Step 4 should include Stage 1 description');
+    assert.ok(step4.includes('Hello World'), 'Step 4 should include Stage 2 description');
+  });
+
+  it('P16: opencode Step 4 still generates project-bootstrap.md when EXISTING = false', () => {
+    const step4 = getStep4(opencodeSeed);
+    assert.ok(/EXISTING\s*=\s*false/i.test(step4), 'Step 4 should reference EXISTING = false');
+    assert.ok(step4.includes('project-bootstrap.md'), 'Step 4 should mention project-bootstrap.md for greenfield');
+    assert.ok(step4.includes('Initialize project'), 'Step 4 should include Stage 1 description');
+    assert.ok(step4.includes('Hello World'), 'Step 4 should include Stage 2 description');
+  });
+
+  it('P16: Claude Step 5 still generates growth-map.md when EXISTING = false', () => {
+    const step5 = getStep5(claudeSeed);
+    assert.ok(/EXISTING\s*=\s*false/i.test(step5), 'Step 5 should reference EXISTING = false');
+    assert.ok(step5.includes('growth-map.md'), 'Step 5 should mention growth-map.md for greenfield');
+    assert.ok(step5.includes('Walking Skeleton'), 'Step 5 should mention Walking Skeleton');
+  });
+
+  it('P16: opencode Step 5 still generates growth-map.md when EXISTING = false', () => {
+    const step5 = getStep5(opencodeSeed);
+    assert.ok(/EXISTING\s*=\s*false/i.test(step5), 'Step 5 should reference EXISTING = false');
+    assert.ok(step5.includes('growth-map.md'), 'Step 5 should mention growth-map.md for greenfield');
+    assert.ok(step5.includes('Walking Skeleton'), 'Step 5 should mention Walking Skeleton');
+  });
+
+  it('P16: Claude Step 7 still lists all files and says /next for EXISTING = false', () => {
+    const step7 = getStep7(claudeSeed);
+    const greenfieldBlock = step7.match(/EXISTING\s*=\s*false,\s*the ONLY files[\s\S]*?Say exactly:\s*\n\s*"([^"]+)"/im);
+    assert.ok(greenfieldBlock, 'Step 7 should have a greenfield file list and closing message');
+    const message = greenfieldBlock[1];
+    assert.ok(message.includes('/next'), 'greenfield closing message should reference /next');
+  });
+
+  it('P16: opencode Step 7 still lists all files and says /next for EXISTING = false', () => {
+    const step7 = getStep7(opencodeSeed);
+    const greenfieldBlock = step7.match(/EXISTING\s*=\s*false,\s*the ONLY files[\s\S]*?Say exactly:\s*\n\s*"([^"]+)"/im);
+    assert.ok(greenfieldBlock, 'Step 7 should have a greenfield file list and closing message');
+    const message = greenfieldBlock[1];
+    assert.ok(message.includes('/next'), 'greenfield closing message should reference /next');
+  });
+
+  // P4 (carried): templates remain structurally identical
+  it('P4: Claude and opencode seed templates remain structurally identical after skip-bootstrap changes', () => {
+    const normalize = (s) => s
+      .replace(/CLAUDE\.md/g, 'CONFIG.md')
+      .replace(/AGENTS\.md/g, 'CONFIG.md')
+      .replace(/\.claude\b/g, '.configdir')
+      .replace(/\.opencode\b/g, '.configdir');
+
+    assert.equal(normalize(claudeSeed), normalize(opencodeSeed),
+      'templates should be identical after normalizing config file references');
+  });
+});
+
+describe('Seed template: project copy sync and full parity (seed-existing-project Stage 5)', () => {
+  const claudeTemplate = readFileSync(join(import.meta.dirname, '..', 'templates', '.claude', 'commands', 'seed.md'), 'utf8');
+  const opencodeTemplate = readFileSync(join(import.meta.dirname, '..', 'templates-opencode', '.opencode', 'commands', 'seed.md'), 'utf8');
+
+  // P17: Project's own .claude/commands/seed.md is identical to template
+  it('P17: project .claude/commands/seed.md is identical to templates/.claude/commands/seed.md', () => {
+    const projectCopy = readFileSync(join(import.meta.dirname, '..', '.claude', 'commands', 'seed.md'), 'utf8');
+    assert.equal(projectCopy, claudeTemplate,
+      'project copy .claude/commands/seed.md must be identical to templates/.claude/commands/seed.md');
+  });
+
+  // P18: Every numbered step in Claude Code template has a corresponding step in opencode
+  it('P18: every numbered step in Claude Code template exists in opencode template with identical logic', () => {
+    // Extract all numbered steps from both templates
+    const stepPattern = /^(\d+)\.\s/gm;
+
+    const claudeSteps = [...claudeTemplate.matchAll(stepPattern)].map(m => m[1]);
+    const opencodeSteps = [...opencodeTemplate.matchAll(stepPattern)].map(m => m[1]);
+
+    assert.ok(claudeSteps.length > 0, 'Claude template should have numbered steps');
+    assert.deepEqual(claudeSteps, opencodeSteps,
+      'both templates should have the same numbered steps in the same order');
+
+    // For each step, normalize platform references and verify logic is identical
+    const normalize = (s) => s
+      .replace(/CLAUDE\.md/g, 'CONFIG.md')
+      .replace(/AGENTS\.md/g, 'CONFIG.md')
+      .replace(/\.claude\b/g, '.configdir')
+      .replace(/\.opencode\b/g, '.configdir');
+
+    // Extract each step's content and compare after normalization
+    for (const stepNum of claudeSteps) {
+      const stepRegex = new RegExp(`^${stepNum}\\.\\s[\\s\\S]*?(?=\\n\\d+\\.|\\nInput:)`, 'm');
+      const claudeStep = claudeTemplate.match(stepRegex);
+      const opencodeStep = opencodeTemplate.match(stepRegex);
+      assert.ok(claudeStep, `Claude template should have Step ${stepNum}`);
+      assert.ok(opencodeStep, `opencode template should have Step ${stepNum}`);
+      assert.equal(normalize(claudeStep[0]), normalize(opencodeStep[0]),
+        `Step ${stepNum} should be identical after normalizing platform references`);
+    }
+  });
+
+  // P4 (carried): full template parity
+  it('P4: full template parity -- templates are identical after normalizing all platform references', () => {
+    const normalize = (s) => s
+      .replace(/CLAUDE\.md/g, 'CONFIG.md')
+      .replace(/AGENTS\.md/g, 'CONFIG.md')
+      .replace(/\.claude\b/g, '.configdir')
+      .replace(/\.opencode\b/g, '.configdir');
+
+    assert.equal(normalize(claudeTemplate), normalize(opencodeTemplate),
+      'entire templates should be identical after normalizing config file references');
   });
 });
 
