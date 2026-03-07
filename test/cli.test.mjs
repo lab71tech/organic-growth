@@ -303,15 +303,6 @@ describe('Version file (.organic-growth/.version)', () => {
   });
 });
 
-function runCLIRaw(args, cwd) {
-  const tmp = cwd || mkdtempSync(join(tmpdir(), 'og-test-'));
-  const output = execFileSync('node', [CLI_PATH, ...args], {
-    cwd: tmp,
-    encoding: 'utf8',
-    timeout: 10000,
-  });
-  return { tmp, output };
-}
 
 describe('Upgrade mode (--upgrade)', () => {
   const pkg = JSON.parse(readFileSync(PKG_PATH, 'utf8'));
@@ -474,18 +465,15 @@ describe('Upgrade mode (--upgrade)', () => {
     // Customize a file to verify nothing changes
     writeFileSync(join(tmp, 'CLAUDE.md'), '# custom\n');
     const managedFile = join(tmp, '.claude', 'settings.json');
-    const managedBefore = readFileSync(managedFile, 'utf8');
     writeFileSync(managedFile, '{"modified": true}');
 
     let threw = false;
-    let stderr = '';
     try {
       execFileSync('node', [CLI_PATH, '--upgrade', '--force'], {
         cwd: tmp, encoding: 'utf8', timeout: 10000,
       });
-    } catch (e) {
+    } catch {
       threw = true;
-      stderr = e.stderr || e.stdout || '';
     }
 
     assert.ok(threw, '--upgrade --force should exit with error');
@@ -548,8 +536,6 @@ describe('Upgrade mode (--upgrade)', () => {
 });
 
 describe('Upgrade CLI output (Stage 3)', () => {
-  const pkg = JSON.parse(readFileSync(PKG_PATH, 'utf8'));
-
   // P13: --help output includes --upgrade with description
   it('P13: --help includes --upgrade with description mentioning managed files and user customizations', () => {
     const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
