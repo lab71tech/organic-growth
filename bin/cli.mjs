@@ -275,6 +275,7 @@ async function install() {
   log(`  ${CYAN}/grow${RESET}    — plan and start a new feature`);
   log(`  ${CYAN}/map${RESET}     — view or adjust the system growth map`);
   log(`  ${CYAN}/next${RESET}    — implement the next growth stage`);
+  log(`  ${CYAN}/next-automatic${RESET} — run multiple stages automatically`);
   log(`  ${CYAN}/replan${RESET}  — re-evaluate when things change`);
   log(`  ${CYAN}/review${RESET}  — deep quality review of recent stages`);
 

@@ -42,6 +42,7 @@ CLAUDE.md                           # Project context template + growth philosop
 │   ├── grow.md                     # /grow     — plan a new feature
 │   ├── map.md                      # /map      — view or adjust growth map
 │   ├── next.md                     # /next     — implement next stage
+│   ├── next-automatic.md           # /next-automatic — run multiple stages automatically
 │   ├── replan.md                   # /replan   — adjust when things change
 │   └── review.md                   # /review   — deep quality review
 ├── hooks/
@@ -77,6 +78,7 @@ Tests run first so failures are caught before the review. This makes the quality
 > /next                          # stage 2
 > /next                          # stage 3
 > /clear                         # fresh session every 3 stages
+> /next-automatic 5              # or run multiple stages unattended
 > /review 3                      # quality check
 > /next                          # continue
 

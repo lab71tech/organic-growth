@@ -25,6 +25,7 @@ Claude Code without structure produces inconsistent results — sprawling change
 - `/seed` — bootstrap project (from DNA document or interview)
 - `/grow` — plan a new feature
 - `/next` — implement next stage
+- `/next-automatic` — run multiple stages automatically (optional max-stages argument)
 - `/replan` — adjust when reality changes
 - `/review` — deep quality check with fresh context
 
