@@ -33,7 +33,7 @@ describe('CLI smoke test', () => {
   it('installs all expected command files including /map', () => {
     const { tmp } = runCLI();
 
-    const commands = ['seed', 'grow', 'map', 'next', 'replan', 'review'];
+    const commands = ['seed', 'grow', 'map', 'next', 'next-automatic', 'replan', 'review'];
     for (const cmd of commands) {
       const file = join(tmp, '.claude', 'commands', `${cmd}.md`);
       assert.ok(existsSync(file), `expected command to exist: ${cmd}.md`);
@@ -142,7 +142,7 @@ describe('Template content integrity (Claude)', () => {
   });
 
   it('commands reference .organic-growth and contain no superpowers skill references', () => {
-    const commands = ['seed', 'grow', 'map', 'next', 'replan', 'review'];
+    const commands = ['seed', 'grow', 'map', 'next', 'next-automatic', 'replan', 'review'];
     const forbidden = [
       'superpowers',
       'brainstorming skill',
@@ -171,6 +171,7 @@ describe('Template content integrity (Claude)', () => {
       'commands/grow.md',
       'commands/map.md',
       'commands/next.md',
+      'commands/next-automatic.md',
       'commands/replan.md',
       'commands/review.md',
     ];
@@ -206,9 +207,9 @@ describe('opencode installation', () => {
     assert.ok(!existsSync(join(tmp, '.claude')), '.claude should not be installed in opencode mode');
   });
 
-  it('installs all 6 opencode commands including map', () => {
+  it('installs all 7 opencode commands including map and next-automatic', () => {
     const { tmp } = runCLI(['--opencode']);
-    const commands = ['seed', 'grow', 'map', 'next', 'replan', 'review'];
+    const commands = ['seed', 'grow', 'map', 'next', 'next-automatic', 'replan', 'review'];
 
     for (const cmd of commands) {
       const file = join(tmp, '.opencode', 'commands', `${cmd}.md`);

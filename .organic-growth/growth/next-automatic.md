@@ -31,7 +31,7 @@ A `/next-automatic` command that runs multiple growth stages in sequence, each i
   - Touches: `.claude/commands/next-automatic.md`
   - Implementation hint: This is a markdown command file like `next.md`. It contains instructions for the orchestrating Claude session. The key mechanics are: (1) read the growth plan to find the active feature and count remaining seedling stages, (2) loop up to max-stages times, (3) each iteration invokes the gardener agent in GROW mode as a subagent, (4) after agent returns, re-read the growth plan file and check if the target stage marker changed, (5) log progress, (6) stop if marker unchanged. The command should reference `$ARGUMENTS` for the optional max-stages parameter.
 
-- Stage 2: Template files for both platforms
+- 🌳 Stage 2: Template files for both platforms (added templates for both Claude and opencode, updated all test assertions)
   - Intent: Ship the command as installable templates so `npx organic-growth` and `npx organic-growth --opencode` include it. Update tests to verify the new template is installed.
   - Properties:
     - P1-carried: `.claude/commands/next-automatic.md` exists with valid frontmatter [from Stage 1]
@@ -72,3 +72,4 @@ A `/next-automatic` command that runs multiple growth stages in sequence, each i
 
 ## Growth Log
 - **2026-03-07 -- Stage 1 complete:** Created `.claude/commands/next-automatic.md` with orchestration loop, file-based detection, optional max-stages argument, fresh subagent invocations, and concise progress logging. All 7 properties verified by file inspection. 57 existing tests pass unchanged.
+- **2026-03-07 -- Stage 2 complete:** Added `templates/.claude/commands/next-automatic.md` (identical to project copy), `templates-opencode/.opencode/commands/next-automatic.md` (with @gardener syntax), and updated all test command lists and template identity checks. 57 tests pass.
