@@ -90,7 +90,13 @@ Plant the seed for a project.
 3. Check if CLAUDE.md already has a filled Product section.
    If yes, ask: "Product context already exists. Overwrite or update?"
 
-4. Generate `.organic-growth/growth/project-bootstrap.md` — the first growth plan:
+4. **Growth plan generation (greenfield only).**
+
+   If EXISTING = true → **skip this step entirely.** Do NOT generate
+   `project-bootstrap.md`. Existing projects do not need bootstrap stages —
+   the user will run `/grow` to plan their first feature against the existing codebase.
+
+   If EXISTING = false → generate `.organic-growth/growth/project-bootstrap.md` — the first growth plan:
    - Stage 1: Initialize project (build tool, dependencies, empty build passes)
    - Stage 2: Hello World endpoint/page (proves stack works end-to-end)
    - Stage 3: First domain concept with hardcoded data
@@ -98,7 +104,12 @@ Plant the seed for a project.
    - Stage 5: First real behavior with real data
    - Include `Capabilities:` tags in the plan header
 
-5. If the project has 4+ distinct capabilities (from DNA/interview),
+5. **Growth map generation (greenfield only).**
+
+   If EXISTING = true → **skip this step entirely.** Do NOT generate
+   `growth-map.md`. There is no bootstrap plan to map.
+
+   If EXISTING = false → if the project has 4+ distinct capabilities (from DNA/interview),
    generate `.organic-growth/growth-map.md` draft:
    - Organize sequence into Walking Skeleton and what follows
    - Add short "Why This Order"
@@ -106,6 +117,12 @@ Plant the seed for a project.
    - Present as aspirational, not a commitment
 
 6. Present a summary of what was created:
+
+   If EXISTING = true:
+   - Product DNA (`.organic-growth/product-dna.md`)
+   - CLAUDE.md Product/Tech Stack/Priorities sections
+
+   If EXISTING = false:
    - Product DNA (`.organic-growth/product-dna.md`)
    - CLAUDE.md Product/Tech Stack/Priorities sections
    - Growth plan (`.organic-growth/growth/project-bootstrap.md`)
@@ -120,7 +137,14 @@ Plant the seed for a project.
    - Do NOT create src/, lib/, app/, or any implementation directories.
    - Do NOT commit anything beyond the seed files created above.
 
-   The ONLY files you create are:
+   If EXISTING = true, the ONLY files you create are:
+   - `.organic-growth/product-dna.md`
+   - `CLAUDE.md` (fill in Product/Tech Stack/Priorities sections)
+
+   Say exactly:
+   "Seed planted. Run `/grow` when you're ready to plan your first feature."
+
+   If EXISTING = false, the ONLY files you create are:
    - `.organic-growth/product-dna.md`
    - `.organic-growth/growth/project-bootstrap.md`
    - `.organic-growth/growth-map.md` (if applicable)

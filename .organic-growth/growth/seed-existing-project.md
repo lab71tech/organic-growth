@@ -56,7 +56,7 @@ The `/seed` command currently assumes greenfield projects: its description says 
   - Touches: templates/.claude/commands/seed.md, templates-opencode/.opencode/commands/seed.md, test/cli.test.mjs
   - Implementation hint: Split Path B into "Path B1 -- Existing project, no DNA" and "Path B2 -- Greenfield, no DNA". B1 presents discoveries then asks gaps. B2 is the current interview verbatim.
 
-- Stage 4: Skip bootstrap plan for existing projects
+- 🌳 Stage 4: Skip bootstrap plan for existing projects (done)
   - Intent: When an existing project is detected, do not generate project-bootstrap.md. The seed output for existing projects is CLAUDE.md/AGENTS.md + product-dna.md only. The user runs /grow when ready to plan their first feature.
   - Properties:
     - P12: When existing project is detected, Step 4 (growth plan generation) is skipped entirely -- the template explicitly instructs the agent NOT to generate project-bootstrap.md [invariant]
@@ -97,3 +97,4 @@ The `/seed` command currently assumes greenfield projects: its description says 
 - **2026-03-07 -- Stage 1 complete:** Removed greenfield-only language from seed template frontmatter and opening line. Restructured Step 0 into a clear EXISTING = true/false detection gate. Synced both Claude Code and opencode templates. 7 tests added, all pass.
 - **2026-03-07 -- Stage 2 complete:** Added explicit auto-discovery checklist to Step 0 naming 10 file types (package.json, build.gradle/.kts, pyproject.toml, Cargo.toml, go.mod, pom.xml, Makefile, README.md, GitHub/GitLab CI configs) with extraction instructions for each. Added Quality Tools population instructions with user confirmation gate. 22 tests added, 86 total pass.
 - **2026-03-07 -- Stage 3 complete:** Split Path B into Path B1 (existing project) and Path B2 (greenfield). B1 presents auto-discovered context first, asks user to confirm/adjust, then asks only gap-filling questions (core problem, business rules, priorities, constraints). B2 preserves original greenfield interview verbatim. Both Claude Code and opencode templates updated in parity. 39 tests added, 159 total pass.
+- **2026-03-07 -- Stage 4 complete:** Wrapped Steps 4-7 in EXISTING conditionals. When EXISTING=true: Step 4 skips project-bootstrap.md generation, Step 5 skips growth-map.md generation, Step 6 lists only product-dna.md + CLAUDE.md/AGENTS.md, Step 7 closing message says "/grow" instead of "/next". Greenfield path unchanged. Both templates updated in parity, project copy synced. 15 tests added, 174 total pass.

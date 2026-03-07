@@ -1085,6 +1085,180 @@ describe('Seed template: interview path split (seed-existing-project Stage 3)', 
   });
 });
 
+describe('Seed template: skip bootstrap for existing projects (seed-existing-project Stage 4)', () => {
+  const claudeSeed = readFileSync(join(import.meta.dirname, '..', 'templates', '.claude', 'commands', 'seed.md'), 'utf8');
+  const opencodeSeed = readFileSync(join(import.meta.dirname, '..', 'templates-opencode', '.opencode', 'commands', 'seed.md'), 'utf8');
+
+  // Helper: extract Step 4 content
+  function getStep4(content) {
+    const match = content.match(/^4\.\s[\s\S]*?(?=\n\d+\.)/m);
+    assert.ok(match, 'should have a Step 4');
+    return match[0];
+  }
+
+  // Helper: extract Step 5 content
+  function getStep5(content) {
+    const match = content.match(/^5\.\s[\s\S]*?(?=\n\d+\.)/m);
+    assert.ok(match, 'should have a Step 5');
+    return match[0];
+  }
+
+  // Helper: extract Step 6 content
+  function getStep6(content) {
+    const match = content.match(/^6\.\s[\s\S]*?(?=\n\d+\.)/m);
+    assert.ok(match, 'should have a Step 6');
+    return match[0];
+  }
+
+  // Helper: extract Step 7 content
+  function getStep7(content) {
+    const match = content.match(/^7\.\s[\s\S]*?(?=\nInput:)/m);
+    assert.ok(match, 'should have a Step 7');
+    return match[0];
+  }
+
+  // P12: When existing, Step 4 (growth plan generation) is skipped
+  it('P12: Claude Step 4 instructs to skip growth plan when EXISTING = true', () => {
+    const step4 = getStep4(claudeSeed);
+    assert.ok(/EXISTING\s*=\s*true/i.test(step4), 'Step 4 should reference EXISTING = true');
+    assert.ok(/skip/i.test(step4), 'Step 4 should say to skip when existing');
+    assert.ok(/do\s*not\s*generate[\s\S]*?project-bootstrap/i.test(step4),
+      'Step 4 should explicitly say not to generate project-bootstrap.md');
+  });
+
+  it('P12: opencode Step 4 instructs to skip growth plan when EXISTING = true', () => {
+    const step4 = getStep4(opencodeSeed);
+    assert.ok(/EXISTING\s*=\s*true/i.test(step4), 'Step 4 should reference EXISTING = true');
+    assert.ok(/skip/i.test(step4), 'Step 4 should say to skip when existing');
+    assert.ok(/do\s*not\s*generate[\s\S]*?project-bootstrap/i.test(step4),
+      'Step 4 should explicitly say not to generate project-bootstrap.md');
+  });
+
+  // P13: When existing, Step 5 (growth map generation) is skipped
+  it('P13: Claude Step 5 instructs to skip growth map when EXISTING = true', () => {
+    const step5 = getStep5(claudeSeed);
+    assert.ok(/EXISTING\s*=\s*true/i.test(step5), 'Step 5 should reference EXISTING = true');
+    assert.ok(/skip/i.test(step5), 'Step 5 should say to skip when existing');
+    assert.ok(/do\s*not\s*generate[\s\S]*?growth-map/i.test(step5),
+      'Step 5 should explicitly say not to generate growth-map.md');
+  });
+
+  it('P13: opencode Step 5 instructs to skip growth map when EXISTING = true', () => {
+    const step5 = getStep5(opencodeSeed);
+    assert.ok(/EXISTING\s*=\s*true/i.test(step5), 'Step 5 should reference EXISTING = true');
+    assert.ok(/skip/i.test(step5), 'Step 5 should say to skip when existing');
+    assert.ok(/do\s*not\s*generate[\s\S]*?growth-map/i.test(step5),
+      'Step 5 should explicitly say not to generate growth-map.md');
+  });
+
+  // P14: When existing, MANDATORY STOP lists only files actually created
+  it('P14: Claude Step 7 lists only product-dna.md and CLAUDE.md for EXISTING = true', () => {
+    const step7 = getStep7(claudeSeed);
+    // Extract the EXISTING = true file list block
+    const existingBlock = step7.match(/EXISTING\s*=\s*true[\s\S]*?(?=If EXISTING\s*=\s*false|Say exactly)/im);
+    assert.ok(existingBlock, 'Step 7 should have a separate EXISTING = true block');
+    const block = existingBlock[0];
+    assert.ok(block.includes('product-dna.md'), 'existing block should list product-dna.md');
+    assert.ok(block.includes('CLAUDE.md'), 'existing block should list CLAUDE.md');
+    assert.ok(!block.includes('project-bootstrap.md'), 'existing block should NOT list project-bootstrap.md');
+    assert.ok(!block.includes('growth-map.md'), 'existing block should NOT list growth-map.md');
+  });
+
+  it('P14: opencode Step 7 lists only product-dna.md and AGENTS.md for EXISTING = true', () => {
+    const step7 = getStep7(opencodeSeed);
+    const existingBlock = step7.match(/EXISTING\s*=\s*true[\s\S]*?(?=If EXISTING\s*=\s*false|Say exactly)/im);
+    assert.ok(existingBlock, 'Step 7 should have a separate EXISTING = true block');
+    const block = existingBlock[0];
+    assert.ok(block.includes('product-dna.md'), 'existing block should list product-dna.md');
+    assert.ok(block.includes('AGENTS.md'), 'existing block should list AGENTS.md');
+    assert.ok(!block.includes('project-bootstrap.md'), 'existing block should NOT list project-bootstrap.md');
+    assert.ok(!block.includes('growth-map.md'), 'existing block should NOT list growth-map.md');
+  });
+
+  // P15: When existing, closing message says /grow instead of /next
+  it('P15: Claude Step 7 says "Run /grow" for EXISTING = true', () => {
+    const step7 = getStep7(claudeSeed);
+    // Find the existing-project closing message
+    const existingSection = step7.match(/EXISTING\s*=\s*true[\s\S]*?Say exactly:\s*\n\s*"([^"]+)"/im);
+    assert.ok(existingSection, 'Step 7 should have a closing message for existing projects');
+    const message = existingSection[1];
+    assert.ok(message.includes('/grow'), 'existing project closing message should reference /grow');
+    assert.ok(!message.includes('/next'), 'existing project closing message should NOT reference /next');
+    assert.ok(/plan your first feature/i.test(message),
+      'existing project closing message should mention planning first feature');
+  });
+
+  it('P15: opencode Step 7 says "Run /grow" for EXISTING = true', () => {
+    const step7 = getStep7(opencodeSeed);
+    const existingSection = step7.match(/EXISTING\s*=\s*true[\s\S]*?Say exactly:\s*\n\s*"([^"]+)"/im);
+    assert.ok(existingSection, 'Step 7 should have a closing message for existing projects');
+    const message = existingSection[1];
+    assert.ok(message.includes('/grow'), 'existing project closing message should reference /grow');
+    assert.ok(!message.includes('/next'), 'existing project closing message should NOT reference /next');
+    assert.ok(/plan your first feature/i.test(message),
+      'existing project closing message should mention planning first feature');
+  });
+
+  // P16: When greenfield, Steps 4, 5, 6, and 7 remain unchanged
+  it('P16: Claude Step 4 still generates project-bootstrap.md when EXISTING = false', () => {
+    const step4 = getStep4(claudeSeed);
+    assert.ok(/EXISTING\s*=\s*false/i.test(step4), 'Step 4 should reference EXISTING = false');
+    assert.ok(step4.includes('project-bootstrap.md'), 'Step 4 should mention project-bootstrap.md for greenfield');
+    assert.ok(step4.includes('Initialize project'), 'Step 4 should include Stage 1 description');
+    assert.ok(step4.includes('Hello World'), 'Step 4 should include Stage 2 description');
+  });
+
+  it('P16: opencode Step 4 still generates project-bootstrap.md when EXISTING = false', () => {
+    const step4 = getStep4(opencodeSeed);
+    assert.ok(/EXISTING\s*=\s*false/i.test(step4), 'Step 4 should reference EXISTING = false');
+    assert.ok(step4.includes('project-bootstrap.md'), 'Step 4 should mention project-bootstrap.md for greenfield');
+    assert.ok(step4.includes('Initialize project'), 'Step 4 should include Stage 1 description');
+    assert.ok(step4.includes('Hello World'), 'Step 4 should include Stage 2 description');
+  });
+
+  it('P16: Claude Step 5 still generates growth-map.md when EXISTING = false', () => {
+    const step5 = getStep5(claudeSeed);
+    assert.ok(/EXISTING\s*=\s*false/i.test(step5), 'Step 5 should reference EXISTING = false');
+    assert.ok(step5.includes('growth-map.md'), 'Step 5 should mention growth-map.md for greenfield');
+    assert.ok(step5.includes('Walking Skeleton'), 'Step 5 should mention Walking Skeleton');
+  });
+
+  it('P16: opencode Step 5 still generates growth-map.md when EXISTING = false', () => {
+    const step5 = getStep5(opencodeSeed);
+    assert.ok(/EXISTING\s*=\s*false/i.test(step5), 'Step 5 should reference EXISTING = false');
+    assert.ok(step5.includes('growth-map.md'), 'Step 5 should mention growth-map.md for greenfield');
+    assert.ok(step5.includes('Walking Skeleton'), 'Step 5 should mention Walking Skeleton');
+  });
+
+  it('P16: Claude Step 7 still lists all files and says /next for EXISTING = false', () => {
+    const step7 = getStep7(claudeSeed);
+    const greenfieldBlock = step7.match(/EXISTING\s*=\s*false,\s*the ONLY files[\s\S]*?Say exactly:\s*\n\s*"([^"]+)"/im);
+    assert.ok(greenfieldBlock, 'Step 7 should have a greenfield file list and closing message');
+    const message = greenfieldBlock[1];
+    assert.ok(message.includes('/next'), 'greenfield closing message should reference /next');
+  });
+
+  it('P16: opencode Step 7 still lists all files and says /next for EXISTING = false', () => {
+    const step7 = getStep7(opencodeSeed);
+    const greenfieldBlock = step7.match(/EXISTING\s*=\s*false,\s*the ONLY files[\s\S]*?Say exactly:\s*\n\s*"([^"]+)"/im);
+    assert.ok(greenfieldBlock, 'Step 7 should have a greenfield file list and closing message');
+    const message = greenfieldBlock[1];
+    assert.ok(message.includes('/next'), 'greenfield closing message should reference /next');
+  });
+
+  // P4 (carried): templates remain structurally identical
+  it('P4: Claude and opencode seed templates remain structurally identical after skip-bootstrap changes', () => {
+    const normalize = (s) => s
+      .replace(/CLAUDE\.md/g, 'CONFIG.md')
+      .replace(/AGENTS\.md/g, 'CONFIG.md')
+      .replace(/\.claude\b/g, '.configdir')
+      .replace(/\.opencode\b/g, '.configdir');
+
+    assert.equal(normalize(claudeSeed), normalize(opencodeSeed),
+      'templates should be identical after normalizing config file references');
+  });
+});
+
 describe('Package metadata', () => {
   it('package includes templates and templates-opencode in files array', () => {
     const pkg = JSON.parse(readFileSync(PKG_PATH, 'utf8'));
