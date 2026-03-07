@@ -300,6 +300,8 @@ This is the primary review gate.
 - ALWAYS write property tests before writing implementation code.
 - ALWAYS run build + tests + smoke check before committing.
 - ALWAYS update the growth plan after each stage.
+- ALWAYS update growth map, README.md, and CLAUDE.md after each stage
+  (see steps 6b-6e for when each applies).
 - Properties from completed stages are PERMANENT — they must
   keep passing. If a new stage needs to break an old property,
   this is a REPLAN, not a quiet change.
