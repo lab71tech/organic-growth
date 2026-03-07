@@ -57,6 +57,16 @@ describe('CLI smoke test', () => {
     const { output } = runCLI();
     assert.ok(!/superpowers/i.test(output), 'install output should not mention superpowers');
   });
+
+  it('CLI output lists /next-automatic in commands available section', () => {
+    const { output } = runCLI();
+    // The "Commands available" section uses format: /command — description
+    // Must match the command reference, not just a filename in the installed files list
+    assert.ok(
+      /\/next-automatic\s+—/.test(output.replace(/\x1b\[[0-9;]*m/g, '')),
+      'CLI output should list /next-automatic with description in commands section'
+    );
+  });
 });
 
 describe('CLI options', () => {

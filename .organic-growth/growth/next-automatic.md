@@ -1,6 +1,6 @@
 # Feature: next-automatic
 Created: 2026-03-07
-Status: Growing
+Status: Complete
 Capabilities: multi-stage-execution, orchestration, commands, templates, cli-output
 
 ## Seed (what & why)
@@ -49,7 +49,7 @@ A `/next-automatic` command that runs multiple growth stages in sequence, each i
   - Touches: `templates/.claude/commands/next-automatic.md`, `templates-opencode/.opencode/commands/next-automatic.md`, `test/cli.test.mjs`
   - Implementation hint: Copy `.claude/commands/next-automatic.md` to `templates/.claude/commands/next-automatic.md`. Create the opencode variant in `templates-opencode/.opencode/commands/next-automatic.md` (same content but use `@gardener` instead of `gardener` for agent reference, matching how other opencode commands differ from Claude commands). Add `next-automatic` to the command arrays in test assertions. Add it to the template-project identity check.
 
-- Stage 3: CLI output and documentation updates
+- 🌳 Stage 3: CLI output and documentation updates (added /next-automatic to CLI output, product DNA, and test coverage)
   - Intent: Update CLI post-install output to mention the new command, update README with the new command in the file tree and workflow sections, and update product DNA.
   - Properties:
     - P13: CLI post-install output includes a line for `/next-automatic` in the "Commands available" section [invariant]
@@ -73,3 +73,4 @@ A `/next-automatic` command that runs multiple growth stages in sequence, each i
 ## Growth Log
 - **2026-03-07 -- Stage 1 complete:** Created `.claude/commands/next-automatic.md` with orchestration loop, file-based detection, optional max-stages argument, fresh subagent invocations, and concise progress logging. All 7 properties verified by file inspection. 57 existing tests pass unchanged.
 - **2026-03-07 -- Stage 2 complete:** Added `templates/.claude/commands/next-automatic.md` (identical to project copy), `templates-opencode/.opencode/commands/next-automatic.md` (with @gardener syntax), and updated all test command lists and template identity checks. 57 tests pass.
+- **2026-03-07 -- Stage 3 complete:** Added `/next-automatic` to CLI post-install "Commands available" output, added to `docs/product-dna.md` Key Commands section, added CLI output test for the new command. README already had the file tree and workflow entries from Stage 2. 20 tests pass (all properties verified: P13-P17).
