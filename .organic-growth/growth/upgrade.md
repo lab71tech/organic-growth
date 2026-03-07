@@ -27,7 +27,7 @@ An `--upgrade` flag for the organic-growth CLI that distinguishes between manage
   - Touches: `bin/cli.mjs`, `test/cli.test.mjs`
   - Implementation hint: At the end of the `install()` function, after all files are copied and DNA is handled, write `readVersion()` result to `.organic-growth/.version` using `writeFileSync`. Add tests that check the version file exists and has the right content for all install modes.
 
-- Stage 2: --upgrade flag with managed vs user file classification
+- 🌳 Stage 2: --upgrade flag with managed vs user file classification
   - Intent: Add the `--upgrade` flag that overwrites managed template files while skipping user-customized files, with clear output showing what was updated vs skipped.
   - Properties:
     - P6: When --upgrade is passed, files under `.claude/` and `.opencode/` directories are overwritten from templates without prompting [invariant]
@@ -86,3 +86,4 @@ An `--upgrade` flag for the organic-growth CLI that distinguishes between manage
 ## Growth Log
 <!-- Auto-updated after each stage -->
 - **2026-03-07 — Stage 1 complete:** Added `.organic-growth/.version` file written at end of every install (fresh, --force, --opencode). Contains exact semver string from package.json. 5 property tests added (P1-P5), all passing. 61/63 tests pass (2 pre-existing failures from docs/ migration unrelated to this stage).
+- **2026-03-07 — Stage 2 complete:** Added `--upgrade` flag that overwrites managed files (.claude/, .opencode/) while preserving user-customized files (CLAUDE.md, AGENTS.md, .mcp.json, opencode.json). User files that don't exist are not created. Output shows updated/skipped lists and version info (from/to or "unknown"). --upgrade and --force are mutually exclusive. 14 property tests added (P6-P12), all 77 tests passing.

@@ -26,6 +26,9 @@ bunx organic-growth docs/my-product-spec.md
 
 # Force overwrite existing files:
 bunx organic-growth --force
+
+# Upgrade managed files (preserves CLAUDE.md, .mcp.json, etc.):
+bunx organic-growth --upgrade
 ```
 
 This installs `CLAUDE.md` at your project root and a `.claude/` directory with agents and commands. No runtime dependencies.
@@ -110,7 +113,7 @@ Properties are not test cases or user stories. A test says "when I do X, Y happe
 
 Properties **accumulate** across stages. Stage 3 must still satisfy the properties from stages 1 and 2. They are permanent commitments, not checkboxes to discard. This is what prevents regressions as the feature grows.
 
-The gardener agent handles the full property format — categories, failure analysis, dependency tracking. See the [example growth plan](docs/example-growth-plan.md) for what this looks like in practice.
+The gardener agent handles the full property format — categories, failure analysis, dependency tracking. See the [example growth plan](.organic-growth/example-growth-plan.md) for what this looks like in practice.
 
 ## After Install
 
@@ -118,7 +121,7 @@ The gardener agent handles the full property format — categories, failure anal
 2. Fill in Quality Tools section with your project's lint/test commands
 3. Start building with `/grow`
 
-See the [example growth plan](docs/example-growth-plan.md) to see properties, stages, and accumulation in action.
+See the [example growth plan](.organic-growth/example-growth-plan.md) to see properties, stages, and accumulation in action.
 
 ## Releases
 

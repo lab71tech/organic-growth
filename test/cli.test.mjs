@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, existsSync, statSync, writeFileSync, readFileSync, mkdirSync } from 'node:fs';
+import { mkdtempSync, existsSync, statSync, writeFileSync, readFileSync, mkdirSync, unlinkSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
@@ -267,7 +267,7 @@ describe('Version file (.organic-growth/.version)', () => {
     // Pre-populate to make --force meaningful
     mkdirSync(join(tmp, '.organic-growth'), { recursive: true });
     writeFileSync(join(tmp, '.organic-growth', '.version'), '0.0.0');
-    const { output } = runCLI([], tmp); // runCLI already includes --force
+    runCLI([], tmp); // runCLI already includes --force
     const content = readFileSync(join(tmp, '.organic-growth', '.version'), 'utf8');
     assert.equal(content, pkg.version, '.version should be updated to current version on --force install');
   });
@@ -300,6 +300,250 @@ describe('Version file (.organic-growth/.version)', () => {
     // Must not contain JSON markers
     assert.ok(!content.includes('{'), '.version should not contain JSON');
     assert.ok(!content.includes('"'), '.version should not contain quotes');
+  });
+});
+
+function runCLIRaw(args, cwd) {
+  const tmp = cwd || mkdtempSync(join(tmpdir(), 'og-test-'));
+  const output = execFileSync('node', [CLI_PATH, ...args], {
+    cwd: tmp,
+    encoding: 'utf8',
+    timeout: 10000,
+  });
+  return { tmp, output };
+}
+
+describe('Upgrade mode (--upgrade)', () => {
+  const pkg = JSON.parse(readFileSync(PKG_PATH, 'utf8'));
+
+  // Helper: do a fresh install, then run --upgrade
+  function freshThenUpgrade(extraInstallArgs = [], extraUpgradeArgs = []) {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+    // Fresh install
+    execFileSync('node', [CLI_PATH, '--force', ...extraInstallArgs], {
+      cwd: tmp, encoding: 'utf8', timeout: 10000,
+    });
+    // Run upgrade
+    const output = execFileSync('node', [CLI_PATH, '--upgrade', ...extraUpgradeArgs], {
+      cwd: tmp, encoding: 'utf8', timeout: 10000,
+    });
+    return { tmp, output };
+  }
+
+  // P6: Managed files (.claude/ and .opencode/) are overwritten without prompting
+  it('P6: --upgrade overwrites managed files under .claude/ without prompting', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+    // Fresh install
+    execFileSync('node', [CLI_PATH, '--force'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    // Modify a managed file
+    const managedFile = join(tmp, '.claude', 'settings.json');
+    writeFileSync(managedFile, '{"modified": true}');
+
+    // Run upgrade
+    execFileSync('node', [CLI_PATH, '--upgrade'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    // Managed file should be restored to template version
+    const content = readFileSync(managedFile, 'utf8');
+    assert.ok(!content.includes('"modified"'), 'managed file should be overwritten by upgrade');
+  });
+
+  // P7: User-customized files are never overwritten on upgrade
+  it('P7: --upgrade never overwrites CLAUDE.md even if it exists', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+    execFileSync('node', [CLI_PATH, '--force'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    // Customize CLAUDE.md
+    const claudePath = join(tmp, 'CLAUDE.md');
+    writeFileSync(claudePath, '# My Custom CLAUDE.md\n');
+
+    // Run upgrade
+    execFileSync('node', [CLI_PATH, '--upgrade'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    const content = readFileSync(claudePath, 'utf8');
+    assert.equal(content, '# My Custom CLAUDE.md\n', 'CLAUDE.md should be preserved on upgrade');
+  });
+
+  it('P7: --upgrade never overwrites .mcp.json even if it exists', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+    execFileSync('node', [CLI_PATH, '--force'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    // Customize .mcp.json
+    const mcpPath = join(tmp, '.mcp.json');
+    writeFileSync(mcpPath, '{"custom": true}');
+
+    execFileSync('node', [CLI_PATH, '--upgrade'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    const content = readFileSync(mcpPath, 'utf8');
+    assert.equal(content, '{"custom": true}', '.mcp.json should be preserved on upgrade');
+  });
+
+  it('P7: --upgrade never overwrites AGENTS.md in opencode mode', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+    execFileSync('node', [CLI_PATH, '--force', '--opencode'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    writeFileSync(join(tmp, 'AGENTS.md'), '# My Custom AGENTS.md\n');
+
+    execFileSync('node', [CLI_PATH, '--upgrade', '--opencode'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    const content = readFileSync(join(tmp, 'AGENTS.md'), 'utf8');
+    assert.equal(content, '# My Custom AGENTS.md\n', 'AGENTS.md should be preserved on upgrade');
+  });
+
+  it('P7: --upgrade never overwrites opencode.json in opencode mode', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+    execFileSync('node', [CLI_PATH, '--force', '--opencode'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    writeFileSync(join(tmp, 'opencode.json'), '{"custom": true}');
+
+    execFileSync('node', [CLI_PATH, '--upgrade', '--opencode'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    const content = readFileSync(join(tmp, 'opencode.json'), 'utf8');
+    assert.equal(content, '{"custom": true}', 'opencode.json should be preserved on upgrade');
+  });
+
+  // P8: User-customized files that don't exist are NOT created on upgrade
+  it('P8: --upgrade does not create CLAUDE.md if it was deleted', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+    execFileSync('node', [CLI_PATH, '--force'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    // Delete the user file
+    unlinkSync(join(tmp, 'CLAUDE.md'));
+
+    execFileSync('node', [CLI_PATH, '--upgrade'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    assert.ok(!existsSync(join(tmp, 'CLAUDE.md')), 'CLAUDE.md should not be re-created by upgrade');
+  });
+
+  it('P8: --upgrade does not create .mcp.json if it was deleted', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+    execFileSync('node', [CLI_PATH, '--force'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    unlinkSync(join(tmp, '.mcp.json'));
+
+    execFileSync('node', [CLI_PATH, '--upgrade'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    assert.ok(!existsSync(join(tmp, '.mcp.json')), '.mcp.json should not be re-created by upgrade');
+  });
+
+  // P9: Output distinguishes updated, skipped, and version info
+  it('P9: --upgrade output shows updated, skipped, and version info', () => {
+    const { output } = freshThenUpgrade();
+    const clean = output.replace(/\x1b\[[0-9;]*m/g, '');
+
+    assert.ok(/updated/i.test(clean), 'upgrade output should mention updated files');
+    assert.ok(/skipped/i.test(clean), 'upgrade output should mention skipped files');
+    // Should show version info (from -> to or "unknown")
+    assert.ok(clean.includes(pkg.version), 'upgrade output should show the target version');
+  });
+
+  it('P9: --upgrade output shows "unknown" when no prior .version file exists', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+    execFileSync('node', [CLI_PATH, '--force'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    // Delete the version file to simulate pre-version-tracking install
+    unlinkSync(join(tmp, '.organic-growth', '.version'));
+
+    const output = execFileSync('node', [CLI_PATH, '--upgrade'], {
+      cwd: tmp, encoding: 'utf8', timeout: 10000,
+    });
+    const clean = output.replace(/\x1b\[[0-9;]*m/g, '');
+
+    assert.ok(/unknown/i.test(clean), 'upgrade output should show "unknown" when no prior .version exists');
+  });
+
+  // P10: .version is written with new version after upgrade
+  it('P10: --upgrade writes .version with new version after managed files are updated', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+    execFileSync('node', [CLI_PATH, '--force'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    // Set old version
+    writeFileSync(join(tmp, '.organic-growth', '.version'), '1.0.0');
+
+    execFileSync('node', [CLI_PATH, '--upgrade'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    const version = readFileSync(join(tmp, '.organic-growth', '.version'), 'utf8');
+    assert.equal(version, pkg.version, '.version should be updated to current package version after upgrade');
+  });
+
+  // P11: --upgrade and --force are mutually exclusive
+  it('P11: --upgrade and --force together prints error and exits without modifying files', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+    execFileSync('node', [CLI_PATH, '--force'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    // Customize a file to verify nothing changes
+    writeFileSync(join(tmp, 'CLAUDE.md'), '# custom\n');
+    const managedFile = join(tmp, '.claude', 'settings.json');
+    const managedBefore = readFileSync(managedFile, 'utf8');
+    writeFileSync(managedFile, '{"modified": true}');
+
+    let threw = false;
+    let stderr = '';
+    try {
+      execFileSync('node', [CLI_PATH, '--upgrade', '--force'], {
+        cwd: tmp, encoding: 'utf8', timeout: 10000,
+      });
+    } catch (e) {
+      threw = true;
+      stderr = e.stderr || e.stdout || '';
+    }
+
+    assert.ok(threw, '--upgrade --force should exit with error');
+    // Files should be unchanged
+    assert.equal(readFileSync(join(tmp, 'CLAUDE.md'), 'utf8'), '# custom\n', 'CLAUDE.md should be untouched');
+    assert.equal(readFileSync(managedFile, 'utf8'), '{"modified": true}', 'managed file should be untouched');
+  });
+
+  it('P11: --upgrade and -f together also errors', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+    let threw = false;
+    try {
+      execFileSync('node', [CLI_PATH, '--upgrade', '-f'], {
+        cwd: tmp, encoding: 'utf8', timeout: 10000,
+      });
+    } catch (e) {
+      threw = true;
+    }
+    assert.ok(threw, '--upgrade -f should exit with error');
+  });
+
+  // P12: --upgrade works without prior .version file
+  it('P12: --upgrade works when no .version file exists (treats as unknown)', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+    execFileSync('node', [CLI_PATH, '--force'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    // Delete version file
+    unlinkSync(join(tmp, '.organic-growth', '.version'));
+
+    // Modify a managed file
+    const managedFile = join(tmp, '.claude', 'settings.json');
+    writeFileSync(managedFile, '{"modified": true}');
+
+    // Upgrade should still work
+    execFileSync('node', [CLI_PATH, '--upgrade'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    // Managed file should be overwritten
+    const content = readFileSync(managedFile, 'utf8');
+    assert.ok(!content.includes('"modified"'), 'managed file should be overwritten even without prior .version');
+
+    // Version file should now exist
+    const version = readFileSync(join(tmp, '.organic-growth', '.version'), 'utf8');
+    assert.equal(version, pkg.version, '.version should be written after upgrade');
+  });
+
+  // P6 for opencode: managed files under .opencode/ are overwritten
+  it('P6: --upgrade --opencode overwrites managed files under .opencode/', () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'og-test-'));
+    execFileSync('node', [CLI_PATH, '--force', '--opencode'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    // Modify a managed opencode file
+    const managedFile = join(tmp, '.opencode', 'agents', 'gardener.md');
+    writeFileSync(managedFile, '# modified gardener');
+
+    execFileSync('node', [CLI_PATH, '--upgrade', '--opencode'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
+
+    const content = readFileSync(managedFile, 'utf8');
+    assert.ok(!content.includes('# modified gardener'), 'opencode managed file should be overwritten by upgrade');
   });
 });
 
